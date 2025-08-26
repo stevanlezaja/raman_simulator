@@ -2,7 +2,7 @@ from scipy.integrate import solve_ivp
 import numpy as np
 import functools
 
-from custom_types import Length
+from custom_types import Length, Frequency
 from fibers import Fiber
 from signals import Signal
 
@@ -22,11 +22,11 @@ class RamanAmplifier:
 
     @functools.cached_property
     def C_R(self):
-        f_s = self.c / self.signal.wavelength  # [Hz]
-        f_p = self.c / self.pump_wavelength  # [Hz]
+        f_s = Frequency(self.c / self.signal.wavelength, 'Hz')
+        f_p = Frequency(self.c / self.pump_wavelength, 'Hz')
 
-        f_s = f_s / 1e12  # [THz]
-        f_p = f_p / 1e12  # [THz]
+        f_s = f_s.THz
+        f_p = f_p.THz
 
         freq_diff = abs(f_p - f_s)
 
