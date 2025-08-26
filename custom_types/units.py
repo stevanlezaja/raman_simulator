@@ -23,7 +23,9 @@ class Unit(ABC):
 
     def convert(self, *, value: float, unit: str):
         mul = unit.removesuffix(self.__class__.default_unit)
-        return value * Multipliers.units[mul]
+        degree = 1
+        if hasattr(self, 'degree'): degree *= self.degree
+        return value * Multipliers.units[mul] ** degree
 
     @property
     def value(self):
