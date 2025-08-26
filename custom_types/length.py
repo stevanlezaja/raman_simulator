@@ -10,9 +10,17 @@ class Length(Unit):
     def m(self):
         return self._value
 
+    @m.setter
+    def m(self, new):
+        self.value = (new, 'm')
+
     @property
     def km(self):
-        return self._value/1e-3
+        return self._value / 1e3
+
+    @km.setter
+    def km(self, new):
+        self.value = (new, 'm')
 
 
 if __name__ == "__main__":
