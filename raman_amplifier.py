@@ -2,7 +2,7 @@ from scipy.integrate import solve_ivp
 import numpy as np
 import functools
 
-from custom_types import Length, Frequency
+from custom_types import Length, Power
 import custom_types.conversions as conv
 from fibers import Fiber
 from signals import Signal
@@ -13,13 +13,8 @@ class RamanAmplifier:
         self.fiber = fiber
         self.signal = signal
         self.pump_wavelength = Length(1455, 'nm')
-        self.pump_power = 0.5  # [W]
+        self.pump_power = Power(0.5, 'W')
         self.__sol = self.solve()
-
-    @property
-    def c(self):
-        """Light speed"""
-        return 3 * 1e8  # [m/s]
 
     @functools.cached_property
     def C_R(self):
@@ -47,7 +42,7 @@ class RamanAmplifier:
         return [dPsdz, dPpdz]
     
     def solve(self):
-        P0 = [self.signal.power, self.pump_power]
+        P0 = [self.signal.power.W, self.pump_power.W]
         z_span = (0, self.fiber.length.m)
         num_points = 100
         z_eval = np.linspace(z_span[0], z_span[1], num_points)
