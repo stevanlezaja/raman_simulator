@@ -2,6 +2,7 @@ from scipy.integrate import solve_ivp
 import numpy as np
 import functools
 
+from custom_types import Length
 from fibers import Fiber
 from signals import Signal
 
@@ -31,12 +32,12 @@ class RamanAmplifier:
 
         return self.fiber.C_R(freq_diff)
 
-    def get_signal_power_at_distance(self, z):
-        Ps, _ = self.__sol(z)
+    def get_signal_power_at_distance(self, z: Length):
+        Ps, _ = self.__sol(z.m)
         return Ps
 
-    def get_pump_power_at_distance(self, z):
-        _, Pp = self.__sol(z)
+    def get_pump_power_at_distance(self, z: Length):
+        _, Pp = self.__sol(z.m)
         return Pp
 
     def raman_ode_system(self, z, P):
