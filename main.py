@@ -28,25 +28,25 @@ def calculate_G_net():
     fib = DispersionCompensatingFiber()
     ra = RamanAmplifier(fib, sig)
 
-    G_net = ra.get_signal_power_at_distance(fib.length) / ra.get_pump_power_at_distance(0)
+    G_net = ra.get_signal_power_at_distance(fib.length.m) / ra.get_pump_power_at_distance(0)
     print("G_net = ", G_net)
 
 def caluclate_G_on_off():
     sig = Signal()
     fib = SuperLargeEffectiveArea()
-    fib.length = 10 * 1e3
+    fib.length.value = (10, 'km')
     fib.alpha_s = 0.0437 * 1e-3
     fib.alpha_p = 0.0576 * 1e-3
     ra = RamanAmplifier(fib, sig)
     ra.pump_power = 1.24
     ra.solve()
 
-    G_on = ra.get_signal_power_at_distance(fib.length)
+    G_on = ra.get_signal_power_at_distance(fib.length.m)
 
     ra.pump_power = 0.0
     ra.solve()
 
-    G_off = ra.get_signal_power_at_distance(fib.length)
+    G_off = ra.get_signal_power_at_distance(fib.length.m)
 
     G_on_off = G_on / G_off
 

@@ -47,7 +47,7 @@ class RamanAmplifier:
     
     def solve(self):
         P0 = [self.signal.power, self.pump_power]
-        z_span = (0, self.fiber.length)
+        z_span = (0, self.fiber.length.m)
         num_points = 100
         z_eval = np.linspace(z_span[0], z_span[1], num_points)
 
