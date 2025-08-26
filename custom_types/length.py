@@ -20,7 +20,7 @@ class Length(Unit):
 
     @km.setter
     def km(self, new):
-        self.value = (new, 'm')
+        self.value = (new, 'km')
 
 
 if __name__ == "__main__":
