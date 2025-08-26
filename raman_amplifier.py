@@ -3,6 +3,7 @@ import numpy as np
 import functools
 
 from custom_types import Length, Frequency
+import custom_types.conversions as conv
 from fibers import Fiber
 from signals import Signal
 
@@ -22,13 +23,10 @@ class RamanAmplifier:
 
     @functools.cached_property
     def C_R(self):
-        f_s = Frequency(self.c / self.signal.wavelength.m, 'Hz')
-        f_p = Frequency(self.c / self.pump_wavelength.m, 'Hz')
+        f_s = conv.wavelenth_to_frequency(self.signal.wavelength)
+        f_p = conv.wavelenth_to_frequency(self.pump_wavelength)
 
-        f_s = f_s.THz
-        f_p = f_p.THz
-
-        freq_diff = abs(f_p - f_s)
+        freq_diff = abs(f_p.THz - f_s.THz)
 
         return self.fiber.C_R(freq_diff)
 
