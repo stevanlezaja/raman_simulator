@@ -18,9 +18,9 @@ class Fiber(ABC):
     
     def C_R(self, delta_f):
         eff_dict = self.raman_efficiency
-        freq = np.array(sorted(eff_dict.keys()))
+        freq = eff_dict.keys()
         eff = np.array([eff_dict[k] for k in freq])
-        return np.interp(delta_f, freq, eff)
+        return np.interp(delta_f, [f.Hz for f in freq], eff)
 
     @property
     def alpha_s(self):
