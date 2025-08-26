@@ -28,7 +28,7 @@ class Unit(ABC):
     @property
     def value(self):
         return self._value
-    
+
     @value.setter
     def value(self, new):
         new_value, new_unit = new
@@ -36,15 +36,3 @@ class Unit(ABC):
 
     def __str__(self):
         return f"{self._value} {self.default_unit}"
-
-class Length(Unit):
-    default_unit = 'm'
-
-    def __init__(self, value: float, unit: str):
-        super().__init__(value=value, unit=unit)
-
-if __name__ == "__main__":
-    distance = Length(value=10, unit='km')
-    print(distance)
-    distance.value = (15, 'mm')
-    print(distance)

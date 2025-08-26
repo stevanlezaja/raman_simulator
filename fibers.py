@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
+from custom_types import Length
+
 
 class NegativeLength(Exception):
     """Exception raised when fiber length is negative"""
@@ -10,23 +12,9 @@ class NegativeLength(Exception):
 
 class Fiber(ABC):
     def __init__(self):
-        self.__length = 25 * 1e3  # [m]
+        self.length = Length(25.0, 'km')
         self.__alpha_s = 4.605 * 1e-5  # [m^-1]
         self.__alpha_p = 4.605 * 1e-5  # [m^-1]
-
-    @property
-    def length(self) -> float:
-        """
-            float
-              - fiber length [m]
-        """
-        return self.__length
-    
-    @length.setter
-    def length(self, value) -> float:
-        if value < 0:
-            raise NegativeLength()
-        self.__length = value
     
     def C_R(self, delta_f):
         eff_dict = self.raman_efficiency
