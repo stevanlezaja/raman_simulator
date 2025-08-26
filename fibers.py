@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
-from custom_types import Length
+from custom_types import Length, Area
 
 
 class NegativeLength(Exception):
@@ -52,12 +52,8 @@ class Fiber(ABC):
     
     @property
     @abstractmethod
-    def effective_area(self) -> float:
-        """"
-            float
-              - effective area of fiber [um^2]
-        """
-        return 0.0
+    def effective_area(self) -> Area:
+        return Area(0.0, 'm')
 
 
 class DispersionCompensatingFiber(Fiber):
@@ -73,7 +69,7 @@ class DispersionCompensatingFiber(Fiber):
     
     @property
     def effective_area(self):
-        return 15 * 1e-12
+        return Area(15, 'um^2')
 
 
 class NonZeroDispersionFiber(Fiber):
@@ -89,7 +85,7 @@ class NonZeroDispersionFiber(Fiber):
     
     @property
     def effective_area(self):
-        return 55 * 1e-12
+        return Area(55, 'um^2')
 
 
 class SuperLargeEffectiveArea(Fiber):
@@ -105,4 +101,4 @@ class SuperLargeEffectiveArea(Fiber):
     
     @property
     def effective_area(self):
-        return 105 * 1e-12
+        return Area(105, 'um^2')
