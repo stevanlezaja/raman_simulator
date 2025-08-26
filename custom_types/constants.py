@@ -1,0 +1,1 @@
+LIGHT_SPEED =  3 * 1e8
