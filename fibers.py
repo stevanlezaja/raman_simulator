@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
-from custom_types import Length, Area
+from custom_types import Length, Area, Frequency
 
 
 class NegativeLength(Exception):
@@ -60,11 +60,11 @@ class DispersionCompensatingFiber(Fiber):
     @property
     def raman_efficiency(self) -> dict:
         return {
-            0: 0,
-            5: 0.1,
-            10: 1.5,
-            15: 2.8,
-            20: 0.5
+            Frequency(0, 'THz'): 0,
+            Frequency(5, 'THz'): 0.1,
+            Frequency(10, 'THz'): 1.5,
+            Frequency(15, 'THz'): 2.8,
+            Frequency(20, 'THz'): 0.5
         }
     
     @property
@@ -76,11 +76,11 @@ class NonZeroDispersionFiber(Fiber):
     @property
     def raman_efficiency(self) -> dict:
         return {
-            0: 0,
-            5: 0.25,
-            10: 0.4,
-            15: 0.5,
-            20: 0.1
+            Frequency(0, 'THz'): 0,
+            Frequency(5, 'THz'): 0.25,
+            Frequency(10, 'THz'): 0.4,
+            Frequency(15, 'THz'): 0.5,
+            Frequency(20, 'THz'): 0.1
         }
     
     @property
@@ -92,11 +92,11 @@ class SuperLargeEffectiveArea(Fiber):
     @property
     def raman_efficiency(self) -> dict:
         return {
-            0: 0,
-            5: 0.1,
-            10: 0.15,
-            15: 0.25,
-            20: 0.05
+            Frequency(0, 'THz'): 0,
+            Frequency(5, 'THz'): 0.1,
+            Frequency(10, 'THz'): 0.15,
+            Frequency(15, 'THz'): 0.25,
+            Frequency(20, 'THz'): 0.05
         }
     
     @property
