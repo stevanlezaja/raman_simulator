@@ -28,7 +28,7 @@ class Unit(ABC):
     @property
     def value(self):
         return self._value
-    
+
     @value.setter
     def value(self, new):
         new_value, new_unit = new

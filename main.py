@@ -5,6 +5,7 @@ from fibers import DispersionCompensatingFiber, SuperLargeEffectiveArea
 from signals import Signal
 from raman_amplifier import RamanAmplifier
 from utils import to_dB, from_dB
+from custom_types import Length
 
 def plot_Pp_Ps_over_distance():
     sig = Signal()

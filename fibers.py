@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 import numpy as np
 
+from custom_types import Length
+
 
 class NegativeLength(Exception):
     """Exception raised when fiber length is negative"""
