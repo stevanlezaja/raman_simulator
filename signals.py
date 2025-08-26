@@ -1,7 +1,7 @@
-from custom_types import Length
+from custom_types import Length, Power
 
 
 class Signal:
     def __init__(self):
-        self.power = 1 * 1e-4
+        self.power = Power(0.1, 'mW')
         self.wavelength = Length(1470, 'nm')

@@ -5,7 +5,7 @@ from fibers import DispersionCompensatingFiber, SuperLargeEffectiveArea
 from signals import Signal
 from raman_amplifier import RamanAmplifier
 from utils import to_dB, from_dB
-from custom_types import Length
+from custom_types import Length, Power
 
 def plot_Pp_Ps_over_distance():
     sig = Signal()
@@ -38,12 +38,12 @@ def caluclate_G_on_off():
     fib.alpha_s = 0.0437 * 1e-3
     fib.alpha_p = 0.0576 * 1e-3
     ra = RamanAmplifier(fib, sig)
-    ra.pump_power = 1.24
+    ra.pump_power.W = 1.24
     ra.solve()
 
     G_on = ra.get_signal_power_at_distance(fib.length)
 
-    ra.pump_power = 0.0
+    ra.pump_power.W = 0.0
     ra.solve()
 
     G_off = ra.get_signal_power_at_distance(fib.length)
