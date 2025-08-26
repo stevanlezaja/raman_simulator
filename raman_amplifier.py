@@ -11,7 +11,7 @@ class RamanAmplifier:
     def __init__(self, fiber: Fiber, signal: Signal):
         self.fiber = fiber
         self.signal = signal
-        self.pump_wavelength = 1.455 * 1e-6  # [m]
+        self.pump_wavelength = Length(1455, 'nm')
         self.pump_power = 0.5  # [W]
         self.__sol = self.solve()
 
@@ -22,8 +22,8 @@ class RamanAmplifier:
 
     @functools.cached_property
     def C_R(self):
-        f_s = Frequency(self.c / self.signal.wavelength, 'Hz')
-        f_p = Frequency(self.c / self.pump_wavelength, 'Hz')
+        f_s = Frequency(self.c / self.signal.wavelength.m, 'Hz')
+        f_p = Frequency(self.c / self.pump_wavelength.m, 'Hz')
 
         f_s = f_s.THz
         f_p = f_p.THz
@@ -45,7 +45,7 @@ class RamanAmplifier:
     def raman_ode_system(self, z, P):
         Ps, Pp = P
         dPsdz = -self.fiber.alpha_s * Ps + self.C_R * Ps * Pp
-        dPpdz = -self.fiber.alpha_p * Pp - self.signal.wavelength / self.pump_wavelength * self.C_R * Ps * Pp
+        dPpdz = -self.fiber.alpha_p * Pp - self.signal.wavelength.m / self.pump_wavelength.m * self.C_R * Ps * Pp
         return [dPsdz, dPpdz]
     
     def solve(self):
