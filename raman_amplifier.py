@@ -33,10 +33,12 @@ class RamanAmplifier:
         return self.fiber.C_R(freq_diff)
 
     def get_signal_power_at_distance(self, z: Length):
+        assert isinstance(z, Length)
         Ps, _ = self.__sol(z.m)
         return Ps
 
     def get_pump_power_at_distance(self, z: Length):
+        assert isinstance(z, Length)
         _, Pp = self.__sol(z.m)
         return Pp
 
