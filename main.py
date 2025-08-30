@@ -62,4 +62,8 @@ def main():
     caluclate_G_on_off()
 
 if __name__ == "__main__":
-    main()
+    from runner.run import Runner
+
+    runner = Runner()
+
+    runner.run()
