@@ -11,16 +11,22 @@ from custom_types import Length, Power
 def plot_Pp_Ps_over_distance():
     sig = Signal()
     fib = DispersionCompensatingFiber()
-    ra = RamanAmplifier(fib, sig)
+    ra = RamanAmplifier()
+    ra.pump_wavelength = Length(1555, 'nm')
+    ra.pump_power = Power(1, 'mW')
+    exp = Experiment(fib, sig, ra)
 
-    distances = np.linspace(0, fib.length, 100)
+    distances = np.linspace(0, fib.length.km, 1000)
 
-    pump_power = ra.get_pump_power_at_distance(distances)
-    signal_power = ra.get_signal_power_at_distance(distances)
+    pump_powers = []
+    signal_powers = []
+    for dist in distances:
+        pump_powers.append(to_dB(exp.get_pump_power_at_distance(Length(dist, 'km')), exp.get_pump_power_at_distance(Length(0, 'km'))))
+        signal_powers.append(to_dB(exp.get_signal_power_at_distance(Length(dist, 'km')), exp.get_signal_power_at_distance(Length(0, 'km'))))
 
     plt.figure()
-    plt.plot(distances, pump_power, label="Pump power")
-    plt.plot(distances, signal_power, label="Signal power")
+    plt.plot(distances, pump_powers, label="Pump power")
+    plt.plot(distances, signal_powers, label="Signal power")
     plt.legend()
     plt.show()
 
@@ -57,13 +63,14 @@ def caluclate_G_on_off():
 
 
 def main():
-    # plot_Pp_Ps_over_distance()
+    plot_Pp_Ps_over_distance()
     calculate_G_net()
     caluclate_G_on_off()
 
 if __name__ == "__main__":
-    from runner.run import Runner
+    # from runner.run import Runner
 
-    runner = Runner()
+    # runner = Runner()
 
-    runner.run()
+    # runner.run()
+    main()
