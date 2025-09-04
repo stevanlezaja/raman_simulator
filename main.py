@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from fibers import DispersionCompensatingFiber, SuperLargeEffectiveArea
 from signals import Signal
 from raman_amplifier import RamanAmplifier
+from experiment.experiment import Experiment
 from utils import to_dB, from_dB
 from custom_types import Length, Power
 
@@ -26,9 +27,10 @@ def plot_Pp_Ps_over_distance():
 def calculate_G_net():
     sig = Signal()
     fib = DispersionCompensatingFiber()
-    ra = RamanAmplifier(fib, sig)
+    ra = RamanAmplifier()
+    exp = Experiment(fib, sig, ra)
 
-    G_net = ra.get_signal_power_at_distance(fib.length) / ra.get_pump_power_at_distance(Length(0, 'm'))
+    G_net = exp.get_signal_power_at_distance(fib.length) / exp.get_pump_power_at_distance(Length(0, 'm'))
     print("G_net = ", G_net)
 
 def caluclate_G_on_off():
@@ -37,16 +39,17 @@ def caluclate_G_on_off():
     fib.length.km = 10.0
     fib.alpha_s = 0.0437 * 1e-3
     fib.alpha_p = 0.0576 * 1e-3
-    ra = RamanAmplifier(fib, sig)
+    ra = RamanAmplifier()
     ra.pump_power.W = 1.24
-    ra.solve()
+    exp = Experiment(fib, sig, ra)
+    exp.solve()
 
-    G_on = ra.get_signal_power_at_distance(fib.length)
+    G_on = exp.get_signal_power_at_distance(fib.length)
 
     ra.pump_power.W = 0.0
-    ra.solve()
+    exp.solve()
 
-    G_off = ra.get_signal_power_at_distance(fib.length)
+    G_off = exp.get_signal_power_at_distance(fib.length)
 
     G_on_off = G_on / G_off
 

@@ -1,25 +1,26 @@
+import functools
 from scipy.integrate import solve_ivp
 import numpy as np
-import functools
 
-from custom_types import Length, Power
 import custom_types.conversions as conv
+from custom_types import Length
+
 from fibers import Fiber
 from signals import Signal
+from raman_amplifier import RamanAmplifier
 
 
-class RamanAmplifier:
-    def __init__(self, fiber: Fiber, signal: Signal):
+class Experiment:
+    def __init__(self, fiber: Fiber, signal: Signal, raman_amplifier: RamanAmplifier):
         self.fiber = fiber
         self.signal = signal
-        self.pump_wavelength = Length(1455, 'nm')
-        self.pump_power = Power(0.5, 'W')
+        self.raman_amplifier = raman_amplifier
         self.__sol = self.solve()
 
     @functools.cached_property
     def C_R(self):
         f_s = conv.wavelenth_to_frequency(self.signal.wavelength)
-        f_p = conv.wavelenth_to_frequency(self.pump_wavelength)
+        f_p = conv.wavelenth_to_frequency(self.raman_amplifier.pump_wavelength)
 
         freq_diff = abs(f_p.THz - f_s.THz)
 
@@ -38,11 +39,11 @@ class RamanAmplifier:
     def raman_ode_system(self, z, P):
         Ps, Pp = P
         dPsdz = -self.fiber.alpha_s * Ps + self.C_R * Ps * Pp
-        dPpdz = -self.fiber.alpha_p * Pp - self.signal.wavelength.m / self.pump_wavelength.m * self.C_R * Ps * Pp
+        dPpdz = -self.fiber.alpha_p * Pp - self.signal.wavelength.m / self.raman_amplifier.pump_wavelength.m * self.C_R * Ps * Pp
         return [dPsdz, dPpdz]
     
     def solve(self):
-        P0 = [self.signal.power.W, self.pump_power.W]
+        P0 = [self.signal.power.W, self.raman_amplifier.pump_power.W]
         z_span = (0, self.fiber.length.m)
         num_points = 100
         z_eval = np.linspace(z_span[0], z_span[1], num_points)
