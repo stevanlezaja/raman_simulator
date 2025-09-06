@@ -98,7 +98,8 @@ def main():
     # plot_Pp_Ps_over_distance()
     # calculate_G_net()
     # caluclate_G_on_off()
-    plot_raman_efficiencies()
+    # plot_raman_efficiencies()
+    net_gain_experiment()
     _ = input()
 
 if __name__ == "__main__":
