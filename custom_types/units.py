@@ -38,3 +38,31 @@ class Unit(ABC):
 
     def __str__(self):
         return f"{self._value} {self.default_unit}"
+    
+    def __hash__(self):
+        return hash(round(self.value, 12))
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.value == other.value
+        return NotImplemented
+
+    def __lt__(self, other):
+        if isinstance(other, self.__class__):
+            return self.value < other.value
+        return NotImplemented
+
+    def __le__(self, other):
+        if isinstance(other, self.__class__):
+            return self.value <= other.value
+        return NotImplemented
+
+    def __gt__(self, other):
+        if isinstance(other, self.__class__):
+            return self.value > other.value
+        return NotImplemented
+
+    def __ge__(self, other):
+        if isinstance(other, self.__class__):
+            return self.value >= other.value
+        return NotImplemented
