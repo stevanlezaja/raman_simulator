@@ -95,7 +95,7 @@ def net_gain_experiment():
     print("G_net = ", to_dB(G_net), "dB")
 
 def main():
-    # plot_Pp_Ps_over_distance()
+    # plot_Pp_Ps_over_distance(Experiment(DispersionCompensatingFiber(), Signal(), RamanAmplifier()))
     # calculate_G_net()
     # caluclate_G_on_off()
     # plot_raman_efficiencies()
