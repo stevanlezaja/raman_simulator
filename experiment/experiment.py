@@ -3,7 +3,7 @@ from scipy.integrate import solve_ivp
 import numpy as np
 
 import custom_types.conversions as conv
-from custom_types import Length
+from custom_types import Length, Frequency
 
 from fibers import Fiber
 from signals import Signal
@@ -22,7 +22,7 @@ class Experiment:
         f_s = conv.wavelenth_to_frequency(self.signal.wavelength)
         f_p = conv.wavelenth_to_frequency(self.raman_amplifier.pump_wavelength)
 
-        freq_diff = abs(f_p.THz - f_s.THz)
+        freq_diff = Frequency(abs(f_p.Hz - f_s.Hz), 'Hz')
 
         return self.fiber.C_R(freq_diff)
 
