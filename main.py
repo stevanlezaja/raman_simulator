@@ -64,9 +64,11 @@ def caluclate_G_on_off():
 
 def plot_raman_efficiencies():
     fibers = [NonZeroDispersionFiber(), DispersionCompensatingFiber(), StandardSingleModeFiber(), SuperLargeEffectiveArea()]
+    fig, ax = plt.subplots()
     for fiber in fibers:
-        fig = fiber.make_raman_efficiency_figure()
-        fig.show()
+        fiber: Fiber
+        ax = fiber.plot_raman_efficiency(ax)
+    fig.show()
 
 def main():
     # plot_Pp_Ps_over_distance()
