@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 import numpy as np
 import csv
+import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 
 from custom_types import Length, Area, Frequency
 
@@ -55,6 +57,24 @@ class Fiber(ABC):
     @abstractmethod
     def effective_area(self) -> Area:
         return Area(0.0, 'm')
+
+    def make_raman_efficiency_figure(self, x_points: int=100) -> Figure:
+        fig, ax = plt.subplots()
+
+        x = np.linspace(0, max(self.raman_efficiency.keys()), x_points)
+        y = []
+
+        for delta_f in x:
+            y.append(self.C_R(delta_f))
+
+        plot_name = f"Raman Efficiency of {self.__class__.__name__}"
+        ax.plot(x, y, label=plot_name)
+        ax.set_title(plot_name)
+        ax.set_xlabel("delta frequency")
+        ax.set_ylabel("Raman efficiency")
+        ax.legend()
+
+        return fig
 
 
 class StandardSingleModeFiber(Fiber):

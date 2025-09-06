@@ -1,12 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from fibers import DispersionCompensatingFiber, SuperLargeEffectiveArea
+from fibers import Fiber, DispersionCompensatingFiber, SuperLargeEffectiveArea, StandardSingleModeFiber, NonZeroDispersionFiber
 from signals import Signal
 from raman_amplifier import RamanAmplifier
 from experiment.experiment import Experiment
 from utils import to_dB, from_dB
 from custom_types import Length, Power
+
 
 def plot_Pp_Ps_over_distance():
     sig = Signal()
@@ -61,11 +62,17 @@ def caluclate_G_on_off():
 
     print("G_on_off = ", to_dB(G_on_off), "dB")
 
+def plot_raman_efficiencies():
+    fibers = [NonZeroDispersionFiber(), DispersionCompensatingFiber(), StandardSingleModeFiber(), SuperLargeEffectiveArea()]
+    for fiber in fibers:
+        fig = fiber.make_raman_efficiency_figure()
+        fig.show()
 
 def main():
-    plot_Pp_Ps_over_distance()
-    calculate_G_net()
-    caluclate_G_on_off()
+    # plot_Pp_Ps_over_distance()
+    # calculate_G_net()
+    # caluclate_G_on_off()
+    plot_raman_efficiencies()
 
 if __name__ == "__main__":
     # from runner.run import Runner
