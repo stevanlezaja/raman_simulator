@@ -28,22 +28,24 @@ class Experiment:
 
     def get_signal_power_at_distance(self, z: Length):
         assert isinstance(z, Length)
-        Ps, _ = self.__sol(z.m)
+        Ps, _, _ = self.__sol(z.m)
         return Ps
 
     def get_pump_power_at_distance(self, z: Length):
         assert isinstance(z, Length)
-        _, Pp = self.__sol(z.m)
-        return Pp
+        _, Ppf, Ppb = self.__sol(z.m)
+        return Ppf + Ppb
 
     def raman_ode_system(self, z, P):
-        Ps, Pp = P
-        dPsdz = -self.fiber.alpha_s * Ps + self.C_R * Ps * Pp
-        dPpdz = -self.fiber.alpha_p * Pp - self.signal.wavelength.m / self.raman_amplifier.pump_wavelength.m * self.C_R * Ps * Pp
-        return [dPsdz, dPpdz]
+        Ps, Ppf, Ppb = P
+        C_R_m = self.C_R / 1e3
+        dPsdz = -self.fiber.alpha_s * Ps + C_R_m * Ps * (Ppf + Ppb)
+        dPpfdz = -self.fiber.alpha_p * Ppf - self.signal.wavelength.m / self.raman_amplifier.pump_wavelength.m * C_R_m * Ps * Ppf
+        dPpbdz = -(-self.fiber.alpha_p * Ppb - self.signal.wavelength.m / self.raman_amplifier.pump_wavelength.m * C_R_m * Ps * Ppb)
+        return [dPsdz, dPpfdz, dPpbdz]
     
     def solve(self):
-        P0 = [self.signal.power.W, self.raman_amplifier.pump_power.W]
+        P0 = [self.signal.power.W, self.raman_amplifier.forward_pump.power.W, self.raman_amplifier.backward_pump.power.W]
         z_span = (0, self.fiber.length.m)
         num_points = 100
         z_eval = np.linspace(z_span[0], z_span[1], num_points)
