@@ -9,16 +9,8 @@ from utils import to_dB, from_dB
 from custom_types import Length, Power
 
 
-def plot_Pp_Ps_over_distance():
-    sig = Signal()
-    fib = DispersionCompensatingFiber()
-    ra = RamanAmplifier()
-    ra.pump_wavelength = Length(1555, 'nm')
-    ra.pump_power = Power(1, 'mW')
-    exp = Experiment(fib, sig, ra)
-
-    distances = np.linspace(0, fib.length.km, 1000)
-
+def plot_Pp_Ps_over_distance(exp: Experiment):
+    distances = np.linspace(0, exp.fiber.length.km, 1000)
     pump_powers = []
     signal_powers = []
     for dist in distances:
@@ -70,11 +62,44 @@ def plot_raman_efficiencies():
         ax = fiber.plot_raman_efficiency(ax)
     fig.show()
 
+def net_gain_experiment():
+    """
+        From Bromage 2004 p82
+    """
+    signal = Signal()
+    signal.wavelength.nm = 1555
+
+    fiber = SuperLargeEffectiveArea()
+    fiber.length.km = 10.0
+    fiber.alpha_s = 0.0437 * 1e-3
+    fiber.alpha_p = 0.0576 * 1e-3
+
+    raman_amplifier = RamanAmplifier(pumping_ratio=1)
+    raman_amplifier.pump_power(Power(1.24, 'W'))
+
+    experiment_on = Experiment(fiber, signal, raman_amplifier)
+    power_on = experiment_on.get_signal_power_at_distance(experiment_on.fiber.length)
+
+    raman_amplifier.pump_power(Power(0.0, 'W'))
+    experiment_off = Experiment(fiber, signal, raman_amplifier)
+    power_off = experiment_off.get_signal_power_at_distance(experiment_off.fiber.length)
+
+    G_net = power_on / power_off
+
+    print(power_on)
+    print(power_off)
+
+    plot_Pp_Ps_over_distance(experiment_on)
+    plot_Pp_Ps_over_distance(experiment_off)
+
+    print("G_net = ", to_dB(G_net), "dB")
+
 def main():
-    # plot_Pp_Ps_over_distance()
+    # plot_Pp_Ps_over_distance(Experiment(DispersionCompensatingFiber(), Signal(), RamanAmplifier()))
     # calculate_G_net()
     # caluclate_G_on_off()
-    plot_raman_efficiencies()
+    # plot_raman_efficiencies()
+    net_gain_experiment()
     _ = input()
 
 if __name__ == "__main__":
