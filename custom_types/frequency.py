@@ -17,7 +17,7 @@ class Frequency(Unit):
 
     @property
     def MHz(self):
-        return self._value
+        return self._value/1e6
 
     @MHz.setter
     def MHz(self, new):
@@ -25,7 +25,7 @@ class Frequency(Unit):
 
     @property
     def THz(self):
-        return self._value
+        return self._value/1e12
 
     @THz.setter
     def THz(self, new):
