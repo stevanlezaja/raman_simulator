@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
+import csv
 
 from custom_types import Length, Area, Frequency
 
@@ -54,6 +55,27 @@ class Fiber(ABC):
     @abstractmethod
     def effective_area(self) -> Area:
         return Area(0.0, 'm')
+
+
+class StandardSingleModeFiber(Fiber):
+    @property
+    def raman_efficiency(self) -> dict:
+        data = {}
+        with open("data/Raman_Gain_efficiency_SSMF_C-band_September2025.csv", "r") as f:
+            reader = csv.reader(f)
+            next(reader)
+            next(reader)
+            for row in reader:
+                if len(row) >= 2:
+                    freq = Frequency(abs(float(row[0])), 'THz')
+                    value = float(row[1])
+                    data[freq] = value
+        return data
+
+    @property
+    def effective_area(self):
+        raise NotImplementedError()
+
 
 
 class DispersionCompensatingFiber(Fiber):

@@ -1,1 +1,1 @@
-from .fiber import Fiber, SuperLargeEffectiveArea, NonZeroDispersionFiber, DispersionCompensatingFiber
+from .fiber import Fiber, SuperLargeEffectiveArea, NonZeroDispersionFiber, DispersionCompensatingFiber, StandardSingleModeFiber
