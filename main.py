@@ -9,16 +9,8 @@ from utils import to_dB, from_dB
 from custom_types import Length, Power
 
 
-def plot_Pp_Ps_over_distance():
-    sig = Signal()
-    fib = DispersionCompensatingFiber()
-    ra = RamanAmplifier()
-    ra.pump_wavelength = Length(1555, 'nm')
-    ra.pump_power = Power(1, 'mW')
-    exp = Experiment(fib, sig, ra)
-
-    distances = np.linspace(0, fib.length.km, 1000)
-
+def plot_Pp_Ps_over_distance(exp: Experiment):
+    distances = np.linspace(0, exp.fiber.length.km, 1000)
     pump_powers = []
     signal_powers = []
     for dist in distances:
