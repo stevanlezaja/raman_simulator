@@ -74,13 +74,13 @@ def net_gain_experiment():
     fiber.alpha_s = 0.0437 * 1e-3
     fiber.alpha_p = 0.0576 * 1e-3
 
-    raman_amplifier = RamanAmplifier()
-    raman_amplifier.pump_power.W = 1.24
+    raman_amplifier = RamanAmplifier(pumping_ratio=1)
+    raman_amplifier.pump_power(Power(1.24, 'W'))
 
     experiment_on = Experiment(fiber, signal, raman_amplifier)
     power_on = experiment_on.get_signal_power_at_distance(experiment_on.fiber.length)
 
-    raman_amplifier.pump_power.W = 0.0
+    raman_amplifier.pump_power(Power(0.0, 'W'))
     experiment_off = Experiment(fiber, signal, raman_amplifier)
     power_off = experiment_off.get_signal_power_at_distance(experiment_off.fiber.length)
 
