@@ -62,6 +62,38 @@ def plot_raman_efficiencies():
         ax = fiber.plot_raman_efficiency(ax)
     fig.show()
 
+def net_gain_experiment():
+    """
+        From Bromage 2004 p82
+    """
+    signal = Signal()
+    signal.wavelength.nm = 1555
+
+    fiber = SuperLargeEffectiveArea()
+    fiber.length.km = 10.0
+    fiber.alpha_s = 0.0437 * 1e-3
+    fiber.alpha_p = 0.0576 * 1e-3
+
+    raman_amplifier = RamanAmplifier()
+    raman_amplifier.pump_power.W = 1.24
+
+    experiment_on = Experiment(fiber, signal, raman_amplifier)
+    power_on = experiment_on.get_signal_power_at_distance(experiment_on.fiber.length)
+
+    raman_amplifier.pump_power.W = 0.0
+    experiment_off = Experiment(fiber, signal, raman_amplifier)
+    power_off = experiment_off.get_signal_power_at_distance(experiment_off.fiber.length)
+
+    G_net = power_on / power_off
+
+    print(power_on)
+    print(power_off)
+
+    plot_Pp_Ps_over_distance(experiment_on)
+    plot_Pp_Ps_over_distance(experiment_off)
+
+    print("G_net = ", to_dB(G_net), "dB")
+
 def main():
     # plot_Pp_Ps_over_distance()
     # calculate_G_net()
