@@ -7,6 +7,14 @@ class Length(Unit):
         super().__init__(value=value, unit=unit)
 
     @property
+    def nm(self):
+        return self._value * 1e9
+
+    @nm.setter
+    def nm(self, new):
+        self.value = (new, 'nm')
+
+    @property
     def m(self):
         return self._value
 
