@@ -61,16 +61,19 @@ class Fiber(ABC):
     def make_raman_efficiency_figure(self, x_points: int=100) -> Figure:
         fig, ax = plt.subplots()
 
-        x = np.linspace(0, max(self.raman_efficiency.keys()), x_points)
+        max_freq = max(self.raman_efficiency.keys()).Hz
+        print(max_freq)
+
+        x = np.linspace(0, max_freq, x_points)
         y = []
 
         for delta_f in x:
             y.append(self.C_R(delta_f))
 
         plot_name = f"Raman Efficiency of {self.__class__.__name__}"
-        ax.plot(x, y, label=plot_name)
+        ax.plot(x/1e12, y, label=plot_name)
         ax.set_title(plot_name)
-        ax.set_xlabel("delta frequency")
+        ax.set_xlabel("delta frequency [THz]")
         ax.set_ylabel("Raman efficiency")
         ax.legend()
 

@@ -73,6 +73,7 @@ def main():
     # calculate_G_net()
     # caluclate_G_on_off()
     plot_raman_efficiencies()
+    _ = input()
 
 if __name__ == "__main__":
     # from runner.run import Runner
