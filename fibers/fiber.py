@@ -25,6 +25,16 @@ class Fiber(ABC):
         return np.interp(delta_f.Hz, [f.Hz for f in freq], eff)
 
     @property
+    def alpha_s(self):
+        """Fiber loss at signal frequency"""
+        return self.__alpha_s
+
+    @property
+    def alpha_p(self):
+        """Fiber loss at pump frequency"""
+        return self.__alpha_p
+
+    @property
     @abstractmethod
     def raman_efficiency(self) -> dict:
         """"
