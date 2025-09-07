@@ -3,7 +3,7 @@ import numpy as np
 import csv
 from matplotlib.axes import Axes
 
-from custom_types import Length, Area, Frequency
+from custom_types import Length, Area, Frequency, FiberAttenuation
 
 
 class NegativeLength(Exception):
@@ -15,8 +15,8 @@ class NegativeLength(Exception):
 class Fiber(ABC):
     def __init__(self):
         self.length = Length(25.0, 'km')
-        self.__alpha_s = 4.605 * 1e-5  # [m^-1]
-        self.__alpha_p = 4.605 * 1e-5  # [m^-1]
+        self.__alpha_p = FiberAttenuation(0.0437, '1/km')
+        self.__alpha_s = FiberAttenuation(0.0576, '1/km')
     
     def C_R(self, delta_f: Frequency):
         eff_dict = self.raman_efficiency
