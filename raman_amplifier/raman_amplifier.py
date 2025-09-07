@@ -2,7 +2,7 @@ from custom_types import Length, Power
 
 
 class Pump:
-    def __init__(self, power: Power, wavelenght: Length):
+    def __init__(self, power: Power=None, wavelenght: Length=None):
         self.wavelength = wavelenght
         self.power = power
 
@@ -18,8 +18,9 @@ class RamanAmplifier:
         self._pumping_ratio = pumping_ratio
         self._pump_power = Power(0.5, 'W')
         self.pump_wavelength = Length(1455, 'nm')
-        self.forward_pump = Pump(Power(self._pump_power.W * self._pumping_ratio, 'W'), self.pump_wavelength)
-        self.backward_pump = Pump(Power(self._pump_power.W * (1 - self._pumping_ratio), 'W'), self.pump_wavelength)
+        self.forward_pump = Pump()
+        self.backward_pump = Pump()
+        self.update_pumps()
 
     def update_pumps(self):
         self.forward_pump.power = Power(self._pump_power.W * self._pumping_ratio, 'W')
@@ -31,6 +32,8 @@ class RamanAmplifier:
 
     @pump_power.setter
     def pump_power(self, new: Power):
+        if new == self._pump_power:
+            return
         self._pump_power = new
         self.update_pumps()
 
@@ -40,6 +43,8 @@ class RamanAmplifier:
 
     @pumping_ratio.setter
     def pumping_ratio(self, new: float):
+        if new == self._pumping_ratio:
+            return
         _validate_ratio(new)
         self._pumping_ratio = new
         self.update_pumps()
