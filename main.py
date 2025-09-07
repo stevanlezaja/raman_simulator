@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from fibers import Fiber, DispersionCompensatingFiber, SuperLargeEffectiveArea, StandardSingleModeFiber, NonZeroDispersionFiber
+from fibers import Fiber, DispersionCompensatingFiber, SuperLargeEffectiveArea, \
+                StandardSingleModeFiber, NonZeroDispersionFiber, ChristopheExperimentFiber
 from signals import Signal
 from raman_amplifier import RamanAmplifier
 from experiment.experiment import Experiment
@@ -19,6 +20,17 @@ def plot_Pp_Ps_over_distance(exp: Experiment):
 
     plt.figure()
     plt.plot(distances, pump_powers, label="Pump power")
+    plt.plot(distances, signal_powers, label="Signal power")
+    plt.legend()
+    plt.show()
+
+def plot_Ps_over_fiber_length(exp: Experiment):
+    distances = np.linspace(0, exp.fiber.length.km, 1000)
+    signal_powers = []
+    for dist in distances:
+        signal_powers.append(to_dB(exp.get_signal_power_at_distance(Length(dist, 'km')), Power(1, 'mW').W))
+
+    plt.figure()
     plt.plot(distances, signal_powers, label="Signal power")
     plt.legend()
     plt.show()
@@ -94,13 +106,48 @@ def net_gain_experiment():
 
     print("G_net = ", to_dB(G_net), "dB")
 
+def validation_experiment():
+    """"
+        Experiment provided by Christophe to validate the model for Raman amplification
+    """
+    fiber = ChristopheExperimentFiber()
+    fiber.length.km = 100
+    a_p_dB_km = 0.3
+    a_s_dB_km = 0.2
+    fiber.alpha_p = a_p_dB_km * np.log(10)/10 / 1000
+    fiber.alpha_s = a_s_dB_km * np.log(10)/10 / 1000
+
+    signal = Signal()
+    signal.wavelength.nm = 1550
+    signal.power.mW = 0.1
+
+    raman_amplifier = RamanAmplifier()
+    raman_amplifier.pump_wavelength.nm = 1450
+    raman_amplifier.pump_power = Power(758.2, 'mW')
+
+    ratios = [0.0, 0.25, 0.5, 0.75, 1.0]
+    fig, ax = plt.subplots()
+
+    for ratio in ratios:
+        raman_amplifier.pumping_ratio = ratio
+        exp = Experiment(fiber, signal, raman_amplifier)
+
+        distances = np.linspace(0, exp.fiber.length.km, 100)
+        signal_powers = []
+        for dist in distances:
+            signal_powers.append(to_dB(exp.get_signal_power_at_distance(Length(dist, 'km')), Power(1, 'mW').W))
+        ax.plot(distances, signal_powers)
+
+    plt.grid()
+    plt.show()
+
 def main():
     # plot_Pp_Ps_over_distance(Experiment(DispersionCompensatingFiber(), Signal(), RamanAmplifier()))
     # calculate_G_net()
     # caluclate_G_on_off()
     # plot_raman_efficiencies()
-    net_gain_experiment()
-    _ = input()
+    # net_gain_experiment()
+    validation_experiment()
 
 if __name__ == "__main__":
     # from runner.run import Runner
