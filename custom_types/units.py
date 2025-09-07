@@ -1,4 +1,7 @@
 from abc import ABC, abstractmethod
+from typing import Optional
+
+from .unit_registry import UnitRegistry
 
 
 class Multipliers:
@@ -35,6 +38,11 @@ class Unit(ABC):
     def value(self, new):
         new_value, new_unit = new
         self._value = self.convert(value=new_value, unit=new_unit)
+
+    def __init_subclass__(cls):
+        super().__init_subclass__()
+        if not any(c in cls.default_unit for c in ['/', '*', '^']):
+            UnitRegistry.register(cls.default_unit, cls.__name__)
 
     def __str__(self):
         return f"{self._value} {self.default_unit}"

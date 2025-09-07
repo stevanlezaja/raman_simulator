@@ -1,4 +1,4 @@
-from .units import Unit
+from .units import Unit, UnitRegistry
 
 class Length(Unit):
     default_unit = 'm'

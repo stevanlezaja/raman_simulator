@@ -1,11 +1,11 @@
 class UnitRegistry:
-    base_units: set[str] = set()
+    base_units: dict[str, str] = dict()
 
     @classmethod
-    def register(cls, unit: str):
-        cls.base_units.add(unit)
+    def register(cls, unit: str, class_name: str):
+        cls.base_units[class_name] = unit
 
     @classmethod
     def all_units(cls):
-        return sorted(cls.base_units, key=len)
+        return cls.base_units.values()
 
