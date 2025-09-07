@@ -1,9 +1,9 @@
 import functools
-from scipy.integrate import solve_ivp
+from scipy.integrate import solve_ivp, solve_bvp
 import numpy as np
 
 import custom_types.conversions as conv
-from custom_types import Length, Frequency
+from custom_types import Length, Frequency, Power
 
 from fibers import Fiber
 from signals import Signal
@@ -15,7 +15,7 @@ class Experiment:
         self.fiber = fiber
         self.signal = signal
         self.raman_amplifier = raman_amplifier
-        self.__sol = self.solve()
+        self.__sol = self._solve()
 
     @functools.cached_property
     def C_R(self):
@@ -26,15 +26,15 @@ class Experiment:
 
         return self.fiber.C_R(freq_diff)
 
-    def get_signal_power_at_distance(self, z: Length):
+    def get_signal_power_at_distance(self, z: Length) -> Power:
         assert isinstance(z, Length)
         Ps, _, _ = self.__sol(z.m)
-        return Ps
+        return Power(Ps, 'W')
 
-    def get_pump_power_at_distance(self, z: Length):
+    def get_pump_power_at_distance(self, z: Length) -> Power:
         assert isinstance(z, Length)
         _, Ppf, Ppb = self.__sol(z.m)
-        return Ppf + Ppb
+        return Power(Ppf + Ppb, 'W')
 
     def raman_ode_system(self, z, P):
         Ps, Ppf, Ppb = P
