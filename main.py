@@ -6,7 +6,7 @@ from fibers import Fiber, DispersionCompensatingFiber, SuperLargeEffectiveArea, 
 from signals import Signal
 from raman_amplifier import RamanAmplifier
 from experiment.experiment import Experiment
-from utils import to_dB, from_dB
+from utils import to_dB, from_dB, attenuation_dBkm_to_linear, attenuation_linear_to_dBkm
 from custom_types import Length, Power
 
 
@@ -15,12 +15,15 @@ def plot_Pp_Ps_over_distance(exp: Experiment):
     pump_powers = []
     signal_powers = []
     for dist in distances:
-        pump_powers.append(to_dB(exp.get_pump_power_at_distance(Length(dist, 'km')), exp.get_pump_power_at_distance(Length(0, 'km'))))
-        signal_powers.append(to_dB(exp.get_signal_power_at_distance(Length(dist, 'km')), exp.get_signal_power_at_distance(Length(0, 'km'))))
+        # pump_powers.append(to_dB(exp.get_pump_power_at_distance(Length(dist, 'km')), exp.get_pump_power_at_distance(Length(0, 'km'))))
+        pump_powers.append(exp.get_pump_power_at_distance(Length(dist, 'km')) / exp.get_pump_power_at_distance(Length(0, 'km')))
+        # signal_powers.append(to_dB(exp.get_signal_power_at_distance(Length(dist, 'km')), exp.get_signal_power_at_distance(Length(0, 'km'))))
+        signal_powers.append(exp.get_signal_power_at_distance(Length(dist, 'km')) / exp.get_signal_power_at_distance(Length(0, 'km')))
 
     plt.figure()
     plt.plot(distances, pump_powers, label="Pump power")
     plt.plot(distances, signal_powers, label="Signal power")
+    plt.grid()
     plt.legend()
     plt.show()
 
@@ -83,26 +86,20 @@ def net_gain_experiment():
 
     fiber = SuperLargeEffectiveArea()
     fiber.length.km = 10.0
-    fiber.alpha_s = 0.0437 * 1e-3
-    fiber.alpha_p = 0.0576 * 1e-3
+    fiber.alpha_s.m = 0.0437 * 1e-3
+    fiber.alpha_p.m = 0.0576 * 1e-3
 
     raman_amplifier = RamanAmplifier(pumping_ratio=1)
-    raman_amplifier.pump_power(Power(1.24, 'W'))
+    raman_amplifier.pump_power = Power(1.24, 'W')
 
     experiment_on = Experiment(fiber, signal, raman_amplifier)
     power_on = experiment_on.get_signal_power_at_distance(experiment_on.fiber.length)
 
-    raman_amplifier.pump_power(Power(0.0, 'W'))
+    raman_amplifier.pump_power = Power(0.0, 'W')
     experiment_off = Experiment(fiber, signal, raman_amplifier)
     power_off = experiment_off.get_signal_power_at_distance(experiment_off.fiber.length)
 
     G_net = power_on / power_off
-
-    print(power_on)
-    print(power_off)
-
-    plot_Pp_Ps_over_distance(experiment_on)
-    plot_Pp_Ps_over_distance(experiment_off)
 
     print("G_net = ", to_dB(G_net), "dB")
 
@@ -114,8 +111,8 @@ def validation_experiment():
     fiber.length.km = 100
     a_p_dB_km = 0.3
     a_s_dB_km = 0.2
-    fiber.alpha_p = a_p_dB_km * np.log(10)/10 / 1000
-    fiber.alpha_s = a_s_dB_km * np.log(10)/10 / 1000
+    fiber.alpha_p.km = attenuation_dBkm_to_linear(a_p_dB_km)
+    fiber.alpha_s.km = attenuation_dBkm_to_linear(a_s_dB_km)
 
     signal = Signal()
     signal.wavelength.nm = 1550
@@ -135,9 +132,11 @@ def validation_experiment():
         distances = np.linspace(0, exp.fiber.length.km, 100)
         signal_powers = []
         for dist in distances:
-            signal_powers.append(to_dB(exp.get_signal_power_at_distance(Length(dist, 'km')), Power(1, 'mW').W))
+            signal_powers.append(to_dB(exp.get_signal_power_at_distance(Length(dist, 'km')).W, Power(1, 'mW').W))
         ax.plot(distances, signal_powers)
 
+    plt.xlabel('Distance [km]')
+    plt.ylabel('Signal power[dBm]')
     plt.grid()
     plt.show()
 
