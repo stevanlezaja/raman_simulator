@@ -21,6 +21,9 @@ class RamanAmplifier:
         self.forward_pump = Pump(Power(self._pump_power.W * self.pumping_ratio, 'W'), self.pump_wavelength)
         self.backward_pump = Pump(Power(self._pump_power.W * (1 - self.pumping_ratio), 'W'), self.pump_wavelength)
 
+    def update_pumps(self):
+        self.forward_pump.power = Power(self._pump_power.W * self._pumping_ratio, 'W')
+        self.backward_pump.power = Power(self._pump_power.W * (1 - self._pumping_ratio), 'W')
     def pump_power(self, new: Power):
         self._pump_power = new
         self.forward_pump.power = Power(self._pump_power.W * self.pumping_ratio, 'W')
