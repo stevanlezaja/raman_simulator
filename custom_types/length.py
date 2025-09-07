@@ -33,6 +33,8 @@ class Length(Unit):
 
 if __name__ == "__main__":
     distance = Length(value=10, unit='km')
-    print(distance)
+    assert distance.m == 10000
     distance.value = (15, 'mm')
-    print(distance)
+    assert distance.m == 0.015
+    distance.value = (1, 'm')
+    assert distance.m == 1
