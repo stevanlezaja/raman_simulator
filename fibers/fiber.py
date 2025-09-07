@@ -144,3 +144,16 @@ class SuperLargeEffectiveArea(Fiber):
     @property
     def effective_area(self):
         return Area(105, 'um^2')
+
+class ChristopheExperimentFiber(Fiber):
+    @property
+    def raman_efficiency(self):
+        return{
+            Frequency(0, 'THz'): 0.42,
+            Frequency(25, 'THz'): 0.42,
+            
+        }
+
+    @property
+    def effective_area(self):
+        raise NotImplementedError()
