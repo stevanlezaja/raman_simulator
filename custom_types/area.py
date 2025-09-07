@@ -3,7 +3,6 @@ from .units import Unit
 
 class Area(Unit):
     default_unit = 'm^2'
-    degree = 2
 
     def __init__(self, value: float, unit: str):
         super().__init__(value=value, unit=unit)
