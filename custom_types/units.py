@@ -74,10 +74,16 @@ class Unit(ABC):
         new_value, new_unit = new
         self._value = self.convert(value=new_value, unit=new_unit)
 
-    def __init_subclass__(cls):
+    def __init_subclass__(cls) -> None:
         super().__init_subclass__()
+        if cls.__name__ in UnitRegistry.base_units.keys():
+            print("Unit", cls.__name__, "already registered")
+            return
         if not any(c in cls.default_unit for c in ['/', '*', '^']):
+            print("Registering", cls.__name__, "\n  Default unit:", cls.default_unit)
             UnitRegistry.register(cls.default_unit, cls.__name__)
+            return
+        print(cls.__name__, "unit", cls.default_unit, "is not a base unit. Not registering")
 
     def __str__(self):
         return f"{self._value} {self.default_unit}"
