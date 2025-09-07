@@ -9,11 +9,11 @@ class FiberAttenuation(Unit):
 
     @property
     def km(self):
-        return self.value / 1e3
+        return self.value * 1e3
 
     @km.setter
     def km(self, new):
-        self.value = (new * 1e3, 'km')
+        self.value = (new, '1/km')
 
     @property
     def m(self):
@@ -21,8 +21,7 @@ class FiberAttenuation(Unit):
 
     @m.setter
     def m(self, new):
-        self.value = (new, 'm')
-
+        self.value = (new, '1/m')
 
 if __name__ == "__main__":
     att = FiberAttenuation(0.1, '1/km')
