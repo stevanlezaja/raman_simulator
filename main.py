@@ -133,10 +133,11 @@ def validation_experiment():
         signal_powers = []
         for dist in distances:
             signal_powers.append(to_dB(exp.get_signal_power_at_distance(Length(dist, 'km')).W, Power(1, 'mW').W))
-        ax.plot(distances, signal_powers)
+        ax.plot(distances, signal_powers, label=f"r = {ratio}")
 
     plt.xlabel('Distance [km]')
     plt.ylabel('Signal power[dBm]')
+    plt.legend()
     plt.grid()
     plt.show()
 
