@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import numpy as np
 import csv
 from matplotlib.axes import Axes
+import re
 
 from custom_types import Length, Area, Frequency, FiberAttenuation
 
@@ -18,6 +19,13 @@ class Fiber(ABC):
         self.__alpha_p = FiberAttenuation(0.0437, '1/km')
         self.__alpha_s = FiberAttenuation(0.0576, '1/km')
     
+    @property
+    def __name__(self):
+        print(self.__class__.__name__)
+        pascal_case = self.__class__.__name__
+        words = re.sub(r'([a-z])([A-Z])', r'\1 \2', pascal_case)
+        return words
+
     def C_R(self, delta_f: Frequency):
         eff_dict = self.raman_efficiency
         freq = eff_dict.keys()
