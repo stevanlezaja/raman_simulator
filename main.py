@@ -6,7 +6,7 @@ from fibers import Fiber, DispersionCompensatingFiber, SuperLargeEffectiveArea, 
 from signals import Signal
 from raman_amplifier import RamanAmplifier
 from experiment.experiment import Experiment
-from utils import to_dB, from_dB, attenuation_dBkm_to_linear, attenuation_linear_to_dBkm
+from utils import to_dB, from_dB
 from custom_types import Length, Power
 
 
@@ -108,10 +108,8 @@ def validation_experiment(fiber: Fiber, ax):
         Experiment provided by Christophe to validate the model for Raman amplification
     """
     fiber.length.km = 100
-    a_p_dB_km = 0.3
-    a_s_dB_km = 0.2
-    fiber.alpha_p.km = attenuation_dBkm_to_linear(a_p_dB_km)
-    fiber.alpha_s.km = attenuation_dBkm_to_linear(a_s_dB_km)
+    fiber.alpha_p.dB_km = 0.3
+    fiber.alpha_s.dB_km = 0.2
 
     signal = Signal()
     signal.wavelength.nm = 1550

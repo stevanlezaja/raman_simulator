@@ -1,3 +1,5 @@
+import numpy as np
+
 from .units import Unit
 
 
@@ -22,6 +24,14 @@ class FiberAttenuation(Unit):
     @m.setter
     def m(self, new):
         self.value = (new, '1/m')
+
+    @property
+    def dB_km(self):
+        return (10 / np.log(10)) * np.asarray(self.value)
+
+    @dB_km.setter
+    def dB_km(self, new):
+        self.value = ((np.log(10) / 10) * np.asarray(new), '1/km')
 
 if __name__ == "__main__":
     att = FiberAttenuation(0.1, '1/km')

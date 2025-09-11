@@ -65,13 +65,13 @@ class Fiber(ABC):
         y = []
 
         for delta_f in x:
-            y.append(self.C_R(delta_f))
+            y.append(self.C_R(Frequency(delta_f, 'Hz')))
 
         plot_name = self.__class__.__name__
         ax.plot(x/1e12, y, label=plot_name)
         ax.set_title(plot_name)
         ax.set_xlabel("delta frequency [THz]")
-        ax.set_ylabel("Raman efficiency")
+        ax.set_ylabel(f"Raman efficiency [1/W/km]")
         ax.legend()
 
         return ax
@@ -151,7 +151,6 @@ class ChristopheExperimentFiber(Fiber):
         return{
             Frequency(0, 'THz'): 0.42,
             Frequency(25, 'THz'): 0.42,
-            
         }
 
     @property
