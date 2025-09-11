@@ -29,31 +29,31 @@ def from_dB(dB_value, ref=1.0):
     return np.log(10) / 10 * dB_value
 
 
-def attenuation_dBkm_to_linear(alpha_dB):
-    """
-    Convert attenuation in dB/km to linear 1/km.
-    """
-    return (np.log(10) / 10) * np.asarray(alpha_dB)
+# def attenuation_dBkm_to_linear(alpha_dB):
+#     """
+#     Convert attenuation in dB/km to linear 1/km.
+#     """
+#     return (np.log(10) / 10) * np.asarray(alpha_dB)
 
-def attenuation_linear_to_dBkm(alpha_linear):
-    """
-    Convert linear attenuation 1/km to dB/km.
-    """
-    return (10 / np.log(10)) * np.asarray(alpha_linear)
-
-if __name__ == '__main__':
-    alpha_dB = 0.19
-    alpha_lin = attenuation_dBkm_to_linear(alpha_dB)
-    print(alpha_lin)  # 0.043749 1/km
-
-    # Back conversion
-    print(attenuation_linear_to_dBkm(alpha_lin))  # 0.19 dB/km
+# def attenuation_linear_to_dBkm(alpha_linear):
+#     """
+#     Convert linear attenuation 1/km to dB/km.
+#     """
+#     return (10 / np.log(10)) * np.asarray(alpha_linear)
 
 # if __name__ == '__main__':
-#     # --- Example usage ---
-#     p = 1e-3  # 1 mW
-#     print(to_dB(p, ref=1e-3))   # 0.0 dBm
-#     print(to_dB(p, ref=1.0))    # -30.0 dBW
+#     alpha_dB = 0.19
+#     alpha_lin = attenuation_dBkm_to_linear(alpha_dB)
+#     print(alpha_lin)  # 0.043749 1/km
 
-#     dB_val = -3  # -3 dB relative to 1 W
-#     print(from_dB(dB_val, ref=1.0))  # 0.5 W
+#     # Back conversion
+#     print(attenuation_linear_to_dBkm(alpha_lin))  # 0.19 dB/km
+
+if __name__ == '__main__':
+    # --- Example usage ---
+    p = 1e-3  # 1 mW
+    print(to_dB(p, ref=1e-3))   # 0.0 dBm
+    print(to_dB(p, ref=1.0))    # -30.0 dBW
+
+    dB_val = -3  # -3 dB relative to 1 W
+    print(from_dB(dB_val, ref=1.0))  # 0.5 W
