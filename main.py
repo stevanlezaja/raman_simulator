@@ -103,11 +103,10 @@ def net_gain_experiment():
 
     print("G_net = ", to_dB(G_net), "dB")
 
-def validation_experiment():
+def validation_experiment(fiber: Fiber, ax):
     """"
         Experiment provided by Christophe to validate the model for Raman amplification
     """
-    fiber = ChristopheExperimentFiber()
     fiber.length.km = 100
     a_p_dB_km = 0.3
     a_s_dB_km = 0.2
@@ -123,7 +122,6 @@ def validation_experiment():
     raman_amplifier.pump_power = Power(758.2, 'mW')
 
     ratios = [0.0, 0.25, 0.5, 0.75, 1.0]
-    fig, ax = plt.subplots()
 
     for ratio in ratios:
         raman_amplifier.pumping_ratio = ratio
@@ -135,11 +133,6 @@ def validation_experiment():
             signal_powers.append(to_dB(exp.get_signal_power_at_distance(Length(dist, 'km')).W, Power(1, 'mW').W))
         ax.plot(distances, signal_powers, label=f"r = {ratio}")
 
-    plt.xlabel('Distance [km]')
-    plt.ylabel('Signal power[dBm]')
-    plt.legend()
-    plt.grid()
-    plt.show()
 
 def main():
     # plot_Pp_Ps_over_distance(Experiment(DispersionCompensatingFiber(), Signal(), RamanAmplifier()))
@@ -147,7 +140,17 @@ def main():
     # caluclate_G_on_off()
     # plot_raman_efficiencies()
     # net_gain_experiment()
-    validation_experiment()
+    fibers = [StandardSingleModeFiber(), NonZeroDispersionFiber(), SuperLargeEffectiveArea()]
+    fig, axes = plt.subplots(2, 2)
+    axes = axes.flatten()
+    for fiber, ax in zip(fibers, axes):
+        validation_experiment(fiber, ax)
+        ax.set_xlabel('Distance [km]')
+        ax.set_ylabel('Signal power [dBm]')
+        ax.legend()
+        ax.grid()
+        ax.set_title(fiber.__name__)
+    plt.show()
 
 if __name__ == "__main__":
     # from runner.run import Runner
