@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
-from custom_types import Power, Length
-from raman_amplifier import Pump
+from raman_amplifier import RamanInputs, GainSpectrum
 
 
 class _Controller(ABC):
@@ -9,5 +8,5 @@ class _Controller(ABC):
         pass
     
     @abstractmethod
-    def get_control(self, curr_input: dict[Pump, tuple[Power, Length]], target_output) -> dict[Pump, tuple[Power, Length]]:
+    def get_control(self, curr_input: RamanInputs, curr_output:GainSpectrum, target_output: GainSpectrum) -> RamanInputs:
         raise NotImplementedError
