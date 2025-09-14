@@ -6,8 +6,8 @@ from .units import Unit
 class PowerGain(Unit):
     default_unit = ''
 
-    def __init__(self):
-        super().__init__(value=0.0, unit='')
+    def __init__(self, value=0.0, unit=''):
+        super().__init__(value=value, unit=unit)
 
     @property
     def dB(self):

@@ -115,3 +115,9 @@ class Unit(ABC):
         if isinstance(other, self.__class__):
             return self.value >= other.value
         return NotImplemented
+
+    def __add__(self, other: "Unit") -> "Unit":
+        assert isinstance(other, self.__class__), (f"Both operands need to be type {self.__class__.__name__}")
+        result = self.__class__(value=self.value, unit=self.default_unit)
+        result.value = (self.value + other.value, self.default_unit)
+        return result
