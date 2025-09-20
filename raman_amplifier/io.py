@@ -4,9 +4,9 @@ from custom_types import PowerGain, Length, Power, Frequency, UnitProtocol
 
 
 class RamanInputs:
-    def __init__(self):
-        self.wavelengths: list[Length] = []
-        self.powers: list[Power] = []
+    def __init__(self, powers: list[Power], wavelengths: list[Length]):
+        self.wavelengths: list[Length] = wavelengths
+        self.powers: list[Power] = powers
 
 
 T = TypeVar("T", bound = UnitProtocol)
