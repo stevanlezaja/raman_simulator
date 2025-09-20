@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import numpy as np
+from numpy.typing import ArrayLike
 import csv
 from matplotlib.axes import Axes
 import re
@@ -9,7 +10,7 @@ from custom_types import Length, Area, Frequency, FiberAttenuation
 
 class NegativeLength(Exception):
     """Exception raised when fiber length is negative"""
-    def __init__(self, length, msg="Fiber length must be non-negative!"):
+    def __init__(self, length: Length, msg: str = "Fiber length must be non-negative!"):
         super().__init__(f"{msg}: {length}")
 
 
@@ -20,17 +21,17 @@ class Fiber(ABC):
         self.__alpha_s = FiberAttenuation(0.0576, '1/km')
     
     @property
-    def __name__(self):
+    def name(self) -> str:
         print(self.__class__.__name__)
         pascal_case = self.__class__.__name__
         words = re.sub(r'([a-z])([A-Z])', r'\1 \2', pascal_case)
         return words
 
-    def C_R(self, delta_f: Frequency):
+    def C_R(self, delta_f: Frequency) -> float:
         eff_dict = self.raman_efficiency
         freq = eff_dict.keys()
         eff = np.array([eff_dict[k] for k in freq])
-        return np.interp(delta_f.Hz, [f.Hz for f in freq], eff)
+        return float(np.interp(delta_f.Hz, [f.Hz for f in freq], eff))
 
     @property
     def alpha_s(self):
@@ -44,7 +45,7 @@ class Fiber(ABC):
 
     @property
     @abstractmethod
-    def raman_efficiency(self) -> dict:
+    def raman_efficiency(self) -> dict[Frequency, float]:
         """"
             dict:
               - keys: pump-signal frequency difference [THz]
@@ -61,26 +62,26 @@ class Fiber(ABC):
         max_freq = max(self.raman_efficiency.keys()).Hz
         print(max_freq)
 
-        x = np.linspace(0, max_freq, x_points)
-        y = []
+        x: ArrayLike = np.linspace(0, max_freq, x_points)
+        y: list[float] = []
 
         for delta_f in x:
             y.append(self.C_R(Frequency(delta_f, 'Hz')))
 
-        plot_name = self.__class__.__name__
-        ax.plot(x/1e12, y, label=plot_name)
-        ax.set_title(plot_name)
-        ax.set_xlabel("delta frequency [THz]")
-        ax.set_ylabel(f"Raman efficiency [1/W/km]")
-        ax.legend()
+        plot_name = self.name
+        ax.plot(x/1e12, y, label=plot_name) # type: ignore[call-overload]
+        ax.set_title(plot_name) # type: ignore[call-overload]
+        ax.set_xlabel("delta frequency [THz]") # type: ignore[call-overload]
+        ax.set_ylabel(f"Raman efficiency [1/W/km]") # type: ignore[call-overload]
+        ax.legend() # type: ignore[call-overload]
 
         return ax
 
 
 class StandardSingleModeFiber(Fiber):
     @property
-    def raman_efficiency(self) -> dict:
-        data = {}
+    def raman_efficiency(self) -> dict[Frequency, float]:
+        data: dict[Frequency, float] = {}
         with open("data/Raman_Gain_efficiency_SSMF_C-band_September2025.csv", "r") as f:
             reader = csv.reader(f)
             next(reader)
@@ -94,13 +95,13 @@ class StandardSingleModeFiber(Fiber):
 
     @property
     def effective_area(self):
-        raise NotImplementedError()
+        return Area(80, 'um^2')
 
 
 
 class DispersionCompensatingFiber(Fiber):
     @property
-    def raman_efficiency(self) -> dict:
+    def raman_efficiency(self) -> dict[Frequency, float]:
         return {
             Frequency(0, 'THz'): 0,
             Frequency(5, 'THz'): 0.1,
@@ -116,7 +117,7 @@ class DispersionCompensatingFiber(Fiber):
 
 class NonZeroDispersionFiber(Fiber):
     @property
-    def raman_efficiency(self) -> dict:
+    def raman_efficiency(self) -> dict[Frequency, float]:
         return {
             Frequency(0, 'THz'): 0,
             Frequency(5, 'THz'): 0.25,
@@ -132,7 +133,7 @@ class NonZeroDispersionFiber(Fiber):
 
 class SuperLargeEffectiveArea(Fiber):
     @property
-    def raman_efficiency(self) -> dict:
+    def raman_efficiency(self) -> dict[Frequency, float]:
         return {
             Frequency(0, 'THz'): 0,
             Frequency(5, 'THz'): 0.1,
@@ -155,4 +156,4 @@ class ChristopheExperimentFiber(Fiber):
 
     @property
     def effective_area(self):
-        raise NotImplementedError()
+        return Area(80, 'um^2')
