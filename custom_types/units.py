@@ -58,7 +58,7 @@ class Unit(ABC, UnitProtocol):
     def __init__(self, *, value: float, unit: str):
         self._value = self.convert(value=value, unit=unit)
 
-    def convert(self, *, value: float, unit: str):
+    def convert(self, *, value: float, unit: str) -> float:
         parts = unit.split("/")
         numerator = parts[0].split("*")
 
