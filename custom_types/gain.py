@@ -4,9 +4,9 @@ from .units import Unit
 
 
 class PowerGain(Unit):
-    default_unit = ''
+    default_unit = ' '
 
-    def __init__(self, value: float = 0.0, unit: str = ''):
+    def __init__(self, value: float = 0.0, unit: str = ' '):
         super().__init__(value=value, unit=unit)
 
     @property
@@ -15,7 +15,7 @@ class PowerGain(Unit):
 
     @dB.setter
     def dB(self, new: float):
-        self.value = (10 ** (new / 10), '')
+        self.value = (10 ** (new / 10), ' ')
 
     @property
     def linear(self):
@@ -23,7 +23,7 @@ class PowerGain(Unit):
 
     @linear.setter
     def linear(self, new: float):
-        self.value = (new, '')
+        self.value = (new, ' ')
 
 
 if __name__ == "__main__":
