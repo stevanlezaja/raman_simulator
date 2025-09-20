@@ -1,3 +1,4 @@
 msc_env/
 __pycache__/
 plots/
+.DS_Store
