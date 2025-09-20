@@ -48,6 +48,9 @@ class Spectrum(Generic[T]):
             mean += v.value
         return mean/len(self.spectrum.values())
 
+    def add_val(self, frequency: Frequency, value: T) -> None:
+        self.spectrum[frequency] = value
+
 
 if __name__ == "__main__":
     spec1 = Spectrum(PowerGain)

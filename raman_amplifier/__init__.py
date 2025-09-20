@@ -1,4 +1,4 @@
 from .raman_amplifier import RamanAmplifier, Pump
-from .io import RamanInputs, GainSpectrum
+from .io import RamanInputs, Spectrum
 
-__all__ = ["RamanAmplifier", "Pump", "RamanInputs", "GainSpectrum"]
+__all__ = ["RamanAmplifier", "Pump", "RamanInputs", "Spectrum"]
