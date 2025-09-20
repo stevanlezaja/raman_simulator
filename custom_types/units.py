@@ -98,6 +98,9 @@ class Unit(ABC, UnitProtocol):
 
     def __str__(self):
         return f"{self._value} {self.default_unit}"
+
+    def __repr__(self):
+        return f"{self._value} {self.default_unit}"
     
     def __hash__(self):
         return hash(round(self.value, 12))
