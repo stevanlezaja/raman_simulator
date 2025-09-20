@@ -1,4 +1,5 @@
 from abc import ABC
+from typing import TypeVar
 
 from .unit_registry import UnitRegistry
 
@@ -19,6 +20,7 @@ class Multipliers:
 
 class Unit(ABC):
     default_unit = ''
+    T = TypeVar("T", bound="Unit")
 
     @staticmethod
     def split_exponent(token: str) -> tuple[str, int]:
@@ -119,13 +121,13 @@ class Unit(ABC):
             return self.value >= other.value
         return NotImplemented
 
-    def __add__(self, other: "Unit") -> "Unit":
+    def __add__(self: T, other: T) -> T:
         assert isinstance(other, self.__class__), (f"Both operands need to be type {self.__class__.__name__}")
         result = self.__class__(value=self.value, unit=self.default_unit)
         result.value = (self.value + other.value, self.default_unit)
         return result
 
-    def __sub__(self, other: "Unit") -> "Unit":
+    def __sub__(self: T, other: T) -> T:
         assert isinstance(other, self.__class__), (f"Both operands need to be type {self.__class__.__name__}")
         result = self.__class__(value=self.value, unit=self.default_unit)
         result.value = (self.value - other.value, self.default_unit)
