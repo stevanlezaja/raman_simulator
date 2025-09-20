@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Type
+from typing import TypeVar, Generic, Type, Iterator
 
 from custom_types import PowerGain, Length, Power, Frequency, UnitProtocol
 
@@ -50,6 +50,17 @@ class Spectrum(Generic[T]):
 
     def add_val(self, frequency: Frequency, value: T) -> None:
         self.spectrum[frequency] = value
+
+    def __iter__(self) -> Iterator[tuple[Frequency, T]]:
+        return iter(self.spectrum.items())
+
+    @property
+    def frequencies(self):
+        return list(self.spectrum.keys())
+
+    @property
+    def values(self):
+        return list(self.spectrum.values())
 
 
 if __name__ == "__main__":
