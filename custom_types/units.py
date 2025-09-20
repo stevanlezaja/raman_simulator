@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from .unit_registry import UnitRegistry
 
@@ -20,10 +20,11 @@ class Multipliers:
 class Unit(ABC):
     default_unit = ''
 
+    @staticmethod
     def split_exponent(token: str) -> tuple[str, int]:
         token_list = token.split('^')
         if len(token_list) == 2:
-            token, exponenent = token_list[0], token_list[1]
+            token, exponenent = token_list[0], int(token_list[1])
         elif len(token_list) == 1:
             token = token_list[0]
             exponenent = 1
@@ -32,6 +33,7 @@ class Unit(ABC):
 
         return (token, exponenent)
 
+    @staticmethod
     def split_unit(token: str) -> tuple[str, str]:
         for base in sorted(UnitRegistry.all_units(), key=len):
             if token.endswith(base):
@@ -39,7 +41,8 @@ class Unit(ABC):
                 return mul, base
         raise Exception(f"Unknown unit token: {token}")
     
-    def process_unit(token: str) -> tuple[str, str, str]:
+    @staticmethod
+    def process_unit(token: str) -> tuple[str, str, int]:
         token, exponent = Unit.split_exponent(token)
         mul, base = Unit.split_unit(token)
         return mul, base, exponent
@@ -54,13 +57,13 @@ class Unit(ABC):
         multiplier = 1.0
 
         for num in numerator:
-            mul, base, exp = Unit.process_unit(num)
+            mul, _, exp = Unit.process_unit(num)
             multiplier *= (Multipliers.units.get(mul, 1.0) ** int(exp))
 
         if len(parts) > 1:
             denominator = parts[1:]
             for den in denominator:
-                mul, base, exp = Unit.process_unit(den)
+                mul, _, exp = Unit.process_unit(den)
                 multiplier /= (Multipliers.units.get(mul, 1.0) ** exp)
 
         return (value * multiplier)
@@ -70,7 +73,7 @@ class Unit(ABC):
         return self._value
 
     @value.setter
-    def value(self, new):
+    def value(self, new: tuple[float, str]):
         new_value, new_unit = new
         self._value = self.convert(value=new_value, unit=new_unit)
 
@@ -91,27 +94,27 @@ class Unit(ABC):
     def __hash__(self):
         return hash(round(self.value, 12))
 
-    def __eq__(self, other):
+    def __eq__(self, other: object):
         if isinstance(other, self.__class__):
             return self.value == other.value
         return NotImplemented
 
-    def __lt__(self, other):
+    def __lt__(self, other: object):
         if isinstance(other, self.__class__):
             return self.value < other.value
         return NotImplemented
 
-    def __le__(self, other):
+    def __le__(self, other: object):
         if isinstance(other, self.__class__):
             return self.value <= other.value
         return NotImplemented
 
-    def __gt__(self, other):
+    def __gt__(self, other: object):
         if isinstance(other, self.__class__):
             return self.value > other.value
         return NotImplemented
 
-    def __ge__(self, other):
+    def __ge__(self, other: object):
         if isinstance(other, self.__class__):
             return self.value >= other.value
         return NotImplemented
@@ -120,4 +123,10 @@ class Unit(ABC):
         assert isinstance(other, self.__class__), (f"Both operands need to be type {self.__class__.__name__}")
         result = self.__class__(value=self.value, unit=self.default_unit)
         result.value = (self.value + other.value, self.default_unit)
+        return result
+
+    def __sub__(self, other: "Unit") -> "Unit":
+        assert isinstance(other, self.__class__), (f"Both operands need to be type {self.__class__.__name__}")
+        result = self.__class__(value=self.value, unit=self.default_unit)
+        result.value = (self.value - other.value, self.default_unit)
         return result
