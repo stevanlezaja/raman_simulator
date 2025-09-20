@@ -1,7 +1,13 @@
 from abc import ABC
-from typing import TypeVar
+from typing import TypeVar, Protocol, Self
 
 from .unit_registry import UnitRegistry
+
+
+class UnitProtocol(Protocol):
+    value: float
+    def __add__(self, other: Self) -> Self: ...
+    def __sub__(self, other: Self) -> Self: ...
 
 
 class Multipliers:
@@ -18,7 +24,7 @@ class Multipliers:
     }
 
 
-class Unit(ABC):
+class Unit(ABC, UnitProtocol):
     default_unit = ''
     T = TypeVar("T", bound="Unit")
 
@@ -75,7 +81,7 @@ class Unit(ABC):
         return self._value
 
     @value.setter
-    def value(self, new: tuple[float, str]):
+    def value(self, new: tuple[float, str]): # type: ignore
         new_value, new_unit = new
         self._value = self.convert(value=new_value, unit=new_unit)
 

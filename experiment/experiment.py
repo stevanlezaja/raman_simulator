@@ -51,7 +51,6 @@ class Experiment:
         z_eval = np.linspace(z_span[0], z_span[1], num_points)
 
         sol = solve_ivp(self._raman_ode_system, z_span, P0, t_eval=z_eval, dense_output=True)
-        self.__sol = sol.sol
 
         return sol.sol
 
