@@ -1,8 +1,10 @@
+from typing import Optional
+
 from custom_types import Length, Power
 
 
 class Pump:
-    def __init__(self, power: Power=None, wavelenght: Length=None):
+    def __init__(self, power: Optional[Power] = None, wavelenght: Optional[Length] = None):
         self.wavelength = wavelenght
         self.power = power
 

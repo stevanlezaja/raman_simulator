@@ -3,8 +3,8 @@ from custom_types import PowerGain, Length, Power, Frequency
 
 class RamanInputs:
     def __init__(self):
-        self.wavelengths = list[Length]
-        self.powers = list[Power]
+        self.wavelengths: list[Length] = []
+        self.powers: list[Power] = []
 
 
 class GainSpectrum:
@@ -20,7 +20,10 @@ class GainSpectrum:
         assert self.spectrum.keys() == other.spectrum.keys(), ("Both spectra need to have the same frequencies")
         result = GainSpectrum()
         for f, g in self.spectrum.items():
-            result.spectrum[f] = g + other.spectrum[f]
+            if operation == '+':
+                result.spectrum[f] = g + other.spectrum[f]
+            elif operation == '-':
+                result.spectrum[f] = g - other.spectrum[f]
         return result
 
     def __add__(self, other: "GainSpectrum") -> "GainSpectrum":
@@ -32,6 +35,13 @@ class GainSpectrum:
     def __repr__(self) -> str:
         lines = [f"{f}: {g}" for f, g in self.spectrum.items()]
         return "Gain Spectrum:\n  " + "\n  ".join(lines)
+
+    @property
+    def mean(self):
+        mean = 0.0
+        for v in self.spectrum.values():
+            mean += v.value
+        return mean/len(self.spectrum.values())
 
 
 if __name__ == "__main__":
