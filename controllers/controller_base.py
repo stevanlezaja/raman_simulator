@@ -1,12 +1,13 @@
 from abc import ABC, abstractmethod
 
-from raman_amplifier import RamanInputs, GainSpectrum
+import raman_amplifier as ra
+import custom_types as ct
 
 
-class _Controller(ABC):
+class Controller(ABC):
     def __init__(self):
         pass
     
     @abstractmethod
-    def get_control(self, curr_input: RamanInputs, curr_output:GainSpectrum, target_output: GainSpectrum) -> RamanInputs:
+    def get_control(self, curr_input: ra.RamanInputs, curr_output:ra.Spectrum[ct.Power], target_output: ra.Spectrum[ct.Power]) -> ra.RamanInputs:
         raise NotImplementedError
