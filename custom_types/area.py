@@ -9,18 +9,18 @@ class Area(Unit):
 
     @property
     def m(self):
-        return self._value
+        return self.value
     
     @m.setter
-    def m(self, new):
+    def m(self, new: float):
         self.value = (new, 'm^2')
 
     @property
     def um(self):
-        return self._value / 1e-12
+        return self.value / 1e-12
 
     @um.setter
-    def um(self, new):
+    def um(self, new: float):
         self.value = (new, 'um^2')
 
 

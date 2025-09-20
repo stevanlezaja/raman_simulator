@@ -1,4 +1,4 @@
-from .units import Unit, UnitRegistry
+from .units import Unit
 
 class Length(Unit):
     default_unit = 'm'
@@ -11,7 +11,7 @@ class Length(Unit):
         return self._value * 1e9
 
     @nm.setter
-    def nm(self, new):
+    def nm(self, new: float):
         self.value = (new, 'nm')
 
     @property
@@ -19,7 +19,7 @@ class Length(Unit):
         return self._value
 
     @m.setter
-    def m(self, new):
+    def m(self, new: float):
         self.value = (new, 'm')
 
     @property
@@ -27,7 +27,7 @@ class Length(Unit):
         return self._value / 1e3
 
     @km.setter
-    def km(self, new):
+    def km(self, new: float):
         self.value = (new, 'km')
 
 

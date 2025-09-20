@@ -14,7 +14,7 @@ class FiberAttenuation(Unit):
         return self.value * 1e3
 
     @km.setter
-    def km(self, new):
+    def km(self, new: float):
         self.value = (new, '1/km')
 
     @property
@@ -22,7 +22,7 @@ class FiberAttenuation(Unit):
         return self.value
 
     @m.setter
-    def m(self, new):
+    def m(self, new: float):
         self.value = (new, '1/m')
 
     @property
@@ -30,7 +30,7 @@ class FiberAttenuation(Unit):
         return (10 / np.log(10)) * np.asarray(self.value)
 
     @dB_km.setter
-    def dB_km(self, new):
+    def dB_km(self, new: float):
         self.value = ((np.log(10) / 10) * np.asarray(new), '1/km')
 
 if __name__ == "__main__":

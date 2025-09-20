@@ -12,7 +12,7 @@ class Power(Unit):
         return self._value
 
     @W.setter
-    def W(self, new):
+    def W(self, new: float):
         self.value = (new, 'W')
 
     @property
@@ -20,6 +20,6 @@ class Power(Unit):
         return self._value
 
     @mW.setter
-    def mW(self, new):
+    def mW(self, new: float):
         self.value = (new, 'mW')
 

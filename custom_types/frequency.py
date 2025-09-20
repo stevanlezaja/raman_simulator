@@ -9,10 +9,10 @@ class Frequency(Unit):
 
     @property
     def Hz(self):
-        return self._value
+        return self.value
 
     @Hz.setter
-    def Hz(self, new):
+    def Hz(self, new: float):
         self.value = (new, 'Hz')
 
     @property
@@ -20,7 +20,7 @@ class Frequency(Unit):
         return self._value/1e6
 
     @MHz.setter
-    def MHz(self, new):
+    def MHz(self, new: float):
         self.value = (new, 'MHz')
 
     @property
@@ -28,7 +28,7 @@ class Frequency(Unit):
         return self._value/1e12
 
     @THz.setter
-    def THz(self, new):
+    def THz(self, new: float):
         self.value = (new, 'THz')
 
 

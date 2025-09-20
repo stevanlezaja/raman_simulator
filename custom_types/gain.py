@@ -6,7 +6,7 @@ from .units import Unit
 class PowerGain(Unit):
     default_unit = ''
 
-    def __init__(self, value=0.0, unit=''):
+    def __init__(self, value: float = 0.0, unit: str = ''):
         super().__init__(value=value, unit=unit)
 
     @property
@@ -14,7 +14,7 @@ class PowerGain(Unit):
         return 10 * np.log10(self.value)
 
     @dB.setter
-    def dB(self, new):
+    def dB(self, new: float):
         self.value = (10 ** (new / 10), '')
 
     @property
@@ -22,7 +22,7 @@ class PowerGain(Unit):
         return self.value
 
     @linear.setter
-    def linear(self, new):
+    def linear(self, new: float):
         self.value = (new, '')
 
 
