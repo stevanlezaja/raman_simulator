@@ -105,7 +105,7 @@ def net_gain_experiment():
 
 def validation_experiment(fiber: Fiber, ax):
     """"
-        RamanSystem provided by Christophe to validate the model for Raman amplification
+        Experiment provided by Christophe to validate the model for Raman amplification
     """
     fiber.length.km = 100
     fiber.alpha_p.dB_km = 0.3
