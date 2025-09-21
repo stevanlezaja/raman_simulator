@@ -12,7 +12,7 @@ log = logging.Logger("[Control Loop]", level=logging.INFO)
 
 
 class ControlLoop:
-    def __init__(self, raman_system: exp.Experiment, controller: ctrl.Controller):
+    def __init__(self, raman_system: exp.RamanSystem, controller: ctrl.Controller):
         self.raman_system = raman_system
         self.controller = controller
         self.target: Optional[ra.Spectrum[ct.Power]] = None

@@ -10,7 +10,7 @@ from signals import Signal
 from raman_amplifier import RamanAmplifier
 
 
-class Experiment:
+class RamanSystem:
     def __init__(self, fiber: Fiber, signal: Signal, raman_amplifier: RamanAmplifier):
         self.fiber = fiber
         self.signal = signal
