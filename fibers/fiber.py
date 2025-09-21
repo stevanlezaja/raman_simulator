@@ -22,7 +22,6 @@ class Fiber(ABC):
     
     @property
     def name(self) -> str:
-        print(self.__class__.__name__)
         pascal_case = self.__class__.__name__
         words = re.sub(r'([a-z])([A-Z])', r'\1 \2', pascal_case)
         return words
@@ -60,7 +59,6 @@ class Fiber(ABC):
 
     def plot_raman_efficiency(self, ax: Axes, x_points: int=100) -> Axes:
         max_freq = max(self.raman_efficiency.keys()).Hz
-        print(max_freq)
 
         x: ArrayLike = np.linspace(0, max_freq, x_points)
         y: list[float] = []

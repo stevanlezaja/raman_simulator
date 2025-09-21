@@ -1,4 +1,5 @@
 import functools
+import logging
 from scipy.integrate import solve_ivp, solve_bvp
 import numpy as np
 
@@ -8,6 +9,9 @@ from custom_types import Length, Frequency, Power
 from fibers import Fiber
 from signals import Signal
 from raman_amplifier import RamanAmplifier
+
+
+log = logging.getLogger("RamanSystem")
 
 
 class RamanSystem:
@@ -72,7 +76,7 @@ class RamanSystem:
         sol = solve_bvp(self._raman_ode_system, bc, x = z_guess, y = y_guess)
 
         if not sol.success:
-            print(f"solve_bvp failed: {sol.message}")
+            log.error(f"solve_bvp failed: {sol.message}")
 
         return sol.sol
 
