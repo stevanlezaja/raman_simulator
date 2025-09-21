@@ -1,15 +1,26 @@
-from typing import TypeVar, Generic, Type, Iterator
+from typing import TypeVar, Generic, Type, Iterator, Optional
 
-from custom_types import PowerGain, Length, Power, Frequency, UnitProtocol
+import custom_types as ct
 
 
 class RamanInputs:
-    def __init__(self, powers: list[Power], wavelengths: list[Length]):
-        self.wavelengths: list[Length] = wavelengths
-        self.powers: list[Power] = powers
+    def __init__(self, powers: Optional[list[ct.Power]] = None, wavelengths: Optional[list[ct.Length]] = None, n_pumps: Optional[int] = None):
+        if powers is not None or wavelengths is not None:
+            assert powers is not None and wavelengths is not None, "Both powers and wavelengths need to be provided"
+
+        if powers is None:
+            assert n_pumps is not None, "n_pumps cannot be None if powers are None"
+            powers = [ct.Power(0.0, 'W') for _ in range(n_pumps)]
+
+        if wavelengths is None:
+            assert n_pumps is not None, "n_pumps cannot be None if wavelengths are None"
+            wavelengths = [ct.Length(0.0, 'm') for _ in range(n_pumps)]
+
+        self.wavelengths: list[ct.Length] = wavelengths
+        self.powers: list[ct.Power] = powers
 
 
-T = TypeVar("T", bound = UnitProtocol)
+T = TypeVar("T", bound = ct.UnitProtocol)
 
 class Spectrum(Generic[T]):
 
@@ -17,7 +28,7 @@ class Spectrum(Generic[T]):
 
     def __init__(self, value_cls: Type[T]):
         self.value_cls: Type[T] = value_cls  # store class type
-        self.spectrum: dict[Frequency, T] = {}
+        self.spectrum: dict[ct.Frequency, T] = {}
 
     def _linear_op(self, other: "Spectrum[T]", operation: str) -> "Spectrum[T]":
         assert operation in Spectrum.operations, f"Operation {operation} is not supported"
@@ -48,10 +59,10 @@ class Spectrum(Generic[T]):
             mean += v.value
         return mean/len(self.spectrum.values())
 
-    def add_val(self, frequency: Frequency, value: T) -> None:
+    def add_val(self, frequency: ct.Frequency, value: T) -> None:
         self.spectrum[frequency] = value
 
-    def __iter__(self) -> Iterator[tuple[Frequency, T]]:
+    def __iter__(self) -> Iterator[tuple[ct.Frequency, T]]:
         return iter(self.spectrum.items())
 
     @property
@@ -64,22 +75,22 @@ class Spectrum(Generic[T]):
 
 
 if __name__ == "__main__":
-    spec1 = Spectrum(PowerGain)
+    spec1 = Spectrum(ct.PowerGain)
     spec1.spectrum = {
-        Frequency(0, 'Hz'): PowerGain(10, ''),
-        Frequency(1, 'Hz'): PowerGain(15, ''),
-        Frequency(2, 'Hz'): PowerGain(20, ''),
-        Frequency(3, 'Hz'): PowerGain(25, ''),
-        Frequency(4, 'Hz'): PowerGain(7, ''),
+        ct.Frequency(0, 'Hz'): ct.PowerGain(10, ''),
+        ct.Frequency(1, 'Hz'): ct.PowerGain(15, ''),
+        ct.Frequency(2, 'Hz'): ct.PowerGain(20, ''),
+        ct.Frequency(3, 'Hz'): ct.PowerGain(25, ''),
+        ct.Frequency(4, 'Hz'): ct.PowerGain(7, ''),
     }
 
-    spec2 = Spectrum(PowerGain)
+    spec2 = Spectrum(ct.PowerGain)
     spec2.spectrum = {
-        Frequency(0, 'Hz'): PowerGain(1, ''),
-        Frequency(1, 'Hz'): PowerGain(2, ''),
-        Frequency(2, 'Hz'): PowerGain(3, ''),
-        Frequency(3, 'Hz'): PowerGain(4, ''),
-        Frequency(4, 'Hz'): PowerGain(1, ''),
+        ct.Frequency(0, 'Hz'): ct.PowerGain(1, ''),
+        ct.Frequency(1, 'Hz'): ct.PowerGain(2, ''),
+        ct.Frequency(2, 'Hz'): ct.PowerGain(3, ''),
+        ct.Frequency(3, 'Hz'): ct.PowerGain(4, ''),
+        ct.Frequency(4, 'Hz'): ct.PowerGain(1, ''),
     }
 
     print(spec1 + spec2)
