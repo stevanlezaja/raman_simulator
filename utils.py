@@ -1,6 +1,9 @@
 import numpy as np
 
-def to_dB(power, ref=1.0):
+import custom_types as ct
+
+
+def to_dB(power: ct.Power, ref: float=1.0):
     """
     Convert a power value (or array) to dB.
     
@@ -28,26 +31,6 @@ def from_dB(dB_value, ref=1.0):
     # return ref * 10**(np.asarray(dB_value) / 10)
     return np.log(10) / 10 * dB_value
 
-
-# def attenuation_dBkm_to_linear(alpha_dB):
-#     """
-#     Convert attenuation in dB/km to linear 1/km.
-#     """
-#     return (np.log(10) / 10) * np.asarray(alpha_dB)
-
-# def attenuation_linear_to_dBkm(alpha_linear):
-#     """
-#     Convert linear attenuation 1/km to dB/km.
-#     """
-#     return (10 / np.log(10)) * np.asarray(alpha_linear)
-
-# if __name__ == '__main__':
-#     alpha_dB = 0.19
-#     alpha_lin = attenuation_dBkm_to_linear(alpha_dB)
-#     print(alpha_lin)  # 0.043749 1/km
-
-#     # Back conversion
-#     print(attenuation_linear_to_dBkm(alpha_lin))  # 0.19 dB/km
 
 if __name__ == '__main__':
     # --- Example usage ---
