@@ -10,29 +10,32 @@ import custom_types.conversions as conv
 import controllers as ctrl
 
 
-fiber = fib.StandardSingleModeFiber()
-fiber.length.km = 10
+def main():
+    log = logging.getLogger("Control Loop Test Script")
 
-signal = sig.Signal()
-signal.power.mW = 1
-signal.wavelength.nm = 1550
+    fiber = fib.StandardSingleModeFiber()
+    fiber.length.km = 10
 
-raman_amplifier = ra.RamanAmplifier(0.5)
+    signal = sig.Signal()
+    signal.power.mW = 1
+    signal.wavelength.nm = 1550
 
-raman_system = exp.Experiment(fiber, signal, raman_amplifier)
+    raman_amplifier = ra.RamanAmplifier(0.5)
 
-controller = ctrl.PidController(p=1.0, i=0.0, d=0.0)
+    raman_system = exp.RamanSystem(fiber, signal, raman_amplifier)
 
-control_loop = loop.ControlLoop(raman_system, controller)
+    controller = ctrl.PidController(p=1.0, i=0.0, d=0.0)
 
-target = ra.Spectrum(ct.Power)
-target.add_val(conv.wavelenth_to_frequency(signal.wavelength), ct.Power(15, 'mW'))
+    control_loop = loop.ControlLoop(raman_system, controller)
 
-control_loop.set_target(target)
+    target = ra.Spectrum(ct.Power)
+    target.add_val(conv.wavelenth_to_frequency(signal.wavelength), ct.Power(15, 'mW'))
 
-for i in range(100):
-    control_loop.step()
-    if control_loop.curr_output is not None:
-        print(f"STEP: {i}")
-        print("Control: ", control_loop.curr_control.powers)
-        print("Spectrum: ", control_loop.curr_output.spectrum)
+    control_loop.set_target(target)
+
+    for i in range(10):
+        control_loop.step()
+        if control_loop.curr_output is not None:
+            log.info(f"STEP: {i}")
+            log.info(f"Control: {control_loop.curr_control.powers}")
+            log.info(f"Spectrum: {control_loop.curr_control.powers}")
