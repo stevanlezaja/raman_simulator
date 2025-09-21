@@ -1,17 +1,17 @@
 import functools
-import logging
 from scipy.integrate import solve_ivp, solve_bvp
 import numpy as np
 
 import custom_types.conversions as conv
 from custom_types import Length, Frequency, Power
+import custom_logging as clog
 
 from fibers import Fiber
 from signals import Signal
 from raman_amplifier import RamanAmplifier
 
 
-log = logging.getLogger("RamanSystem")
+log = clog.get_logger("RamanSystem")
 
 
 class RamanSystem:

@@ -1,14 +1,14 @@
 import numpy as np
-import logging
 
 import controllers as ctl
 import raman_amplifier as ra
 import custom_types as ct
 import custom_types.conversions as conv
+import custom_logging as clog
 
 
 def main():
-    log = logging.getLogger("Controller Test Script")
+    log = clog.get_logger("Controller Test Script")
 
     controller = ctl.PidController()
     ra_input = ra.RamanInputs([ct.Power(0.0, 'mW')], [ct.Length(1450, 'nm')])

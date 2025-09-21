@@ -1,11 +1,12 @@
 from abc import ABC
-import logging
 from typing import TypeVar, Protocol, Self
+
+import custom_logging as clog
 
 from .unit_registry import UnitRegistry
 
 
-log = logging.getLogger("Unit")
+log = clog.get_logger("Unit")
 
 
 class UnitProtocol(Protocol):

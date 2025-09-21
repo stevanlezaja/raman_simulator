@@ -1,5 +1,3 @@
-import logging
-
 import control_loop as loop
 import raman_amplifier as ra
 import fibers as fib
@@ -8,10 +6,11 @@ import experiment as exp
 import custom_types as ct
 import custom_types.conversions as conv
 import controllers as ctrl
+import custom_logging as clog
 
 
 def main():
-    log = logging.getLogger("Control Loop Test Script")
+    log = clog.get_logger("Control Loop Test Script")
 
     fiber = fib.StandardSingleModeFiber()
     fiber.length.km = 10
