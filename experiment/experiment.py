@@ -75,3 +75,6 @@ class Experiment:
             print(f"solve_bvp failed: {sol.message}")
 
         return sol.sol
+
+    def update(self):
+        self.__sol = self._solve()
