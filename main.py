@@ -5,12 +5,12 @@ from fibers import Fiber, DispersionCompensatingFiber, SuperLargeEffectiveArea, 
                 StandardSingleModeFiber, NonZeroDispersionFiber, ChristopheExperimentFiber
 from signals import Signal
 from raman_amplifier import RamanAmplifier
-from experiment.experiment import RamanSystem
+from experiment.experiment import Experiment
 from utils import to_dB, from_dB
 from custom_types import Length, Power
 
 
-def plot_Pp_Ps_over_distance(exp: RamanSystem):
+def plot_Pp_Ps_over_distance(exp: Experiment):
     distances = np.linspace(0, exp.fiber.length.km, 1000)
     pump_powers = []
     signal_powers = []
@@ -27,7 +27,7 @@ def plot_Pp_Ps_over_distance(exp: RamanSystem):
     plt.legend()
     plt.show()
 
-def plot_Ps_over_fiber_length(exp: RamanSystem):
+def plot_Ps_over_fiber_length(exp: Experiment):
     distances = np.linspace(0, exp.fiber.length.km, 1000)
     signal_powers = []
     for dist in distances:
@@ -42,7 +42,7 @@ def calculate_G_net():
     sig = Signal()
     fib = DispersionCompensatingFiber()
     ra = RamanAmplifier()
-    exp = RamanSystem(fib, sig, ra)
+    exp = Experiment(fib, sig, ra)
 
     G_net = exp.get_signal_power_at_distance(fib.length) / exp.get_pump_power_at_distance(Length(0, 'm'))
     print("G_net = ", G_net)
@@ -55,7 +55,7 @@ def caluclate_G_on_off():
     fib.alpha_p = 0.0576 * 1e-3
     ra = RamanAmplifier()
     ra.pump_power.W = 1.24
-    exp = RamanSystem(fib, sig, ra)
+    exp = Experiment(fib, sig, ra)
     exp.solve()
 
     G_on = exp.get_signal_power_at_distance(fib.length)
@@ -92,11 +92,11 @@ def net_gain_experiment():
     raman_amplifier = RamanAmplifier(pumping_ratio=1)
     raman_amplifier.pump_power = Power(1.24, 'W')
 
-    experiment_on = RamanSystem(fiber, signal, raman_amplifier)
+    experiment_on = Experiment(fiber, signal, raman_amplifier)
     power_on = experiment_on.get_signal_power_at_distance(experiment_on.fiber.length)
 
     raman_amplifier.pump_power = Power(0.0, 'W')
-    experiment_off = RamanSystem(fiber, signal, raman_amplifier)
+    experiment_off = Experiment(fiber, signal, raman_amplifier)
     power_off = experiment_off.get_signal_power_at_distance(experiment_off.fiber.length)
 
     G_net = power_on / power_off
@@ -123,7 +123,7 @@ def validation_experiment(fiber: Fiber, ax):
 
     for ratio in ratios:
         raman_amplifier.pumping_ratio = ratio
-        exp = RamanSystem(fiber, signal, raman_amplifier)
+        exp = Experiment(fiber, signal, raman_amplifier)
 
         distances = np.linspace(0, exp.fiber.length.km, 100)
         signal_powers = []
@@ -133,7 +133,7 @@ def validation_experiment(fiber: Fiber, ax):
 
 
 def main():
-    # plot_Pp_Ps_over_distance(RamanSystem(DispersionCompensatingFiber(), Signal(), RamanAmplifier()))
+    # plot_Pp_Ps_over_distance(Experiment(DispersionCompensatingFiber(), Signal(), RamanAmplifier()))
     # calculate_G_net()
     # caluclate_G_on_off()
     # plot_raman_efficiencies()

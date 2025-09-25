@@ -11,10 +11,10 @@ from signals import Signal
 from raman_amplifier import RamanAmplifier
 
 
-log = clog.get_logger("RamanSystem")
+log = clog.get_logger("Experiment")
 
 
-class RamanSystem:
+class Experiment:
     def __init__(self, fiber: Fiber, signal: Signal, raman_amplifier: RamanAmplifier):
         self.fiber = fiber
         self.signal = signal

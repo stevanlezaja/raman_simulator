@@ -33,7 +33,7 @@ for component in input_spectrum:
     s.wavelength = conv.frequency_to_wavelenth(component[0])
     s.power = component[1]
 
-    experiment = exp.RamanSystem(fiber, s, amplifier)
+    experiment = exp.Experiment(fiber, s, amplifier)
 
     output_signal = sig.Signal()
     output_signal.wavelength = conv.frequency_to_wavelenth(component[0])
