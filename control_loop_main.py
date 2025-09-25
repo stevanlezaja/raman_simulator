@@ -35,6 +35,6 @@ def main():
     for i in range(10):
         control_loop.step()
         if control_loop.curr_output is not None:
-            log.info(f"STEP: {i}")
-            log.info(f"Control: {control_loop.curr_control.powers}")
-            log.info(f"Spectrum: {control_loop.curr_control.powers}")
+            log.info("STEP: %i", i)
+            log.info("Control: %s", control_loop.curr_control.powers)
+            log.info("Spectrum: %s", control_loop.curr_control.powers)

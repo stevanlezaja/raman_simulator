@@ -76,7 +76,7 @@ class RamanSystem:
         sol = solve_bvp(self._raman_ode_system, bc, x = z_guess, y = y_guess)
 
         if not sol.success:
-            log.error(f"solve_bvp failed: {sol.message}")
+            log.error("solve_bvp failed: %s", sol.message)
 
         return sol.sol
 

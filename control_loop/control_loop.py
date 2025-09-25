@@ -23,7 +23,7 @@ class ControlLoop:
         self.target = target
 
     def get_raman_output(self) -> ra.Spectrum[ct.Power]:
-        log.debug(f"Current pump power: {self.raman_system.raman_amplifier.pump_power}")
+        log.debug("Current pump power: %s", self.raman_system.raman_amplifier.pump_power)
         self.raman_system.update()
         output_power = self.raman_system.get_signal_power_at_distance(self.raman_system.fiber.length)
         log.debug(f"Current output power: {output_power}")
@@ -40,9 +40,9 @@ class ControlLoop:
         return control
 
     def apply_control(self):
-        log.debug(f"Old pump power: {self.raman_system.raman_amplifier.pump_power}")
+        log.debug("Old pump power: %s", self.raman_system.raman_amplifier.pump_power)
         self.raman_system.raman_amplifier.pump_power += self.curr_control.powers[0]
-        log.debug(f"New pump power: {self.raman_system.raman_amplifier.pump_power}")
+        log.debug("New pump power: %s", self.raman_system.raman_amplifier.pump_power)
         self.raman_system.raman_amplifier.pump_wavelength += self.curr_control.wavelengths[0]
 
     def step(self):
