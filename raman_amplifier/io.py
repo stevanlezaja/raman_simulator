@@ -91,6 +91,16 @@ class Spectrum(Generic[T]):
         """
         return iter(sorted(self.spectrum.items(), key=lambda item: item[0]))
 
+    def __getitem__(self, freq: ct.Frequency) -> T:
+        if freq in self.frequencies:
+            return self.spectrum[freq]
+        raise ValueError(f"{freq} is not inside {self.__class__.__name__}")
+
+    def __setitem__(self, freq: ct.Frequency, new_val: T) -> None:
+        if freq in self.frequencies:
+            self.spectrum[freq] = new_val
+        raise ValueError(f"{freq} is not inside {self.__class__.__name__}")
+
     @property
     def mean(self) -> float:
         """
