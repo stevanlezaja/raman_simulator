@@ -85,6 +85,12 @@ class Spectrum(Generic[T]):
         lines = [f"{f}: {g}" for f, g in self.spectrum.items()]
         return "Gain Spectrum:\n  " + "\n  ".join(lines)
 
+    def __iter__(self) -> Iterator[tuple[ct.Frequency, T]]:
+        """
+        Iterate over (frequency, value) pairs sorted by frequency.
+        """
+        return iter(sorted(self.spectrum.items(), key=lambda item: item[0]))
+
     @property
     def mean(self) -> float:
         """
@@ -100,9 +106,6 @@ class Spectrum(Generic[T]):
         Adds a Frequency - value pair to the Spectrum dict
         """
         self.spectrum[frequency] = value
-
-    def __iter__(self) -> Iterator[tuple[ct.Frequency, T]]:
-        return iter(self.spectrum.items())
 
     @property
     def frequencies(self):
