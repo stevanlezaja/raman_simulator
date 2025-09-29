@@ -5,6 +5,10 @@ This module contains Input and Output types for a Raman Amplifier
 from typing import TypeVar, Generic, Type, Iterator, Optional
 
 import custom_types as ct
+import custom_logging as clog
+
+
+log = clog.get_logger("IO")
 
 
 class RamanInputs:
