@@ -119,10 +119,12 @@ class Spectrum(Generic[T]):
             mean += v.value
         return mean/len(self.spectrum.values())
 
-    def add_val(self, frequency: ct.Frequency, value: T) -> None:
+    def add_val(self, frequency: ct.Frequency, value: T, do_round: bool = True) -> None:
         """
         Adds a Frequency - value pair to the Spectrum dict
         """
+        if do_round:
+            frequency.Hz = round(frequency.Hz)
         self.spectrum[frequency] = value
 
     @property
