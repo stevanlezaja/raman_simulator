@@ -63,12 +63,14 @@ class Spectrum(Generic[T]):
 
         assert operation in Spectrum.operations, f"Operation {operation} is not supported"
 
+        assert self.frequencies and other.frequencies, "There must be frequencies in both spectrums"
+
         assert (
             isinstance(other, Spectrum)
         ), (f"Both operands need to be type {self.__class__.__name__}")
 
         assert (
-            self.spectrum.keys() == other.spectrum.keys()
+            self.frequencies == other.frequencies
         ), ("Both spectra need to have the same frequencies")
 
         result: Spectrum[T] = Spectrum(self.value_cls)
