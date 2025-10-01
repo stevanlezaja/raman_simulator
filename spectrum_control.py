@@ -48,10 +48,12 @@ def main() -> None:
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = input_spectrum
 
-    # controller = ctrl.BernoulliController()
-    controller = ctrl.PidController(p=1, i=0, d=0)
+    controller = ctrl.BernoulliController()
+    # controller = ctrl.PidController(p=1, i=0, d=0)
     control_loop = loop.ControlLoop(raman_system, controller)
     control_loop.set_target(target_spectrum)
+    control_loop.curr_control = ra.RamanInputs(powers=[ct.Power(0.5, 'W')], wavelengths=[ct.Length(1500, 'nm')])
+    print(control_loop.curr_control.wavelengths)
 
     # store errors
     errors = []
