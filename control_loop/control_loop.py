@@ -127,6 +127,7 @@ class ControlLoop:
         Updates the amplifier's pump power and wavelength based on `curr_control`.
         Logs the old and new pump power values.
         """
+        self.curr_control.clamp_values()
 
         log.debug("Old pump power: %s", self.raman_system.raman_amplifier.pump_power)
         self.raman_system.raman_amplifier.pump_power += self.curr_control.powers[0]
@@ -149,5 +150,4 @@ class ControlLoop:
         self.curr_control += self.get_control()
         if isinstance(self.controller, ctrl.BernoulliController):
             self.controller.update_controller(self.curr_output - self.target, self.curr_control)
-        # self.curr_control.clamp_values()
         self.apply_control()

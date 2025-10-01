@@ -16,6 +16,10 @@ class RamanInputs:
     RamanInputs is a class used to represent inputs to a Raman Amplifier
         It contains the Wavelength - Power pairs representing the Pump state
     """
+
+    power_range = (ct.Power(0.0, 'W'), ct.Power(1.5, 'W'))
+    wavelength_range = (ct.Length(1450, 'nm'), ct.Length(1500, 'nm'))
+
     def __init__(
             self,
             powers: Optional[list[ct.Power]] = None,
@@ -45,8 +49,24 @@ class RamanInputs:
         new_wavelengths = [w1 + w2 for w1, w2 in zip(self.wavelengths, other.wavelengths)]
         return RamanInputs(powers=new_powers, wavelengths=new_wavelengths)
 
-    def clamp_values(self, power_range, wavelength_range):
-        pass
+    def clamp_values(self) -> None:
+        """Clamp powers and wavelengths to their defined ranges in-place."""
+        
+        # Clamp powers
+        p_min, p_max = self.power_range
+        for i, p in enumerate(self.powers):
+            clamped_val = min(max(p.value, p_min.value), p_max.value)
+            self.powers[i] = ct.Power(clamped_val, p.default_unit)
+
+        # Clamp wavelengths
+        wl_min, wl_max = self.wavelength_range
+        for i, wl in enumerate(self.wavelengths):
+            clamped_val = min(max(wl.value, wl_min.value), wl_max.value)
+            self.wavelengths[i] = ct.Length(clamped_val, wl.default_unit)
+
+        # Update value_dict to stay consistent
+        self.value_dict = dict(zip(self.wavelengths, self.powers))
+
 
 T = TypeVar("T", bound = ct.UnitProtocol)
 
