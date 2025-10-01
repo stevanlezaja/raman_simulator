@@ -1,11 +1,12 @@
 from abc import ABC
-import logging
 from typing import TypeVar, Protocol, Self
+
+import custom_logging as clog
 
 from .unit_registry import UnitRegistry
 
 
-log = logging.getLogger("Unit")
+log = clog.get_logger("Unit")
 
 
 class UnitProtocol(Protocol):
@@ -29,6 +30,7 @@ class Multipliers:
 
 
 class Unit(ABC, UnitProtocol):
+    allow_negative = True
     default_unit = ''
     T = TypeVar("T", bound="Unit")
 
@@ -87,18 +89,21 @@ class Unit(ABC, UnitProtocol):
     @value.setter
     def value(self, new: tuple[float, str]): # type: ignore
         new_value, new_unit = new
+        if not self.allow_negative:
+            if new_value < 0:
+                new_value = 0.0
         self._value = self.convert(value=new_value, unit=new_unit)
 
     def __init_subclass__(cls) -> None:
         super().__init_subclass__()
         if cls.__name__ in UnitRegistry.base_units.keys():
-            log.info(f"Unit {cls.__name__} already registered")
+            log.info("Unit %s already registered", cls.__name__)
             return
         if not any(c in cls.default_unit for c in ['/', '*', '^']):
-            log.info(f"Registering {cls.__name__}: Default unit: {cls.default_unit}")
+            log.info("Registering %s: Default unit: %s", cls.__name__, cls.default_unit)
             UnitRegistry.register(cls.default_unit, cls.__name__)
             return
-        log.info(f"{cls.__name__} unit {cls.default_unit} is not a base unit. Not registering")
+        log.info("%s unit %s is not a base unit. Not registering", cls.__name__, cls.default_unit)
 
     def __str__(self):
         return f"{self._value} {self.default_unit}"

@@ -1,3 +1,3 @@
-from .experiment import RamanSystem
+from .experiment import Experiment
 
-__all__ = ["RamanSystem"]
+__all__ = ["Experiment"]
