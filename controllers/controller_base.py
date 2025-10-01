@@ -61,3 +61,7 @@ class Controller(ABC):
         controller state.
         """
         raise NotImplementedError
+
+    @property
+    def is_valid(self) -> bool:
+        return True
