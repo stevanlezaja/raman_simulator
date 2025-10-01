@@ -40,6 +40,14 @@ class RamanInputs:
         self.powers: list[ct.Power] = powers
         self.value_dict: dict[ct.Length, ct.Power] = dict(zip(wavelengths, powers))
 
+    def __add__(self, other: "RamanInputs") -> "RamanInputs":
+        new_powers = [p1 + p2 for p1, p2 in zip(self.powers, other.powers)]
+        new_wavelengths = [w1 + w2 for w1, w2 in zip(self.wavelengths, other.wavelengths)]
+        return RamanInputs(powers=new_powers, wavelengths=new_wavelengths)
+
+    def clamp_values(self, power_range, wavelength_range):
+        pass
+
 T = TypeVar("T", bound = ct.UnitProtocol)
 
 class Spectrum(Generic[T]):
