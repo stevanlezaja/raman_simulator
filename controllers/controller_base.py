@@ -33,3 +33,31 @@ class Controller(ABC):
                 RamanInputs - new control signal to be applied
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def update_controller(
+        self,
+        error: ra.Spectrum[ct.Power],
+        control_delta: ra.RamanInputs
+    ) -> None:
+        """
+        Update the internal state of the controller based on the current error 
+        and the proposed change in Raman amplifier inputs.
+
+        Parameters
+        ----------
+        error : ra.Spectrum[ct.Power]
+            The difference between the desired and actual gain spectrum, 
+            expressed as power deviations at each frequency sample.
+        control_delta : ra.RamanInputs
+            The adjustment in pump powers and wavelengths to be applied 
+            by the controller in order to reduce the error.
+
+        Notes
+        -----
+        This method defines the policy by which the controller adapts its 
+        parameters over time. Concrete implementations must specify how 
+        the error signal and control adjustment are used to update the 
+        controller state.
+        """
+        raise NotImplementedError

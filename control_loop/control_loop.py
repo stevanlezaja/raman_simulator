@@ -146,5 +146,8 @@ class ControlLoop:
         """
 
         self.curr_output = self.get_raman_output()
-        self.curr_control = self.get_control()
+        self.curr_control += self.get_control()
+        if isinstance(self.controller, ctrl.BernoulliController):
+            self.controller.update_controller(self.curr_output - self.target, self.curr_control)
+        # self.curr_control.clamp_values()
         self.apply_control()

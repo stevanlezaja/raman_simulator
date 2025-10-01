@@ -37,7 +37,18 @@ class PidController(Controller):
 
         control = p + i + d
 
-        delta_powers = [ct.Power(control, 'W') for _ in curr_input.powers]
-        delta_wavelengths = [wl for wl in curr_input.wavelengths]
+        delta_wavelengths = [ct.Length(control, 'nm') for _ in curr_input.powers]
+        delta_powers = [ct.Power(0.0, 'W') for _ in curr_input.powers]
+        # delta_wavelengths = [ct.Length(0.0, 'm') for _ in curr_input.wavelengths]
+
+        print(delta_wavelengths)
+        print(delta_powers)
 
         return ra.RamanInputs(powers=delta_powers, wavelengths=delta_wavelengths)
+
+    def update_controller(
+            self,
+            error: ra.Spectrum[ct.Power],
+            control_delta: ra.RamanInputs
+        ) -> None:
+        pass
