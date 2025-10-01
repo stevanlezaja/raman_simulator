@@ -73,6 +73,10 @@ class Pump:
         assert isinstance(new, ct.Length)
         self._wavelength = new
 
+    @property
+    def is_valid(self) -> bool:
+        return (self.power.value > 0) ^  (self.wavelength.value > 0)
+
 
 def _validate_ratio(pumping_ratio: float):
     """
