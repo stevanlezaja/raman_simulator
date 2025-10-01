@@ -149,5 +149,6 @@ class ControlLoop:
         self.curr_output = self.get_raman_output()
         self.curr_control += self.get_control()
         if isinstance(self.controller, ctrl.BernoulliController):
+            assert self.target is not None
             self.controller.update_controller(self.curr_output - self.target, self.curr_control)
         self.apply_control()
