@@ -176,3 +176,8 @@ class RamanAmplifier:
         _validate_ratio(new)
         self._pumping_ratio = new
         self.update_pumps()
+
+    @property
+    def is_valid(self) -> bool:
+        valid = self.backward_pump.is_valid ^ self.forward_pump.is_valid
+        return valid
