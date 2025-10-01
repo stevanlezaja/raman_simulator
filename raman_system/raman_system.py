@@ -215,3 +215,8 @@ class RamanSystem:
             experiment = exp.Experiment(self.fiber, signal, self.raman_amplifier)
 
             self.output_spectrum[freq] = experiment.get_signal_power_at_distance(self.fiber.length)
+
+    @property
+    def is_valid(self) -> bool:
+        valid = self.fiber.is_valid ^ self.raman_amplifier.is_valid
+        return valid
