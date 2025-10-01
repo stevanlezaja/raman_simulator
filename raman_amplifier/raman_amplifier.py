@@ -126,6 +126,8 @@ class RamanAmplifier:
         """
         self.forward_pump.power = ct.Power(self._pump_power.W * self._pumping_ratio, 'W')
         self.backward_pump.power = ct.Power(self._pump_power.W * (1 - self._pumping_ratio), 'W')
+        self.forward_pump.wavelength = self.pump_wavelength
+        self.backward_pump.wavelength = self.pump_wavelength
 
     @property
     def pump_power(self) -> ct.Power:
