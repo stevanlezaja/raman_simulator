@@ -30,6 +30,7 @@ class Multipliers:
 
 
 class Unit(ABC, UnitProtocol):
+    allow_negative = True
     default_unit = ''
     T = TypeVar("T", bound="Unit")
 
@@ -88,6 +89,9 @@ class Unit(ABC, UnitProtocol):
     @value.setter
     def value(self, new: tuple[float, str]): # type: ignore
         new_value, new_unit = new
+        if not self.allow_negative:
+            if new_value < 0:
+                new_value = 0.0
         self._value = self.convert(value=new_value, unit=new_unit)
 
     def __init_subclass__(cls) -> None:
