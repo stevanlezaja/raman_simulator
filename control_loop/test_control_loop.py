@@ -90,3 +90,33 @@ def test_control_loop_set_target():
 
     # Assert that the target attribute is now updated
     assert loop.target == dummy_target
+
+
+def test_control_loop_get_raman_output():
+    """
+    Test that get_raman_output calls the Raman system update and returns the output spectrum.
+
+    This test verifies that:
+    - raman_system.update() is called exactly once.
+    - The returned value equals raman_system.output_spectrum.
+    """
+
+    # Create a mock RamanSystem with a mock output_spectrum
+    mock_raman_system = MagicMock()
+    dummy_output = MagicMock()  # could be a Spectrum mock
+    mock_raman_system.output_spectrum = dummy_output
+
+    # Create a mock controller (not used in this test)
+    mock_controller = MagicMock()
+
+    # Instantiate the ControlLoop
+    loop = cl.ControlLoop(mock_raman_system, mock_controller)
+
+    # Call get_raman_output
+    result = loop.get_raman_output()
+
+    # Assert that raman_system.update was called once
+    mock_raman_system.update.assert_called_once()
+
+    # Assert that the result equals the mocked output_spectrum
+    assert result == dummy_output
