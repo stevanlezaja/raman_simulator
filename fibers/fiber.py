@@ -148,6 +148,11 @@ class Fiber(ABC):
 
         return ax
 
+    @property
+    def is_valid(self) -> bool:
+        valid = self.length.m > 0
+        return valid
+
 
 class StandardSingleModeFiber(Fiber):
     """Standard single-mode fiber with measured Raman gain efficiency in the C-band."""

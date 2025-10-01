@@ -73,6 +73,10 @@ class Pump:
         assert isinstance(new, ct.Length)
         self._wavelength = new
 
+    @property
+    def is_valid(self) -> bool:
+        return (self.power.value > 0) ^  (self.wavelength.value > 0)
+
 
 def _validate_ratio(pumping_ratio: float):
     """
@@ -122,6 +126,8 @@ class RamanAmplifier:
         """
         self.forward_pump.power = ct.Power(self._pump_power.W * self._pumping_ratio, 'W')
         self.backward_pump.power = ct.Power(self._pump_power.W * (1 - self._pumping_ratio), 'W')
+        self.forward_pump.wavelength = self.pump_wavelength
+        self.backward_pump.wavelength = self.pump_wavelength
 
     @property
     def pump_power(self) -> ct.Power:
@@ -172,3 +178,8 @@ class RamanAmplifier:
         _validate_ratio(new)
         self._pumping_ratio = new
         self.update_pumps()
+
+    @property
+    def is_valid(self) -> bool:
+        valid = self.backward_pump.is_valid ^ self.forward_pump.is_valid
+        return valid
