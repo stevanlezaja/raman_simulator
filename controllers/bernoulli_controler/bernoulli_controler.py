@@ -11,8 +11,8 @@ class BernoulliController(torch.nn.Module, Controller):
                  beta: int = 1,
                  weight_decay: float = 1e-5,
                  input_dim: int = 2,
-                 power_step: float = 0.1 * 1e-3,
-                 wavelength_step: float = 0.1 * 1e-9,
+                 power_step: ct.Power = ct.Power(1, 'mW'),
+                 wavelength_step: ct.Length = ct.Length(0.1, 'nm'),
                  lr: float = 1e-3,
                  gamma: float = 0
                  ):
@@ -45,8 +45,10 @@ class BernoulliController(torch.nn.Module, Controller):
         power_sample = sample[:self.input_dim // 2]
         wavelength_sample = sample[self.input_dim // 2:]
 
-        power_action = self.power_step * (power_sample * 2 - 1)
-        wavelength_action = self.wavelength_step * (wavelength_sample * 2 - 1)
+        power_action = self.power_step.value * (power_sample * 2 - 1)
+        wavelength_action = self.wavelength_step.value * (wavelength_sample * 2 - 1)
+        print("WAVELENGHT STEP", self.wavelength_step)
+        print("WAVELENGTH ACTION: ", wavelength_action)
 
         powers_update: list[ct.Power] = []
         for power in power_action:
