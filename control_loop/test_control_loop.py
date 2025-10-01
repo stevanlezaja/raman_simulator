@@ -22,7 +22,7 @@ from unittest.mock import MagicMock
 import pytest
 
 import control_loop as cl
-from raman_amplifier import RamanInputs
+from raman_amplifier import RamanInputs, Spectrum
 
 
 def test_control_loop_initialization():
@@ -58,3 +58,35 @@ def test_control_loop_initialization():
 
     # Assert that the current output is initially None
     assert loop.curr_output is None
+
+
+def test_control_loop_set_target():
+    """
+    Test that the set_target method correctly updates the target spectrum.
+
+    This test verifies that:
+    - Before setting, the target is None.
+    - After calling set_target, the target attribute is updated to the provided spectrum.
+    """
+
+    # Create mock objects for RamanSystem and Controller
+    mock_raman_system = MagicMock()
+    mock_controller = MagicMock()
+
+    # Instantiate the ControlLoop with mocks
+    loop = cl.ControlLoop(mock_raman_system, mock_controller)
+
+    # Assert that target is initially None
+    assert loop.target is None
+
+    # Create a dummy target spectrum (can be any object, here a string for simplicity)
+    dummy_target = "dummy_spectrum"
+    dummy_target = MagicMock(spec=Spectrum)
+    loop.set_target(dummy_target)
+    assert loop.target is dummy_target
+
+    # Set the target using set_target
+    loop.set_target(dummy_target)
+
+    # Assert that the target attribute is now updated
+    assert loop.target == dummy_target
