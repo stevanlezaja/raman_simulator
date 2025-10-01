@@ -28,12 +28,22 @@ def main() -> None:
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
         input_spectrum.add_val(freq, ct.Power(1, 'mW'))
 
-    target_spectrum = ra.Spectrum(ct.Power)
-    for num in list(np.linspace(1450, 1600, 40)):
-        freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
-        target_spectrum.add_val(freq, ct.Power(10, 'mW'))
+    # parameters
+    center_idx = 30         # peak position (sample index)
+    peak_power = 200         # peak height in mW
+    base_power = 10         # baseline in mW
+    sigma = 5               # controls the smoothness (spread of peak)
 
-    target_spectrum[target_spectrum.frequencies[30]].mW = 200
+    target_spectrum = ra.Spectrum(ct.Power)
+    # create values
+    for idx, num in enumerate(np.linspace(1450, 1600, 40)):
+        freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
+        
+        # Gaussian bump around center_idx
+        bump = np.exp(-0.5 * ((idx - center_idx) / sigma) ** 2)
+        power_mw = base_power + (peak_power - base_power) * bump
+        
+        target_spectrum.add_val(freq, ct.Power(power_mw, 'mW'))
 
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = input_spectrum
