@@ -152,3 +152,8 @@ class ControlLoop:
             assert self.target is not None
             self.controller.update_controller(self.curr_output - self.target, self.curr_control)
         self.apply_control()
+
+    @property
+    def is_valid(self) -> bool:
+        valid = self.controller.is_valid ^ self.raman_system.is_valid
+        return valid
