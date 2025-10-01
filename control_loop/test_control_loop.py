@@ -22,7 +22,7 @@ from unittest.mock import MagicMock
 import pytest
 
 import control_loop as cl
-from raman_amplifier import RamanInputs, Spectrum
+import raman_amplifier as ra
 
 
 def test_control_loop_initialization():
@@ -54,7 +54,7 @@ def test_control_loop_initialization():
 
     # Assert that the current control is an instance of RamanInputs
     # This ensures the loop has a valid default control object
-    assert isinstance(loop.curr_control, RamanInputs)
+    assert isinstance(loop.curr_control, ra.RamanInputs)
 
     # Assert that the current output is initially None
     assert loop.curr_output is None
@@ -81,7 +81,7 @@ def test_control_loop_set_target():
 
     # Create a dummy target spectrum (can be any object, here a string for simplicity)
     dummy_target = "dummy_spectrum"
-    dummy_target = MagicMock(spec=Spectrum)
+    dummy_target = MagicMock(spec=ra.Spectrum)
     loop.set_target(dummy_target)
     assert loop.target is dummy_target
 
