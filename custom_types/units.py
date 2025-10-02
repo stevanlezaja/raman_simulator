@@ -150,3 +150,7 @@ class Unit(ABC, UnitProtocol):
         result = self.__class__(value=self.value, unit=self.default_unit)
         result.value = (self.value - other.value, self.default_unit)
         return result
+
+    def __neg__(self: T) -> T:
+        self._value = -self._value
+        return self
