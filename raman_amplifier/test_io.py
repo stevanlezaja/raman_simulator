@@ -84,7 +84,7 @@ def test_spectrum_mean():
     spec = Spectrum(ct.Power)
     spec.add_val(ct.Frequency(1.0, 'THz'), ct.Power(1.0, 'W'))
     spec.add_val(ct.Frequency(2.0, 'THz'), ct.Power(3.0, 'W'))
-    assert spec.mean == 2.0
+    assert spec.mean == (1 ** 2 + 3 ** 2) ** 0.5 / 2
 
 def test_spectrum_mismatched_keys():
     """
