@@ -16,10 +16,11 @@ import controllers as ctrl
 
 log = clog.get_logger("Spectrum Control Test Script")
 
-LOWER = 1400
+LOWER = 1500
 UPPER = 1600
-SAMPLES = 100
+SAMPLES = 40
 
+NUM_STEPS = 200
 
 def main() -> None:
     fiber = fib.StandardSingleModeFiber()
@@ -32,13 +33,13 @@ def main() -> None:
     input_spectrum = ra.Spectrum(ct.Power)
     for num in list(np.linspace(LOWER, UPPER, SAMPLES)):
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
-        input_spectrum.add_val(freq, ct.Power(1, 'mW'))
+        input_spectrum.add_val(freq, ct.Power(10, 'mW'))
 
     # parameters
     center_idx = 30         # peak position (sample index)
     peak_power = 200         # peak height in mW
     base_power = 10         # baseline in mW
-    sigma = 5               # controls the smoothness (spread of peak)
+    sigma = 8               # controls the smoothness (spread of peak)
 
     target_spectrum = ra.Spectrum(ct.Power)
     # create values
@@ -55,54 +56,83 @@ def main() -> None:
     raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
     controller = ctrl.PidController(p=1, i=0, d=0)
+    # controller = ctrl.BernoulliController()
     control_loop = loop.ControlLoop(raman_system, controller)
     control_loop.set_target(target_spectrum)
     control_loop.curr_control = ra.RamanInputs(powers=[ct.Power(0.5, 'W')], wavelengths=[ct.Length(1500, 'nm')])
 
-    # store errors
-    errors = []
-
     # enable interactive plotting
     plt.ion()
 
-    fig1, ax1 = plt.subplots()
-    fig2, ax2 = plt.subplots()
+    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+    ax_err, ax_spec, ax_pow, ax_wl = axes.flatten()
 
-    for step in range(1000):
+    errors = []
+    powers = []
+    wavelengths = []
+
+    for step in range(NUM_STEPS):
         print(f"\n\n STEP: {step}")
         control_loop.step()
+
         assert control_loop.curr_output is not None and control_loop.target is not None
+
         error = control_loop.curr_output - control_loop.target
-        errors.append(error.mean)
+        errors.append(abs(error.mean))
 
-        # --- update error over time plot ---
-        ax1.clear()
-        ax1.plot(errors, label="Error mean")
-        ax1.set_xlabel("Iteration")
-        ax1.set_ylabel("Error (mean)")
-        ax1.set_title("Error over time")
-        ax1.legend()
-        fig1.canvas.draw()
-        fig1.canvas.flush_events()
+        # Log powers and wavelengths for plotting
+        powers.append([p.W for p in control_loop.curr_control.powers])
+        wavelengths.append([w.nm for w in control_loop.curr_control.wavelengths])
 
-        # --- update target vs output spectra plot ---
-        ax2.clear()
-        ax2.plot(
-            list([f.Hz for f in control_loop.target.frequencies]),
+        # clear all axes
+        for ax in axes.flatten():
+            ax.clear()
+
+        # --- subplot 1: Error over time ---
+        ax_err.plot(errors, label="Error mean", color="tab:red")
+        ax_err.set_xlabel("Iteration")
+        ax_err.set_ylabel("Error (mean)")
+        ax_err.set_title("Error over time")
+        ax_err.legend()
+
+        # --- subplot 2: Target vs Output spectrum ---
+        ax_spec.plot(
+            [f.Hz for f in control_loop.target.frequencies],
             [val.value for val in control_loop.target.values],
             label="Target",
         )
-        ax2.plot(
-            list([f.Hz for f in control_loop.curr_output.frequencies]),
+        ax_spec.plot(
+            [f.Hz for f in control_loop.curr_output.frequencies],
             [val.value for val in control_loop.curr_output.values],
             label="Current Output",
         )
-        ax2.set_xlabel("Frequency (Hz)")  # or convert back to nm if you prefer
-        ax2.set_ylabel("Power (mW)")
-        ax2.set_title("Target vs. Current Output")
-        ax2.legend()
-        fig2.canvas.draw()
-        fig2.canvas.flush_events()
+        ax_spec.set_xlabel("Frequency (Hz)")
+        ax_spec.set_ylabel("Power (mW)")
+        ax_spec.set_title("Target vs Current Output Spectrum")
+        ax_spec.legend()
+
+        # --- subplot 3: Power evolution ---
+        power_arr = np.array(powers)
+        for i in range(power_arr.shape[1]):
+            ax_pow.plot(power_arr[:, i], label=f"Power {i}")
+        ax_pow.set_xlabel("Iteration")
+        ax_pow.set_ylabel("Power (W)")
+        ax_pow.set_title("Power evolution")
+        ax_pow.legend()
+
+        # --- subplot 4: Wavelength evolution ---
+        wl_arr = np.array(wavelengths)
+        for i in range(wl_arr.shape[1]):
+            ax_wl.plot(wl_arr[:, i], label=f"Wavelength {i}")
+        ax_wl.set_xlabel("Iteration")
+        ax_wl.set_ylabel("Wavelength (nm)")
+        ax_wl.set_title("Wavelength evolution")
+        ax_wl.legend()
+
+        # update figure
+        fig.tight_layout()
+        fig.canvas.draw()
+        fig.canvas.flush_events()
 
     plt.ioff()
     plt.show()
