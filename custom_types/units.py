@@ -152,5 +152,7 @@ class Unit(ABC, UnitProtocol):
         return result
 
     def __neg__(self: T) -> T:
-        self._value = -self._value
-        return self
+        new = self.__class__.__new__(self.__class__)
+        new.__dict__ = self.__dict__.copy()
+        new._value = -self._value
+        return new
