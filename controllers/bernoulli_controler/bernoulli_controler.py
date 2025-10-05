@@ -11,8 +11,8 @@ class BernoulliController(torch.nn.Module, Controller):
                  beta: int = 1,
                  weight_decay: float = 1e-5,
                  input_dim: int = 2,
-                 power_step: ct.Power = ct.Power(1, 'mW'),
-                 wavelength_step: ct.Length = ct.Length(0.1, 'nm'),
+                 power_step: ct.Power = ct.Power(0.01, 'W'),
+                 wavelength_step: ct.Length = ct.Length(1, 'nm'),
                  lr: float = 1e-3,
                  gamma: float = 0
                  ):
@@ -47,8 +47,6 @@ class BernoulliController(torch.nn.Module, Controller):
 
         power_action = self.power_step.value * (power_sample * 2 - 1)
         wavelength_action = self.wavelength_step.value * (wavelength_sample * 2 - 1)
-        print("WAVELENGHT STEP", self.wavelength_step)
-        print("WAVELENGTH ACTION: ", wavelength_action)
 
         powers_update: list[ct.Power] = []
         for power in power_action:
@@ -70,8 +68,8 @@ class BernoulliController(torch.nn.Module, Controller):
 
         # Use the current error (the result after applying control_delta).
         # Compute scalar loss (MSE of spectrum). Convert to float for stability.
-        curr_loss = float(error.mean ** 2)
-        prev_loss = float(self.prev_error.mean ** 2) if self.prev_error is not None else None
+        curr_loss = error.mean
+        prev_loss = (self.prev_error.mean ** 2) if self.prev_error is not None else None
 
         # Reward = improvement in loss (positive if loss went down).
         if prev_loss is None:
@@ -79,8 +77,6 @@ class BernoulliController(torch.nn.Module, Controller):
             reward = 0.0
         else:
             reward = prev_loss - curr_loss
-        
-        print(reward)
 
         # Running baseline for variance reduction
         self.baseline = self.gamma * self.baseline + (1 - self.gamma) * reward
