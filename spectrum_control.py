@@ -16,6 +16,10 @@ import controllers as ctrl
 
 log = clog.get_logger("Spectrum Control Test Script")
 
+LOWER = 1400
+UPPER = 1600
+SAMPLES = 100
+
 
 def main() -> None:
     fiber = fib.StandardSingleModeFiber()
@@ -26,7 +30,7 @@ def main() -> None:
     raman_system.fiber = fiber
 
     input_spectrum = ra.Spectrum(ct.Power)
-    for num in list(np.linspace(1450, 1600, 40)):
+    for num in list(np.linspace(LOWER, UPPER, SAMPLES)):
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
         input_spectrum.add_val(freq, ct.Power(1, 'mW'))
 
@@ -38,7 +42,7 @@ def main() -> None:
 
     target_spectrum = ra.Spectrum(ct.Power)
     # create values
-    for idx, num in enumerate(np.linspace(1450, 1600, 40)):
+    for idx, num in enumerate(np.linspace(LOWER, UPPER, SAMPLES)):
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
         
         # Gaussian bump around center_idx
@@ -50,8 +54,7 @@ def main() -> None:
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
-    controller = ctrl.BernoulliController()
-    # controller = ctrl.PidController(p=1, i=0, d=0)
+    controller = ctrl.PidController(p=1, i=0, d=0)
     control_loop = loop.ControlLoop(raman_system, controller)
     control_loop.set_target(target_spectrum)
     control_loop.curr_control = ra.RamanInputs(powers=[ct.Power(0.5, 'W')], wavelengths=[ct.Length(1500, 'nm')])
