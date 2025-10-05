@@ -10,11 +10,11 @@ import custom_logging as clog
 
 log = clog.get_logger("IO")
 
-MAX_POWER_W = 1.5
-MIN_POWER_W = 0.0
+MAX_POWER_W = 1.4
+MIN_POWER_W = 1.0
 
-MAX_WAVELENGTH_NM = 1700
-MIN_WAVELENGTH_NM = 1300
+MAX_WAVELENGTH_NM = 1490
+MIN_WAVELENGTH_NM = 1420
 
 
 class RamanInputs:
@@ -153,8 +153,8 @@ class Spectrum(Generic[T]):
         """
         mean: float = 0.0
         for v in self.spectrum.values():
-            mean += v.value
-        return mean/len(self.spectrum.values())
+            mean += v.value ** 2
+        return mean**0.5/len(self.spectrum.values())
 
     def add_val(self, frequency: ct.Frequency, value: T, do_round: bool = True) -> None:
         """
