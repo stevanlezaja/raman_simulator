@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -46,7 +48,7 @@ def main() -> None:
         target_spectrum.add_val(freq, ct.Power(power_mw, 'mW'))
 
     raman_system.input_spectrum = input_spectrum
-    raman_system.output_spectrum = input_spectrum
+    raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
     controller = ctrl.BernoulliController()
     # controller = ctrl.PidController(p=1, i=0, d=0)
