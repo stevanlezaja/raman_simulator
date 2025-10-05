@@ -171,3 +171,9 @@ class Spectrum(Generic[T]):
         Property that retuns the spectrum values as a list
         """
         return list(self.spectrum.values())
+
+    def peak_frequency(self) -> ct.Frequency:
+        """Return the frequency with the maximum value in the spectrum."""
+        if not self.spectrum:
+            raise ValueError("Spectrum is empty")
+        return max(self.spectrum.items(), key=lambda item: item[1].value)[0]
