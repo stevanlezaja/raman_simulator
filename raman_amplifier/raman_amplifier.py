@@ -183,3 +183,6 @@ class RamanAmplifier:
     def is_valid(self) -> bool:
         valid = self.backward_pump.is_valid ^ self.forward_pump.is_valid
         return valid
+
+    def __repr__(self) -> str:
+        return f"Raman Amplifier object\n  Pump powers: {self.pump_power}, ratio: {self.pumping_ratio}\n  Pump wavelengths: {self.pump_wavelength}"

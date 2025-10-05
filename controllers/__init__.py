@@ -5,5 +5,6 @@ from .bernoulli_controler import BernoulliController
 from .pid_controller import PidController
 from .controller_base import Controller
 # from .controller import Controller, ControllerType, controller_step
+from .manual_controller import ManualController
 
-__all__ = ["BernoulliController", "PidController", "Controller"]
+__all__ = ["ManualController", "BernoulliController", "PidController", "Controller"]

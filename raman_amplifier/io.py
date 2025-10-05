@@ -67,6 +67,9 @@ class RamanInputs:
         # Update value_dict to stay consistent
         self.value_dict = dict(zip(self.wavelengths, self.powers))
 
+    def __repr__(self):
+        return f"Raman inputs: \n Powers: {self.powers},\n Wavelengths: {self.wavelengths}.\n"
+
 
 T = TypeVar("T", bound = ct.UnitProtocol)
 
