@@ -17,7 +17,7 @@ class ManualController(Controller):
         self.power_change: list[ct.Power] = [ct.Power(0, "W")]
         self.wavelength_change: list[ct.Length] = [ct.Length(0, "m")]
         self.power_step: ct.Power = ct.Power(0.1, "W")
-        self.wavelength_step: ct.Length = ct.Length(50, "nm")
+        self.wavelength_step: ct.Length = ct.Length(5, "nm")
 
     # ----------------------------
     # Cross-platform single-key reader

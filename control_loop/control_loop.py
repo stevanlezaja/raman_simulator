@@ -41,6 +41,8 @@ class ControlLoop:
         Most recent output spectrum observed from the Raman system.
     """
 
+    manual_controller = ctrl.ManualController
+
     def __init__(self, raman_system: rs.RamanSystem, controller: ctrl.Controller):
         """
         Initialize a ControlLoop instance.
@@ -93,7 +95,7 @@ class ControlLoop:
             The current output spectrum of the Raman system.
         """
 
-        log.debug("Current pump power: %s", self.raman_system.raman_amplifier.pump_power)
+        log.debug("Current inputs %s", self.curr_control)
         self.raman_system.update()
         return self.raman_system.output_spectrum
 
@@ -130,9 +132,12 @@ class ControlLoop:
         self.curr_control.clamp_values()
 
         log.debug("Old pump power: %s", self.raman_system.raman_amplifier.pump_power)
-        self.raman_system.raman_amplifier.pump_power += self.curr_control.powers[0]
+        self.raman_system.raman_amplifier.pump_power = self.curr_control.powers[0]
         log.debug("New pump power: %s", self.raman_system.raman_amplifier.pump_power)
-        self.raman_system.raman_amplifier.pump_wavelength += self.curr_control.wavelengths[0]
+
+        log.debug("Old pump wavelength: %s", self.raman_system.raman_amplifier.pump_wavelength)
+        self.raman_system.raman_amplifier.pump_wavelength = self.curr_control.wavelengths[0]
+        log.debug("New pump wavelength: %s", self.raman_system.raman_amplifier.pump_wavelength)
 
     def step(self):
         """

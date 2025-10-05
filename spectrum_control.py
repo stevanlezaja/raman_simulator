@@ -58,7 +58,6 @@ def main() -> None:
     control_loop = loop.ControlLoop(raman_system, controller)
     control_loop.set_target(target_spectrum)
     control_loop.curr_control = ra.RamanInputs(powers=[ct.Power(0.5, 'W')], wavelengths=[ct.Length(1500, 'nm')])
-    print(control_loop.curr_control.wavelengths)
 
     # store errors
     errors = []

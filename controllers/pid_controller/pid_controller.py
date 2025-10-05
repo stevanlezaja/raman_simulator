@@ -31,9 +31,6 @@ class PidController(Controller):
         delta_powers = [ct.Power(power_control, 'W') for _ in curr_input.powers]
         delta_wavelengths = [ct.Length(wavelength_control, 'nm') for _ in curr_input.wavelengths]
 
-        print("Wavelength change", delta_wavelengths)
-        print("Power change", delta_powers)
-
         return ra.RamanInputs(powers=delta_powers, wavelengths=delta_wavelengths)
 
     def _get_power_control(self, target_output: ra.Spectrum[ct.Power], curr_output: ra.Spectrum[ct.Power]) -> float:
