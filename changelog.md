@@ -1,3 +1,17 @@
+# 05.10
+
+## Added
+* Negation method for Unit
+* Manual Controller
+* Raman Inputs string representation
+* Raman Amplifier string representation
+* PID for controlling wavelengths
+* getter for peak frequency in spectrum
+
+# Changed
+* Spectrum mean returns square root of mean squared
+* Script parameters are now constants
+
 # 02.10
 
 ## Added
