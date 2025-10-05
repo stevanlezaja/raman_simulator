@@ -10,6 +10,12 @@ import custom_logging as clog
 
 log = clog.get_logger("IO")
 
+MAX_POWER_W = 1.5
+MIN_POWER_W = 0.0
+
+MAX_WAVELENGTH_NM = 1700
+MIN_WAVELENGTH_NM = 1300
+
 
 class RamanInputs:
     """
@@ -17,8 +23,8 @@ class RamanInputs:
         It contains the Wavelength - Power pairs representing the Pump state
     """
 
-    power_range = (ct.Power(0.0, 'W'), ct.Power(1.5, 'W'))
-    wavelength_range = (ct.Length(1450, 'nm'), ct.Length(1500, 'nm'))
+    power_range = (ct.Power(MIN_POWER_W, 'W'), ct.Power(MAX_POWER_W, 'W'))
+    wavelength_range = (ct.Length(MIN_WAVELENGTH_NM, 'nm'), ct.Length(MAX_WAVELENGTH_NM, 'nm'))
 
     def __init__(
             self,
@@ -51,7 +57,7 @@ class RamanInputs:
 
     def clamp_values(self) -> None:
         """Clamp powers and wavelengths to their defined ranges in-place."""
-        
+
         # Clamp powers
         p_min, p_max = self.power_range
         for i, p in enumerate(self.powers):
