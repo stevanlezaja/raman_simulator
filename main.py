@@ -150,6 +150,15 @@ def main():
         ax.set_title(fiber.__name__)
     plt.show()
 
+
 if __name__ == "__main__":
     import spectrum_control
-    spectrum_control.main()
+    from utils import parser
+
+    prs = parser.get_parser()
+    args = prs.parse_args()
+
+    # Convert Namespace → dict and drop None values
+    kwargs = {k: v for k, v in vars(args).items() if v is not None}
+
+    spectrum_control.main(**kwargs)
