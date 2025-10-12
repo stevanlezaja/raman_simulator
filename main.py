@@ -6,7 +6,7 @@ from fibers import Fiber, DispersionCompensatingFiber, SuperLargeEffectiveArea, 
 from signals import Signal
 from raman_amplifier import RamanAmplifier
 from experiment.experiment import Experiment
-from utils import to_dB, from_dB
+from utils.utils import to_dB, from_dB
 from custom_types import Length, Power
 
 
