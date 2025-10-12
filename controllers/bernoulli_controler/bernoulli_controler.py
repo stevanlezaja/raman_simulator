@@ -9,12 +9,12 @@ from ..controller_base import Controller
 class BernoulliController(torch.nn.Module, Controller):
     def __init__(self,
                  beta: int = 1,
-                 weight_decay: float = 1e-5,
+                 weight_decay: float = 0.0,
                  input_dim: int = 2,
                  power_step: ct.Power = ct.Power(0.01, 'W'),
-                 wavelength_step: ct.Length = ct.Length(1, 'nm'),
-                 lr: float = 1e-3,
-                 gamma: float = 0
+                 wavelength_step: ct.Length = ct.Length(5, 'nm'),
+                 lr: float = 1e-1,
+                 gamma: float = 0.9
                  ):
         self.power_step = power_step
         self.wavelength_step = wavelength_step
