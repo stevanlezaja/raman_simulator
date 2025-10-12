@@ -150,20 +150,21 @@ def main(
     if save_plots:
         plt.savefig()  # type: ignore
 
-    plt.show()  # type: ignore
+    if live_plot or save_plots:
+        plt.show()  # type: ignore
 
-    probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
+        probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
 
-    plt.figure(figsize=(8, 5))  # type: ignore
-    for i in range(probs.shape[1]):
-        plt.plot(probs[:, i], label=f'Action {i+1}')  # type: ignore
+        plt.figure(figsize=(8, 5))  # type: ignore
+        for i in range(probs.shape[1]):
+            plt.plot(probs[:, i], label=f'Action {i+1}')  # type: ignore
 
-    plt.xlabel('Iteration')  # type: ignore
-    plt.ylabel('Probability')  # type: ignore
-    plt.title('Action Probability Evolution')  # type: ignore
-    plt.legend()  # type: ignore
-    plt.grid(True)  # type: ignore
-    plt.show()  # type: ignore
+        plt.xlabel('Iteration')  # type: ignore
+        plt.ylabel('Probability')  # type: ignore
+        plt.title('Action Probability Evolution')  # type: ignore
+        plt.legend()  # type: ignore
+        plt.grid(True)  # type: ignore
+        plt.show()  # type: ignore
 
 
 if __name__ == "__main__":
