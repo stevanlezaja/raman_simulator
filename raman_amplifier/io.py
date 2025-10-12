@@ -10,18 +10,18 @@ import custom_logging as clog
 
 log = clog.get_logger("IO")
 
-MAX_POWER_W = 1.4
-MIN_POWER_W = 1.0
-
-MAX_WAVELENGTH_NM = 1490
-MIN_WAVELENGTH_NM = 1420
-
 
 class RamanInputs:
     """
     RamanInputs is a class used to represent inputs to a Raman Amplifier
         It contains the Wavelength - Power pairs representing the Pump state
     """
+
+    MAX_POWER_W = 0.75
+    MIN_POWER_W = 0.0
+
+    MAX_WAVELENGTH_NM = 1490
+    MIN_WAVELENGTH_NM = 1420
 
     power_range = (ct.Power(MIN_POWER_W, 'W'), ct.Power(MAX_POWER_W, 'W'))
     wavelength_range = (ct.Length(MIN_WAVELENGTH_NM, 'nm'), ct.Length(MAX_WAVELENGTH_NM, 'nm'))

@@ -1,4 +1,5 @@
 import copy
+import tqdm
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -28,6 +29,9 @@ def main() -> None:
 
     raman_system = rs.RamanSystem()
     raman_system.raman_amplifier = ra.RamanAmplifier()
+    # raman_system.raman_amplifier.pump_power.W = ra.RamanInputs.MIN_POWER_W + (np.random.random() * (ra.RamanInputs.MAX_POWER_W - ra.RamanInputs.MIN_POWER_W))
+    raman_system.raman_amplifier.pump_power.W = 0.5
+    raman_system.raman_amplifier.pump_wavelength.nm = ra.RamanInputs.MIN_WAVELENGTH_NM + (np.random.random() * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM))
     raman_system.fiber = fiber
 
     input_spectrum = ra.Spectrum(ct.Power)
@@ -35,28 +39,25 @@ def main() -> None:
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
         input_spectrum.add_val(freq, ct.Power(10, 'mW'))
 
-    # parameters
-    center_idx = 30         # peak position (sample index)
-    peak_power = 200         # peak height in mW
-    base_power = 10         # baseline in mW
-    sigma = 8               # controls the smoothness (spread of peak)
-
     target_spectrum = ra.Spectrum(ct.Power)
     # create values
-    for idx, num in enumerate(np.linspace(LOWER, UPPER, SAMPLES)):
-        freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
-        
-        # Gaussian bump around center_idx
-        bump = np.exp(-0.5 * ((idx - center_idx) / sigma) ** 2)
-        power_mw = base_power + (peak_power - base_power) * bump
-        
-        target_spectrum.add_val(freq, ct.Power(power_mw, 'mW'))
+    dummy_sytem = rs.RamanSystem()
+    dummy_sytem.raman_amplifier = ra.RamanAmplifier()
+    dummy_sytem.fiber = fiber
+    dummy_sytem.input_spectrum = copy.deepcopy(input_spectrum)
+    dummy_sytem.output_spectrum = copy.deepcopy(input_spectrum)
+    dummy_sytem.raman_amplifier.pump_power.mW = 500
+    dummy_sytem.raman_amplifier.pump_wavelength.nm = 1450
+
+    dummy_sytem.update()
+
+    target_spectrum = dummy_sytem.output_spectrum
 
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
-    controller = ctrl.PidController(p=1, i=0, d=0)
-    # controller = ctrl.BernoulliController()
+    # controller = ctrl.PidController(p=1, i=0, d=0)
+    controller = ctrl.BernoulliController()
     control_loop = loop.ControlLoop(raman_system, controller)
     control_loop.set_target(target_spectrum)
     control_loop.curr_control = ra.RamanInputs(powers=[ct.Power(0.5, 'W')], wavelengths=[ct.Length(1500, 'nm')])
@@ -67,12 +68,11 @@ def main() -> None:
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
     ax_err, ax_spec, ax_pow, ax_wl = axes.flatten()
 
-    errors = []
-    powers = []
-    wavelengths = []
+    errors: list[float] = []
+    powers: list[float] = []
+    wavelengths: list[float] = []
 
-    for step in range(NUM_STEPS):
-        print(f"\n\n STEP: {step}")
+    for _ in tqdm.tqdm(range(NUM_STEPS)):
         control_loop.step()
 
         assert control_loop.curr_output is not None and control_loop.target is not None
@@ -135,6 +135,19 @@ def main() -> None:
         fig.canvas.flush_events()
 
     plt.ioff()
+    plt.show()
+
+    probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
+
+    plt.figure(figsize=(8, 5))
+    for i in range(probs.shape[1]):
+        plt.plot(probs[:, i], label=f'Action {i+1}')
+
+    plt.xlabel('Iteration')
+    plt.ylabel('Probability')
+    plt.title('Action Probability Evolution')
+    plt.legend()
+    plt.grid(True)
     plt.show()
 
 

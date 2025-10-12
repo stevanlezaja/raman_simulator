@@ -151,9 +151,5 @@ def main():
     plt.show()
 
 if __name__ == "__main__":
-    # from runner.run import Runner
-
-    # runner = Runner()
-
-    # runner.run()
-    main()
+    import spectrum_control
+    spectrum_control.main()
