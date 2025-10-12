@@ -23,19 +23,25 @@ SAMPLES = 40
 
 NUM_STEPS = 200
 
-def main() -> None:
+def main(
+        save_plots: bool = True,
+        live_plot: bool = False,
+        num_steps: int = NUM_STEPS,
+        num_samples: int = SAMPLES,
+        wavelength_range: tuple[float, float] = (LOWER, UPPER),
+) -> None:
+
     fiber = fib.StandardSingleModeFiber()
     fiber.length.km = 10
 
     raman_system = rs.RamanSystem()
     raman_system.raman_amplifier = ra.RamanAmplifier()
-    # raman_system.raman_amplifier.pump_power.W = ra.RamanInputs.MIN_POWER_W + (np.random.random() * (ra.RamanInputs.MAX_POWER_W - ra.RamanInputs.MIN_POWER_W))
     raman_system.raman_amplifier.pump_power.W = 0.5
     raman_system.raman_amplifier.pump_wavelength.nm = ra.RamanInputs.MIN_WAVELENGTH_NM + (np.random.random() * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM))
     raman_system.fiber = fiber
 
     input_spectrum = ra.Spectrum(ct.Power)
-    for num in list(np.linspace(LOWER, UPPER, SAMPLES)):
+    for num in list(np.linspace(wavelength_range[0], wavelength_range[1], num_samples)):
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
         input_spectrum.add_val(freq, ct.Power(10, 'mW'))
 
@@ -56,23 +62,23 @@ def main() -> None:
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
-    # controller = ctrl.PidController(p=1, i=0, d=0)
     controller = ctrl.BernoulliController()
     control_loop = loop.ControlLoop(raman_system, controller)
     control_loop.set_target(target_spectrum)
     control_loop.curr_control = ra.RamanInputs(powers=[ct.Power(0.5, 'W')], wavelengths=[ct.Length(1500, 'nm')])
 
-    # enable interactive plotting
-    plt.ion()
+    if live_plot:
+        plt.ion()  # type: ignore
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
-    ax_err, ax_spec, ax_pow, ax_wl = axes.flatten()
+    if live_plot or save_plots:
+        fig, axes = plt.subplots(2, 2, figsize=(12, 8))  # type: ignore
+        ax_err, ax_spec, ax_pow, ax_wl = axes.flatten()
 
     errors: list[float] = []
     powers: list[float] = []
     wavelengths: list[float] = []
 
-    for _ in tqdm.tqdm(range(NUM_STEPS)):
+    for _ in tqdm.tqdm(range(num_steps)):
         control_loop.step()
 
         assert control_loop.curr_output is not None and control_loop.target is not None
@@ -85,70 +91,79 @@ def main() -> None:
         wavelengths.append([w.nm for w in control_loop.curr_control.wavelengths])
 
         # clear all axes
-        for ax in axes.flatten():
-            ax.clear()
+        if live_plot:
+            for ax in axes.flatten():
+                ax.clear()
 
-        # --- subplot 1: Error over time ---
-        ax_err.plot(errors, label="Error mean", color="tab:red")
-        ax_err.set_xlabel("Iteration")
-        ax_err.set_ylabel("Error (mean)")
-        ax_err.set_title("Error over time")
-        ax_err.legend()
+        if live_plot or save_plots:
+            # --- subplot 1: Error over time ---
+            ax_err.plot(errors, label="Error mean", color="tab:red")  # type: ignore
+            ax_err.set_xlabel("Iteration")  # type: ignore
+            ax_err.set_ylabel("Error (mean)")  # type: ignore
+            ax_err.set_title("Error over time")  # type: ignore
+            ax_err.legend()  # type: ignore
 
-        # --- subplot 2: Target vs Output spectrum ---
-        ax_spec.plot(
-            [f.Hz for f in control_loop.target.frequencies],
-            [val.value for val in control_loop.target.values],
-            label="Target",
-        )
-        ax_spec.plot(
-            [f.Hz for f in control_loop.curr_output.frequencies],
-            [val.value for val in control_loop.curr_output.values],
-            label="Current Output",
-        )
-        ax_spec.set_xlabel("Frequency (Hz)")
-        ax_spec.set_ylabel("Power (mW)")
-        ax_spec.set_title("Target vs Current Output Spectrum")
-        ax_spec.legend()
+            # --- subplot 2: Target vs Output spectrum ---
+            ax_spec.plot(
+                [f.Hz for f in control_loop.target.frequencies],
+                [val.value for val in control_loop.target.values],
+                label="Target",
+            )  # type: ignore
+            ax_spec.plot(
+                [f.Hz for f in control_loop.curr_output.frequencies],
+                [val.value for val in control_loop.curr_output.values],
+                label="Current Output",
+            )  # type: ignore
+            ax_spec.set_xlabel("Frequency (Hz)")  # type: ignore
+            ax_spec.set_ylabel("Power (mW)")  # type: ignore
+            ax_spec.set_title("Target vs Current Output Spectrum")  # type: ignore
+            ax_spec.legend()  # type: ignore
 
-        # --- subplot 3: Power evolution ---
-        power_arr = np.array(powers)
-        for i in range(power_arr.shape[1]):
-            ax_pow.plot(power_arr[:, i], label=f"Power {i}")
-        ax_pow.set_xlabel("Iteration")
-        ax_pow.set_ylabel("Power (W)")
-        ax_pow.set_title("Power evolution")
-        ax_pow.legend()
+            # --- subplot 3: Power evolution ---
+            power_arr = np.array(powers)
+            for i in range(power_arr.shape[1]):
+                ax_pow.plot(power_arr[:, i], label=f"Power {i}")  # type: ignore
+            ax_pow.set_xlabel("Iteration")  # type: ignore
+            ax_pow.set_ylabel("Power (W)")  # type: ignore
+            ax_pow.set_title("Power evolution")  # type: ignore
+            ax_pow.legend()  # type: ignore
 
-        # --- subplot 4: Wavelength evolution ---
-        wl_arr = np.array(wavelengths)
-        for i in range(wl_arr.shape[1]):
-            ax_wl.plot(wl_arr[:, i], label=f"Wavelength {i}")
-        ax_wl.set_xlabel("Iteration")
-        ax_wl.set_ylabel("Wavelength (nm)")
-        ax_wl.set_title("Wavelength evolution")
-        ax_wl.legend()
+            # --- subplot 4: Wavelength evolution ---
+            wl_arr = np.array(wavelengths)
+            for i in range(wl_arr.shape[1]):
+                ax_wl.plot(wl_arr[:, i], label=f"Wavelength {i}")  # type: ignore
+            ax_wl.set_xlabel("Iteration")  # type: ignore
+            ax_wl.set_ylabel("Wavelength (nm)")  # type: ignore
+            ax_wl.set_title("Wavelength evolution")  # type: ignore
+            ax_wl.legend()  # type: ignore
 
-        # update figure
-        fig.tight_layout()
-        fig.canvas.draw()
-        fig.canvas.flush_events()
+            # update figure
+            fig.tight_layout()  # type: ignore
 
-    plt.ioff()
-    plt.show()
+        if live_plot:
+            fig.canvas.draw()  # type: ignore
+            fig.canvas.flush_events()  # type: ignore
+
+    if live_plot:
+        plt.ioff()  # type: ignore
+
+    if save_plots:
+        plt.savefig()  # type: ignore
+
+    plt.show()  # type: ignore
 
     probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
 
-    plt.figure(figsize=(8, 5))
+    plt.figure(figsize=(8, 5))  # type: ignore
     for i in range(probs.shape[1]):
-        plt.plot(probs[:, i], label=f'Action {i+1}')
+        plt.plot(probs[:, i], label=f'Action {i+1}')  # type: ignore
 
-    plt.xlabel('Iteration')
-    plt.ylabel('Probability')
-    plt.title('Action Probability Evolution')
-    plt.legend()
-    plt.grid(True)
-    plt.show()
+    plt.xlabel('Iteration')  # type: ignore
+    plt.ylabel('Probability')  # type: ignore
+    plt.title('Action Probability Evolution')  # type: ignore
+    plt.legend()  # type: ignore
+    plt.grid(True)  # type: ignore
+    plt.show()  # type: ignore
 
 
 if __name__ == "__main__":
