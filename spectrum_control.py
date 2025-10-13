@@ -29,12 +29,12 @@ def main(
         num_steps: int = NUM_STEPS,
         num_samples: int = SAMPLES,
         wavelength_range: tuple[float, float] = (LOWER, UPPER),
+        raman_system: rs.RamanSystem = rs.RamanSystem(),
+        fiber: fib.Fiber = fib.StandardSingleModeFiber(),
 ) -> None:
 
-    fiber = fib.StandardSingleModeFiber()
     fiber.length.km = 10
 
-    raman_system = rs.RamanSystem()
     raman_system.raman_amplifier = ra.RamanAmplifier()
     raman_system.raman_amplifier.pump_power.W = 0.5
     raman_system.raman_amplifier.pump_wavelength.nm = ra.RamanInputs.MIN_WAVELENGTH_NM + (np.random.random() * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM))
