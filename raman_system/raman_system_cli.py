@@ -10,6 +10,7 @@ class RamanSystemCli():
     def make(self) -> RamanSystem:
         raman_system = RamanSystem()
         print("=== Making the Raman System ===")
-        raman_system.fiber = fib.make()
+        fiber_cli = fib.FiberCli()
+        raman_system.fiber = fiber_cli.make()
         raman_system.raman_amplifier = self.raman_amplifier_cli.make()
         return raman_system
