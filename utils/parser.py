@@ -1,6 +1,6 @@
 import argparse
 
-def get_parser():
+def get_main_parser():
     parser = argparse.ArgumentParser(
         description="Raman Amplifier Control CLI"
     )
@@ -15,6 +15,12 @@ def get_parser():
         "-l", "--live-plot",
         action="store_true",
         help="If set, plots figures live"
+    )
+
+    parser.add_argument(
+        "-c", "--customize",
+        action="store_true",
+        help="If set, you will be prompted to customize simulation elements"
     )
 
     parser.add_argument(
