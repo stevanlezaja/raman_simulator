@@ -17,5 +17,7 @@ Available classes:
 from .fiber import Fiber, SuperLargeEffectiveArea, NonZeroDispersionFiber, \
     DispersionCompensatingFiber, StandardSingleModeFiber, ChristopheExperimentFiber
 
-__all__ = ["Fiber", "SuperLargeEffectiveArea", "NonZeroDispersionFiber",
+from .fiber_cli import FiberCli
+
+__all__ = ["Fiber", "FiberCli", "SuperLargeEffectiveArea", "NonZeroDispersionFiber",
            "DispersionCompensatingFiber", "StandardSingleModeFiber", "ChristopheExperimentFiber"]
