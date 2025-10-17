@@ -6,7 +6,7 @@ from fibers import Fiber, DispersionCompensatingFiber, SuperLargeEffectiveArea, 
 from signals import Signal
 from raman_amplifier import RamanAmplifier
 from experiment.experiment import Experiment
-from utils import to_dB, from_dB
+from utils.utils import to_dB, from_dB
 from custom_types import Length, Power
 
 
@@ -150,6 +150,25 @@ def main():
         ax.set_title(fiber.__name__)
     plt.show()
 
+
 if __name__ == "__main__":
     import spectrum_control
-    spectrum_control.main()
+    import raman_system as rs
+    from utils import parser
+
+    main_parser = parser.get_main_parser()
+    main_args = main_parser.parse_args()
+    print(main_args)
+
+    # Convert Namespace → dict and drop None values
+    kwargs = {k: v for k, v in vars(main_args).items() if v is not None}
+
+    customize = kwargs.pop('customize', False)
+
+    if customize:
+        raman_system_cli = rs.RamanSystemCli()
+        raman_system = raman_system_cli.make()
+
+        spectrum_control.main(**kwargs, raman_system=raman_system)
+    else:
+        spectrum_control.main(**kwargs)

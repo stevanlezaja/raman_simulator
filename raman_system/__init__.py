@@ -11,5 +11,6 @@ RamanSystem : class
 """
 
 from .raman_system import RamanSystem
+from .raman_system_cli import RamanSystemCli
 
-__all__ = ["RamanSystem"]
+__all__ = ["RamanSystem", "RamanSystemCli"]
