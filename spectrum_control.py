@@ -33,13 +33,6 @@ def main(
         fiber: fib.Fiber = fib.StandardSingleModeFiber(),
 ) -> None:
 
-    fiber.length.km = 10
-
-    raman_system.raman_amplifier = ra.RamanAmplifier()
-    raman_system.raman_amplifier.pump_power.W = 0.5
-    raman_system.raman_amplifier.pump_wavelength.nm = ra.RamanInputs.MIN_WAVELENGTH_NM + (np.random.random() * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM))
-    raman_system.fiber = fiber
-
     input_spectrum = ra.Spectrum(ct.Power)
     for num in list(np.linspace(wavelength_range[0], wavelength_range[1], num_samples)):
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))

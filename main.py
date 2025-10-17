@@ -153,12 +153,22 @@ def main():
 
 if __name__ == "__main__":
     import spectrum_control
+    import raman_system as rs
     from utils import parser
 
-    prs = parser.get_parser()
-    args = prs.parse_args()
+    main_parser = parser.get_main_parser()
+    main_args = main_parser.parse_args()
+    print(main_args)
 
     # Convert Namespace → dict and drop None values
-    kwargs = {k: v for k, v in vars(args).items() if v is not None}
+    kwargs = {k: v for k, v in vars(main_args).items() if v is not None}
 
-    spectrum_control.main(**kwargs)
+    customize = kwargs.pop('customize', False)
+
+    if customize:
+        raman_system_cli = rs.RamanSystemCli()
+        raman_system = raman_system_cli.make()
+
+        spectrum_control.main(**kwargs, raman_system=raman_system)
+    else:
+        spectrum_control.main(**kwargs)
