@@ -2,6 +2,7 @@ import torch
 
 import raman_amplifier as ra
 import custom_types as ct
+import utils.parameter
 
 from ..controller_base import Controller
 
@@ -103,3 +104,9 @@ class BernoulliController(torch.nn.Module, Controller):
         self.logits = self.logits + update
 
         self.prev_error = error
+
+    def _populate_parameters(self) -> None:
+        self.power_step = utils.parameter.get_unit_input(self.power_step, ct.Power(500, 'mW'), "Power Step")
+        self.wavelength_step = utils.parameter.get_unit_input(self.wavelength_step, ct.Length(1, 'nm'), "Wavelength Step")
+
+        return

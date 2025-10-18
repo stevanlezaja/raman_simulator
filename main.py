@@ -154,6 +154,7 @@ def main():
 if __name__ == "__main__":
     import spectrum_control
     import raman_system as rs
+    import controllers as ctrl
     from utils import parser
 
     main_parser = parser.get_main_parser()
@@ -168,7 +169,9 @@ if __name__ == "__main__":
     if customize:
         raman_system_cli = rs.RamanSystemCli()
         raman_system = raman_system_cli.make()
+        controller_cli = ctrl.ControllerCli()
+        controller = controller_cli.make()
 
-        spectrum_control.main(**kwargs, raman_system=raman_system)
+        spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller)
     else:
         spectrum_control.main(**kwargs)

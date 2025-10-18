@@ -65,3 +65,7 @@ class Controller(ABC):
     @property
     def is_valid(self) -> bool:
         return True
+
+    @abstractmethod
+    def _populate_parameters(self) -> None:
+        raise NotImplementedError
