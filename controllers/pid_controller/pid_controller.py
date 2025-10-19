@@ -2,8 +2,10 @@
 This module contains the implementation of PID Controller class
 """
 
+from typing import Any
 import raman_amplifier as ra
 import custom_types as ct
+import utils.parameter
 
 from ..controller_base import Controller
 
@@ -12,6 +14,7 @@ class PidController(Controller):
     Implements PID Control strategy
     """
     def __init__(self, p: float=0.2, i: float=0.1, d: float=0.1):
+        super().__init__()
         self._params['p'] = (float, p)
         self._params['i'] = (float, i)
         self._params['d'] = (float, d)
@@ -44,6 +47,15 @@ class PidController(Controller):
     @property
     def d(self):
         return self._params['d'][1]
+
+    def _populate_parameters(self, value_dict: dict[str, Any] = {}) -> None:
+        for key in self._params.keys():
+            if key in value_dict.keys():
+                self._params[key] = value_dict[key]
+            elif self._params[key][0] == float:
+                self._params[key] = (self._params[key][0], utils.parameter.get_numeric_input(f"Please input {key}", self._params[key][1]))
+            else:
+                self._params[key] = (self._params[key][0], utils.parameter.get_unit_input(self._params[key][1], self._params[key][1], key))
 
     def _get_power_control(self, target_output: ra.Spectrum[ct.Power], curr_output: ra.Spectrum[ct.Power]) -> float:
         error = (target_output - curr_output).mean
