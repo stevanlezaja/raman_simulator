@@ -70,11 +70,13 @@ class Controller(ABC):
 
     def _populate_parameters(self, value_dict: dict[str, Any] = {}) -> None:
         for key in self._params.keys():
+            param_type, param = self._params[key]
+            print(param_type)
             if key in value_dict.keys():
                 self._params[key] = value_dict[key]
-            elif self._params[key][0] == float:
-                self._params[key] = (self._params[key][0], utils.parameter.get_numeric_input(f"Please input {key}", self._params[key][1]))
-            elif self._params[key][0] == ct.units.Unit:
-                self._params[key] = (self._params[key][0], utils.parameter.get_unit_input(self._params[key][1], self._params[key][1], key))
+            elif param_type == float:
+                self._params[key] = (param_type, utils.parameter.get_numeric_input(f"Please input {key}", param))
+            elif issubclass(param_type, ct.units.Unit):
+                self._params[key] = (param_type, utils.parameter.get_unit_input(param, param, key))
             else:
-                raise Exception(f"Unhandled parameter type: {self._params[key][0]}")
+                raise Exception(f"Unhandled parameter type: {param_type}")
