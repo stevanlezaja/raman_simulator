@@ -66,6 +66,9 @@ class Controller(ABC):
 
     @property
     def is_valid(self) -> bool:
+        """
+        Returns True if object is valid (initialized properly)
+        """
         return True
 
     def populate_parameters(self, value_dict: dict[str, Any] = {}) -> None:
