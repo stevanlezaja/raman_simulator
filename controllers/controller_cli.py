@@ -32,6 +32,6 @@ class ControllerCli():
         controller_class = getattr(controllers, class_name)
         controller = controller_class()
 
-        controller._populate_parameters()
+        controller.populate_parameters()
 
         return controller

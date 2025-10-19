@@ -68,7 +68,7 @@ class Controller(ABC):
     def is_valid(self) -> bool:
         return True
 
-    def _populate_parameters(self, value_dict: dict[str, Any] = {}) -> None:
+    def populate_parameters(self, value_dict: dict[str, Any] = {}) -> None:
         for key in self._params.keys():
             param_type, param = self._params[key]
             print(param_type)
