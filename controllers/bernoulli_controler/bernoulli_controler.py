@@ -2,36 +2,61 @@ import torch
 
 import raman_amplifier as ra
 import custom_types as ct
-import utils.parameter
 
 from ..controller_base import Controller
 
 
 class BernoulliController(torch.nn.Module, Controller):
     def __init__(self,
-                 beta: int = 1,
-                 weight_decay: float = 0.0,
-                 input_dim: int = 2,
-                 power_step: ct.Power = ct.Power(0.01, 'W'),
+                 power_step: ct.Power = ct.Power(1, 'mW'),
                  wavelength_step: ct.Length = ct.Length(5, 'nm'),
                  lr: float = 1e-1,
-                 gamma: float = 0.9
+                 weight_decay: float = 0.0,
+                 beta: int = 1,
+                 gamma: float = 1,
+                 input_dim: int = 2,
                  ):
-        self.power_step = power_step
-        self.wavelength_step = wavelength_step
+        Controller.__init__(self)
+        self._params['power_step'] = (ct.Power, power_step)
+        self._params['wavelength_step'] = (ct.Length, wavelength_step)
+        self._params['lr'] = (float, lr)
+        self._params['weight_decay'] = (float, weight_decay)
+        self._params['beta'] = (float, beta)
+        self._params['gamma'] = (float, gamma)
+
         self.input_dim = input_dim
         self.logits = torch.zeros(input_dim)
-        self.learning_rate = lr
-        self.gamma = gamma
-        self.beta = beta
         self.best_reward = None
-        self.weight_decay = weight_decay
         self.baseline = 0.0
         self.history = {'probs': [], 'rewards': []}
         self.avg_sample = torch.zeros_like(self.logits)
         self.prev_error: ra.Spectrum[ct.Power] | None = None
         self.output_integral: float = 0.0
         self.target_integral: float = 0.0
+
+    @property
+    def power_step(self) -> ct.Power:
+        return self._params['power_step'][1]
+
+    @property
+    def wavelength_step(self) -> ct.Length:
+        return self._params['wavelength_step'][1]
+
+    @property
+    def learning_rate(self) -> float:
+        return self._params['lr'][1]
+
+    @property
+    def weight_decay(self) -> float:
+        return self._params['weight_decay'][1]
+
+    @property
+    def beta(self) -> float:
+        return self._params['beta'][1]
+
+    @property
+    def gamma(self) -> float:
+        return self._params['gamma'][1]
 
     def get_control(
         self,
@@ -104,14 +129,3 @@ class BernoulliController(torch.nn.Module, Controller):
         self.logits = self.logits + update
 
         self.prev_error = error
-
-    def _populate_parameters(self) -> None:
-        self.power_step = utils.parameter.get_unit_input(self.power_step, ct.Power(5, 'mW'), "Power Step")
-        self.wavelength_step = utils.parameter.get_unit_input(self.wavelength_step, ct.Length(1, 'nm'), "Wavelength Step")
-
-        self.learning_rate = utils.parameter.get_numeric_input(f"Input learning rate: \n(Default - {self.learning_rate})", self.learning_rate)
-        self.beta = utils.parameter.get_numeric_input(f"Insert value for beta:", default=self.beta)
-        self.gamma = utils.parameter.get_numeric_input(f"Insert value for gamma:", default=self.gamma)
-        self.weight_decay = utils.parameter.get_numeric_input(f"Insert value for weight_decay:", default=self.weight_decay)
-
-        return

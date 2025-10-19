@@ -12,9 +12,10 @@ class PidController(Controller):
     Implements PID Control strategy
     """
     def __init__(self, p: float=0.2, i: float=0.1, d: float=0.1):
-        self.p = p
-        self.i = i
-        self.d = d
+        super().__init__()
+        self._params['p'] = (float, p)
+        self._params['i'] = (float, i)
+        self._params['d'] = (float, d)
         self.integral = 0.0
         self.e1 = 0.0
 
@@ -32,6 +33,18 @@ class PidController(Controller):
         delta_wavelengths = [ct.Length(wavelength_control, 'nm') for _ in curr_input.wavelengths]
 
         return ra.RamanInputs(powers=delta_powers, wavelengths=delta_wavelengths)
+
+    @property
+    def p(self):
+        return self._params['p'][1]
+
+    @property
+    def i(self):
+        return self._params['i'][1]
+
+    @property
+    def d(self):
+        return self._params['d'][1]
 
     def _get_power_control(self, target_output: ra.Spectrum[ct.Power], curr_output: ra.Spectrum[ct.Power]) -> float:
         error = (target_output - curr_output).mean
