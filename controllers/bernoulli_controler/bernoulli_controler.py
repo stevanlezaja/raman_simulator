@@ -1,3 +1,4 @@
+from typing import Any
 import torch
 
 import raman_amplifier as ra

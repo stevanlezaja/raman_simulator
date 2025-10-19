@@ -3,6 +3,7 @@
 """
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 import raman_amplifier as ra
 import custom_types as ct
@@ -14,7 +15,7 @@ class Controller(ABC):
         Defines the get_control method
     """
     def __init__(self):
-        pass
+        self._params: dict[str, tuple[type, Any]] = {}
 
     @abstractmethod
     def get_control(
@@ -67,5 +68,5 @@ class Controller(ABC):
         return True
 
     @abstractmethod
-    def _populate_parameters(self) -> None:
+    def _populate_parameters(self, value_dict: dict[str, Any]) -> None:
         raise NotImplementedError
