@@ -107,8 +107,8 @@ class Controller(ABC):
         configuration data or user input.
         """
 
-        for key in self._params.keys():
-            param_type, param = self._params[key]
+        for key, value in self._params.items():
+            param_type, param = value
             print(param_type)
             if key in value_dict.keys():
                 self._params[key] = value_dict[key]
