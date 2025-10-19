@@ -2,6 +2,7 @@ import torch
 
 import raman_amplifier as ra
 import custom_types as ct
+import utils.parameter
 
 from ..controller_base import Controller
 
@@ -25,7 +26,7 @@ class BernoulliController(torch.nn.Module, Controller):
         self.beta = beta
         self.best_reward = None
         self.weight_decay = weight_decay
-        self.baseline = 0.4
+        self.baseline = 0.0
         self.history = {'probs': [], 'rewards': []}
         self.avg_sample = torch.zeros_like(self.logits)
         self.prev_error: ra.Spectrum[ct.Power] | None = None
@@ -103,3 +104,14 @@ class BernoulliController(torch.nn.Module, Controller):
         self.logits = self.logits + update
 
         self.prev_error = error
+
+    def _populate_parameters(self) -> None:
+        self.power_step = utils.parameter.get_unit_input(self.power_step, ct.Power(5, 'mW'), "Power Step")
+        self.wavelength_step = utils.parameter.get_unit_input(self.wavelength_step, ct.Length(1, 'nm'), "Wavelength Step")
+
+        self.learning_rate = utils.parameter.get_numeric_input(f"Input learning rate: \n(Default - {self.learning_rate})", self.learning_rate)
+        self.beta = utils.parameter.get_numeric_input(f"Insert value for beta:", default=self.beta)
+        self.gamma = utils.parameter.get_numeric_input(f"Insert value for gamma:", default=self.gamma)
+        self.weight_decay = utils.parameter.get_numeric_input(f"Insert value for weight_decay:", default=self.weight_decay)
+
+        return

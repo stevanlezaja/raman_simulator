@@ -31,6 +31,7 @@ def main(
         wavelength_range: tuple[float, float] = (LOWER, UPPER),
         raman_system: rs.RamanSystem = rs.RamanSystem(),
         fiber: fib.Fiber = fib.StandardSingleModeFiber(),
+        controller: ctrl.Controller = ctrl.BernoulliController(),
 ) -> None:
 
     input_spectrum = ra.Spectrum(ct.Power)
@@ -55,7 +56,6 @@ def main(
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
-    controller = ctrl.BernoulliController()
     control_loop = loop.ControlLoop(raman_system, controller)
     control_loop.set_target(target_spectrum)
     control_loop.curr_control = ra.RamanInputs(powers=[ct.Power(0.5, 'W')], wavelengths=[ct.Length(1500, 'nm')])
