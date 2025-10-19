@@ -1,3 +1,22 @@
+"""
+bernoulli_controller.py
+=======================
+
+Implements a Bernoulli-based reinforcement learning controller for Raman
+Amplifiers. The controller generates stochastic control signals for pump
+powers and wavelengths based on a Bernoulli policy and updates its internal
+parameters using policy gradient-like updates.
+
+The module depends on `torch` for tensor operations and probabilistic sampling,
+`custom_types` for units like Power and Length, and the abstract `Controller`
+base class.
+
+Example:
+    >>> from controllers.bernoulli_controller import BernoulliController
+    >>> controller = BernoulliController()
+    >>> controller.populate_parameters()
+"""
+
 import torch
 
 import raman_amplifier as ra
@@ -7,7 +26,47 @@ from ..controller_base import Controller
 
 
 class BernoulliController(torch.nn.Module, Controller):
-    def __init__(self,
+    """
+    A Bernoulli stochastic policy controller for Raman Amplifiers.
+
+    This controller represents pump power and wavelength adjustments as
+    Bernoulli random variables derived from logits. It supports interactive
+    parameter population via the `_params` dictionary, and updates its internal
+    policy using a simple reward baseline and gradient-like update.
+
+    Parameters
+    ----------
+    power_step : ct.Power, optional
+        The step size for power adjustments (default 1 mW).
+    wavelength_step : ct.Length, optional
+        The step size for wavelength adjustments (default 5 nm).
+    lr : float, optional
+        Learning rate for policy updates (default 0.1).
+    weight_decay : float, optional
+        L2 regularization for logits (default 0.0).
+    beta : float, optional
+        Coefficient for optional reward scaling (default 1.0).
+    gamma : float, optional
+        Reward baseline decay factor for advantage estimation (default 1.0).
+    input_dim : int, optional
+        Dimension of the input vector for the Bernoulli distribution
+        (default 2).
+
+    Attributes
+    ----------
+    _params : dict[str, tuple[type, Any]]
+        Stores controller parameters with their types and values.
+    logits : torch.Tensor
+        The raw logits used to sample Bernoulli actions.
+    history : dict
+        Stores historical probabilities and rewards for analysis.
+    baseline : float
+        Running reward baseline for advantage estimation.
+    prev_error : ra.Spectrum[ct.Power] | None
+        Stores the previous error spectrum for reward calculation.
+    """
+
+    def __init__(self, *,
                  power_step: ct.Power = ct.Power(1, 'mW'),
                  wavelength_step: ct.Length = ct.Length(5, 'nm'),
                  lr: float = 1e-1,
@@ -16,6 +75,7 @@ class BernoulliController(torch.nn.Module, Controller):
                  gamma: float = 1,
                  input_dim: int = 2,
                  ):
+        super(torch.nn.Module, self).__init__()
         Controller.__init__(self)
         self._params['power_step'] = (ct.Power, power_step)
         self._params['wavelength_step'] = (ct.Length, wavelength_step)
@@ -33,37 +93,107 @@ class BernoulliController(torch.nn.Module, Controller):
         self.prev_error: ra.Spectrum[ct.Power] | None = None
         self.output_integral: float = 0.0
         self.target_integral: float = 0.0
+        self.last_sample = None
 
     @property
     def power_step(self) -> ct.Power:
+        """
+        Get the current power step parameter.
+
+        Returns
+        -------
+        ct.Power
+            The step size for power adjustments used by the controller.
+        """
         return self._params['power_step'][1]
 
     @property
     def wavelength_step(self) -> ct.Length:
+        """
+        Get the current wavelength step parameter.
+
+        Returns
+        -------
+        ct.Length
+            The step size for wavelength adjustments used by the controller.
+        """
         return self._params['wavelength_step'][1]
 
     @property
     def learning_rate(self) -> float:
+        """
+        Get the learning rate for policy updates.
+
+        Returns
+        -------
+        float
+            The learning rate applied to Bernoulli logits during controller updates.
+        """
         return self._params['lr'][1]
 
     @property
     def weight_decay(self) -> float:
+        """
+        Get the L2 regularization coefficient for logits.
+
+        Returns
+        -------
+        float
+            The weight decay applied to logits during policy updates.
+        """
         return self._params['weight_decay'][1]
 
     @property
     def beta(self) -> float:
+        """
+        Get the beta parameter for reward scaling.
+
+        Returns
+        -------
+        float
+            The reward scaling coefficient used internally by the controller.
+        """
         return self._params['beta'][1]
 
     @property
     def gamma(self) -> float:
+        """
+        Get the gamma parameter for reward baseline decay.
+
+        Returns
+        -------
+        float
+            The discount factor applied to the running baseline of rewards.
+        """
         return self._params['gamma'][1]
 
     def get_control(
         self,
         curr_input: ra.RamanInputs,
-        curr_output:ra.Spectrum[ct.Power],
+        curr_output: ra.Spectrum[ct.Power],
         target_output: ra.Spectrum[ct.Power],
     ) -> ra.RamanInputs:
+        """
+        Generate a new RamanInputs control signal based on a Bernoulli policy.
+
+        The controller computes probabilities via the sigmoid of the internal logits,
+        samples a Bernoulli action, and converts the resulting +/-1 actions into
+        stepwise changes in power and wavelength.
+
+        Parameters
+        ----------
+        curr_input : ra.RamanInputs
+            The last applied control signal.
+        curr_output : ra.Spectrum[ct.Power]
+            The last measured gain spectrum.
+        target_output : ra.Spectrum[ct.Power]
+            The desired gain spectrum to achieve.
+
+        Returns
+        -------
+        ra.RamanInputs
+            The new control signal for pump powers and wavelengths.
+        """
 
         probs = torch.sigmoid(self.logits)
         self.history['probs'].append(probs.detach().numpy())
@@ -101,6 +231,27 @@ class BernoulliController(torch.nn.Module, Controller):
             error: ra.Spectrum[ct.Power],
             control_delta: ra.RamanInputs
         ) -> None:
+        """
+        Update the controller's internal policy using the observed error.
+
+        This method computes a reward based on the reduction in absolute error
+        since the previous step, updates a running baseline using the gamma
+        decay factor, computes the advantage, and applies a policy gradient-like
+        update to the logits. Updates are clamped to avoid excessive step sizes.
+
+        Parameters
+        ----------
+        error : ra.Spectrum[ct.Power]
+            The difference between the target and measured gain spectrum.
+        control_delta : ra.RamanInputs
+            The previously applied change in control inputs.
+
+        Notes
+        -----
+        The controller stores the last error and logits for use in subsequent
+        updates. The method implements a simple stochastic policy gradient
+        update with optional weight decay and step clamping.
+        """
 
         curr_loss = abs(error.mean)
         prev_loss = abs(self.prev_error.mean) if self.prev_error is not None else None

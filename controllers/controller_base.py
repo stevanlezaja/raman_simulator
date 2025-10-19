@@ -66,11 +66,49 @@ class Controller(ABC):
 
     @property
     def is_valid(self) -> bool:
+        """
+        Returns True if object is valid (initialized properly)
+        """
         return True
 
-    def _populate_parameters(self, value_dict: dict[str, Any] = {}) -> None:
-        for key in self._params.keys():
-            param_type, param = self._params[key]
+    def populate_parameters(self, value_dict: dict[str, Any] = {}) -> None:
+        """
+        Populate controller parameters from a provided dictionary or via user input.
+
+        This method iterates through all controller parameters defined in
+        ``self._params``. Each parameter entry is a tuple of the form
+        ``(type, value)`` where ``type`` denotes the expected parameter type
+        (e.g., ``float`` or a subclass of ``ct.units.Unit``) and ``value`` is
+        the current or default value.
+
+        If a parameter key exists in ``value_dict``, its value is assigned
+        directly. Otherwise, the user is interactively prompted to input
+        a new value through the appropriate utility function:
+        
+        - ``utils.parameter.get_numeric_input()`` for numeric parameters
+        - ``utils.parameter.get_unit_input()`` for unit-based parameters
+
+        Parameters
+        ----------
+        value_dict : dict[str, Any], optional
+            A dictionary mapping parameter names to their desired values.
+            Missing keys trigger interactive input prompts. Defaults to an empty dict.
+
+        Raises
+        ------
+        Exception
+            If a parameter type is not ``float`` or a subclass of
+            ``ct.units.Unit``, an exception is raised.
+
+        Notes
+        -----
+        This method modifies ``self._params`` in place, ensuring that all
+        required controller parameters are populated either from external
+        configuration data or user input.
+        """
+
+        for key, value in self._params.items():
+            param_type, param = value
             print(param_type)
             if key in value_dict.keys():
                 self._params[key] = value_dict[key]
