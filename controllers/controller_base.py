@@ -109,9 +109,8 @@ class Controller(ABC):
 
         for key, value in self._params.items():
             param_type, param = value
-            print(param_type)
             if key in value_dict.keys():
-                self._params[key] = value_dict[key]
+                self._params[key] = (type(value_dict[key]), value_dict[key])
             elif param_type == float:
                 self._params[key] = (param_type, utils.parameter.get_numeric_input(f"Please input {key}", param))
             elif issubclass(param_type, ct.units.Unit):
