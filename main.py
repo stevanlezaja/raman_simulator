@@ -159,9 +159,7 @@ if __name__ == "__main__":
 
     main_parser = parser.get_main_parser()
     main_args = main_parser.parse_args()
-    print(main_args)
 
-    # Convert Namespace → dict and drop None values
     kwargs = {k: v for k, v in vars(main_args).items() if v is not None}
 
     customize = kwargs.pop('customize', False)
@@ -174,4 +172,21 @@ if __name__ == "__main__":
 
         spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller)
     else:
-        spectrum_control.main(**kwargs)
+        import fibers as fib
+        import raman_amplifier as ra
+        import controllers as ctrl
+        import custom_types as ct
+
+        raman_system = rs.RamanSystem()
+        raman_system.fiber = fib.StandardSingleModeFiber()
+        raman_system.raman_amplifier = ra.RamanAmplifier()
+
+        controller = ctrl.BernoulliController(
+            lr=500,
+            power_step=ct.Power(1, 'mW'),
+            wavelength_step=ct.Length(1, 'nm'),
+            beta=0.99,
+            gamma=0.999
+        )
+
+        spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller)
