@@ -1,3 +1,4 @@
+import os
 import copy
 import tqdm
 
@@ -30,9 +31,14 @@ def main(
         num_samples: int = SAMPLES,
         wavelength_range: tuple[float, float] = (LOWER, UPPER),
         raman_system: rs.RamanSystem = rs.RamanSystem(),
-        fiber: fib.Fiber = fib.StandardSingleModeFiber(),
         controller: ctrl.Controller = ctrl.BernoulliController(),
 ) -> None:
+
+    if save_plots:
+        save_dir = 'plots/experiments'
+        os.makedirs(save_dir, exist_ok=True)
+        exp_name = f"lr{controller.learning_rate}_wd{controller.weight_decay}_b{controller.beta}_g{controller.gamma}.png"
+        exp_path = os.path.join(save_dir, exp_name)
 
     input_spectrum = ra.Spectrum(ct.Power)
     for num in list(np.linspace(wavelength_range[0], wavelength_range[1], num_samples)):
@@ -43,7 +49,7 @@ def main(
     # create values
     dummy_sytem = rs.RamanSystem()
     dummy_sytem.raman_amplifier = ra.RamanAmplifier()
-    dummy_sytem.fiber = fiber
+    dummy_sytem.fiber = copy.deepcopy(raman_system.fiber)
     dummy_sytem.input_spectrum = copy.deepcopy(input_spectrum)
     dummy_sytem.output_spectrum = copy.deepcopy(input_spectrum)
     dummy_sytem.raman_amplifier.pump_power.mW = 500
@@ -64,14 +70,14 @@ def main(
         plt.ion()  # type: ignore
 
     if live_plot or save_plots:
-        fig, axes = plt.subplots(2, 2, figsize=(12, 8))  # type: ignore
-        ax_err, ax_spec, ax_pow, ax_wl = axes.flatten()
+        fig, axes = plt.subplots(3, 2, figsize=(12, 8))  # type: ignore
+        ax_err, ax_spec, ax_pow, ax_wl, ax_p1, ax_p2 = axes.flatten()
 
     errors: list[float] = []
     powers: list[float] = []
     wavelengths: list[float] = []
 
-    for _ in tqdm.tqdm(range(num_steps)):
+    for curr_step in tqdm.tqdm(range(num_steps)):
         control_loop.step()
 
         assert control_loop.curr_output is not None and control_loop.target is not None
@@ -88,12 +94,13 @@ def main(
             for ax in axes.flatten():
                 ax.clear()
 
-        if live_plot or save_plots:
+        if live_plot or (save_plots and curr_step == num_steps - 1):
             # --- subplot 1: Error over time ---
             ax_err.plot(errors, label="Error mean", color="tab:red")  # type: ignore
             ax_err.set_xlabel("Iteration")  # type: ignore
             ax_err.set_ylabel("Error (mean)")  # type: ignore
             ax_err.set_title("Error over time")  # type: ignore
+            ax_err.grid()
             ax_err.legend()  # type: ignore
 
             # --- subplot 2: Target vs Output spectrum ---
@@ -110,6 +117,7 @@ def main(
             ax_spec.set_xlabel("Frequency (Hz)")  # type: ignore
             ax_spec.set_ylabel("Power (mW)")  # type: ignore
             ax_spec.set_title("Target vs Current Output Spectrum")  # type: ignore
+            ax_spec.grid()
             ax_spec.legend()  # type: ignore
 
             # --- subplot 3: Power evolution ---
@@ -119,6 +127,7 @@ def main(
             ax_pow.set_xlabel("Iteration")  # type: ignore
             ax_pow.set_ylabel("Power (W)")  # type: ignore
             ax_pow.set_title("Power evolution")  # type: ignore
+            ax_pow.grid()
             ax_pow.legend()  # type: ignore
 
             # --- subplot 4: Wavelength evolution ---
@@ -128,7 +137,27 @@ def main(
             ax_wl.set_xlabel("Iteration")  # type: ignore
             ax_wl.set_ylabel("Wavelength (nm)")  # type: ignore
             ax_wl.set_title("Wavelength evolution")  # type: ignore
+            ax_wl.grid()
             ax_wl.legend()  # type: ignore
+
+            probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
+            # --- subplot 5: Power step probability evolution ---
+            ax_p1.plot(probs[:, 0], label=f'Action {1}')  # type: ignore
+            ax_p1.set_ylim([0.4, 0.6])
+            ax_p1.set_xlabel("Iteration")  # type: ignore
+            ax_p1.set_ylabel("Probability")  # type: ignore
+            ax_p1.set_title("Power step probability evolution")  # type: ignore
+            ax_p1.grid()
+            ax_p1.legend()  # type: ignore
+
+            # --- subplot 6: Wavelength step probability evolution ---
+            ax_p2.plot(probs[:, 1], label=f'Action {2}')  # type: ignore
+            ax_p2.set_ylim([0.4, 0.6])
+            ax_p2.set_xlabel("Iteration")  # type: ignore
+            ax_p2.set_ylabel("Probability")  # type: ignore
+            ax_p2.set_title("Wavelength step probability evolution")  # type: ignore
+            ax_p2.grid()
+            ax_p2.legend()  # type: ignore
 
             # update figure
             fig.tight_layout()  # type: ignore
@@ -141,22 +170,11 @@ def main(
         plt.ioff()  # type: ignore
 
     if save_plots:
-        plt.savefig()  # type: ignore
+        fig.savefig(exp_path, dpi=300)
+        log.info(f"Saved figure to {exp_path}")
+        plt.close(fig)
 
     if live_plot or save_plots:
-        plt.show()  # type: ignore
-
-        probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
-
-        plt.figure(figsize=(8, 5))  # type: ignore
-        for i in range(probs.shape[1]):
-            plt.plot(probs[:, i], label=f'Action {i+1}')  # type: ignore
-
-        plt.xlabel('Iteration')  # type: ignore
-        plt.ylabel('Probability')  # type: ignore
-        plt.title('Action Probability Evolution')  # type: ignore
-        plt.legend()  # type: ignore
-        plt.grid(True)  # type: ignore
         plt.show()  # type: ignore
 
 
