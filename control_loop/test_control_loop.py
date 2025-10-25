@@ -19,7 +19,6 @@ behavior from actual amplifier simulations or controller logic.
 """
 
 from unittest.mock import MagicMock
-import pytest
 
 import control_loop as cl
 import raman_amplifier as ra

@@ -262,7 +262,7 @@ class BernoulliController(torch.nn.Module, Controller):
             reward = prev_loss - curr_loss
 
         self.baseline = self.gamma * self.baseline + (1 - self.gamma) * reward
-        advantage = reward - self.baseline
+        advantage = self.beta * (reward - self.baseline)
 
         sample = getattr(self, "last_sample", None)
         if sample is None:
@@ -277,6 +277,6 @@ class BernoulliController(torch.nn.Module, Controller):
         max_step = 0.2
         update = torch.clamp(update, min=-max_step, max=max_step)
 
-        self.logits = self.logits + update
+        self.logits += update
 
         self.prev_error = error

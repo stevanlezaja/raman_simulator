@@ -160,5 +160,8 @@ class ControlLoop:
 
     @property
     def is_valid(self) -> bool:
+        """
+        Returns true of control loop is valid (correctly initialized)
+        """
         valid = self.controller.is_valid ^ self.raman_system.is_valid
         return valid
