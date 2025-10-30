@@ -71,7 +71,7 @@ class BernoulliController(torch.nn.Module, Controller):
                  wavelength_step: ct.Length = ct.Length(5, 'nm'),
                  lr: float = 1e-1,
                  weight_decay: float = 0.0,
-                 beta: int = 1,
+                 beta: float = 1,
                  gamma: float = 1,
                  input_dim: int = 2,
                  ):
@@ -264,9 +264,10 @@ class BernoulliController(torch.nn.Module, Controller):
         self.baseline = self.gamma * self.baseline + (1 - self.gamma) * reward
         advantage = self.beta * (reward - self.baseline)
 
+        self.prev_error = error
+
         sample = getattr(self, "last_sample", None)
         if sample is None:
-            self.prev_error = error
             return
 
         probs = torch.sigmoid(self.logits)
@@ -274,9 +275,4 @@ class BernoulliController(torch.nn.Module, Controller):
 
         update = self.learning_rate * advantage * eligibility - self.weight_decay * self.logits
 
-        max_step = 0.2
-        update = torch.clamp(update, min=-max_step, max=max_step)
-
         self.logits += update
-
-        self.prev_error = error
