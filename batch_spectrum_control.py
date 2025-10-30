@@ -10,11 +10,11 @@ import raman_amplifier as ra
 
 def main():
 
-    learning_rates: list[float] = [1e-3, 1e-4, 1e-5]
+    learning_rates: list[float] = [1e-2]
     weight_decays: list[float] = [0, 1e-5]
-    betas: list[float] = [1, 0.99, 0.9]
+    betas: list[float] = [100, 500, 1000, 5000, 10000]
     gammas: list[float] = [1, 0.99, 0.9, 0.75]
-    power_steps = [ct.Power(0.5, 'mW')]
+    power_steps = [ct.Power(1, 'mW')]
     wavelength_steps = [ct.Length(1, 'nm')]
 
     for params in itertools.product(learning_rates, weight_decays, betas, gammas, power_steps, wavelength_steps):
@@ -32,10 +32,8 @@ def main():
         fiber = fib.StandardSingleModeFiber()
         raman_system.fiber = fiber
         raman_system.raman_amplifier = ra.RamanAmplifier()
-        raman_system.raman_amplifier.pump_power.W = 0.5
-        raman_system.raman_amplifier.pump_wavelength.nm = 1450
 
-        spectrum_control.main(save_plots=True, num_steps=1000, raman_system=raman_system, controller=controller)
+        spectrum_control.main(save_plots=True, iterations=1000, raman_system=raman_system, controller=controller)
 
 
 if __name__ == "__main__":
