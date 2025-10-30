@@ -24,6 +24,13 @@ def get_main_parser():
     )
 
     parser.add_argument(
+        "-i", "--iterations",
+        type=int,
+        action="store",
+        help="Sets the number of iterations to simulate"
+    )
+
+    parser.add_argument(
         "--bounds",
         type=int,
         nargs=2,

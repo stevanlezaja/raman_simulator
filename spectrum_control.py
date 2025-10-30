@@ -27,7 +27,7 @@ NUM_STEPS = 200
 def main(
         save_plots: bool = True,
         live_plot: bool = False,
-        num_steps: int = NUM_STEPS,
+        iterations: int = NUM_STEPS,
         num_samples: int = SAMPLES,
         wavelength_range: tuple[float, float] = (LOWER, UPPER),
         raman_system: rs.RamanSystem = rs.RamanSystem(),
@@ -64,7 +64,13 @@ def main(
 
     control_loop = loop.ControlLoop(raman_system, controller)
     control_loop.set_target(target_spectrum)
-    control_loop.curr_control = ra.RamanInputs(powers=[ct.Power(0.5, 'W')], wavelengths=[ct.Length(1500, 'nm')])
+
+    initial_power = ct.Power(0, 'W')
+    initial_power.mW = np.random.randint(low=250, high=750)
+    initial_wavelength = ct.Length(0, 'm')
+    initial_wavelength.nm = np.random.randint(low=1430, high=1470)
+
+    control_loop.curr_control = ra.RamanInputs(powers=[initial_power], wavelengths=[initial_wavelength])
 
     if live_plot:
         plt.ion()  # type: ignore
@@ -77,7 +83,7 @@ def main(
     powers: list[float] = []
     wavelengths: list[float] = []
 
-    for curr_step in tqdm.tqdm(range(num_steps)):
+    for curr_step in tqdm.tqdm(range(iterations)):
         control_loop.step()
 
         assert control_loop.curr_output is not None and control_loop.target is not None
@@ -94,7 +100,7 @@ def main(
             for ax in axes.flatten():
                 ax.clear()
 
-        if live_plot or (save_plots and curr_step == num_steps - 1):
+        if live_plot or (save_plots and curr_step == iterations - 1):
             # --- subplot 1: Error over time ---
             ax_err.plot(errors, label="Error mean", color="tab:red")  # type: ignore
             ax_err.set_xlabel("Iteration")  # type: ignore
@@ -143,7 +149,6 @@ def main(
             probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
             # --- subplot 5: Power step probability evolution ---
             ax_p1.plot(probs[:, 0], label=f'Action {1}')  # type: ignore
-            ax_p1.set_ylim([0.4, 0.6])
             ax_p1.set_xlabel("Iteration")  # type: ignore
             ax_p1.set_ylabel("Probability")  # type: ignore
             ax_p1.set_title("Power step probability evolution")  # type: ignore
@@ -152,7 +157,6 @@ def main(
 
             # --- subplot 6: Wavelength step probability evolution ---
             ax_p2.plot(probs[:, 1], label=f'Action {2}')  # type: ignore
-            ax_p2.set_ylim([0.4, 0.6])
             ax_p2.set_xlabel("Iteration")  # type: ignore
             ax_p2.set_ylabel("Probability")  # type: ignore
             ax_p2.set_title("Wavelength step probability evolution")  # type: ignore
