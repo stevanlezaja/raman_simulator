@@ -76,8 +76,8 @@ def main(
         plt.ion()  # type: ignore
 
     if live_plot or save_plots:
-        fig, axes = plt.subplots(3, 2, figsize=(12, 8))  # type: ignore
-        ax_err, ax_spec, ax_pow, ax_wl, ax_p1, ax_p2 = axes.flatten()
+        fig, axes = plt.subplots(2, 3, figsize=(12, 8))  # type: ignore
+        ax_err, ax_spec, ax_pow, ax_wl, ax_err_2d, ax_p = axes.flatten()
 
     errors: list[float] = []
     powers: list[float] = []
@@ -126,8 +126,19 @@ def main(
             ax_spec.grid()
             ax_spec.legend()  # type: ignore
 
-            # --- subplot 3: Power evolution ---
             power_arr = np.array(powers)
+            wl_arr = np.array(wavelengths)
+            # --- subplot 3: Parameter evolution in 2D ---
+            ax_err_2d.plot(power_arr, wl_arr)  # type: ignore
+            ax_err_2d.set_xlabel("Power [W]")  # type: ignore
+            ax_err_2d.set_ylabel("Wavelength [nm]")  # type: ignore
+            ax_err_2d.set_ylim([1420, 1490])
+            ax_err_2d.set_xlim([0, 1])
+            ax_err_2d.set_title("Wavelength step probability evolution")  # type: ignore
+            ax_err_2d.grid()  # type: ignore
+            ax_err_2d.legend()  # type: ignore
+
+            # --- subplot 4: Power evolution ---
             for i in range(power_arr.shape[1]):
                 ax_pow.plot(power_arr[:, i], label=f"Power {i}")  # type: ignore
             ax_pow.set_xlabel("Iteration")  # type: ignore
@@ -136,8 +147,7 @@ def main(
             ax_pow.grid()
             ax_pow.legend()  # type: ignore
 
-            # --- subplot 4: Wavelength evolution ---
-            wl_arr = np.array(wavelengths)
+            # --- subplot 5: Wavelength evolution ---
             for i in range(wl_arr.shape[1]):
                 ax_wl.plot(wl_arr[:, i], label=f"Wavelength {i}")  # type: ignore
             ax_wl.set_xlabel("Iteration")  # type: ignore
@@ -147,21 +157,15 @@ def main(
             ax_wl.legend()  # type: ignore
 
             probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
-            # --- subplot 5: Power step probability evolution ---
-            ax_p1.plot(probs[:, 0], label=f'Action {1}')  # type: ignore
-            ax_p1.set_xlabel("Iteration")  # type: ignore
-            ax_p1.set_ylabel("Probability")  # type: ignore
-            ax_p1.set_title("Power step probability evolution")  # type: ignore
-            ax_p1.grid()
-            ax_p1.legend()  # type: ignore
+            # --- subplot 6: Step probability evolution ---
+            ax_p.plot(probs[:, 0], label=f'Power')  # type: ignore
+            ax_p.plot(probs[:, 1], label=f'Wavelength')  # type: ignore
+            ax_p.set_xlabel("Iteration")  # type: ignore
+            ax_p.set_ylabel("Probability")  # type: ignore
+            ax_p.set_title("Step probability evolution")  # type: ignore
+            ax_p.grid()
+            ax_p.legend()  # type: ignore
 
-            # --- subplot 6: Wavelength step probability evolution ---
-            ax_p2.plot(probs[:, 1], label=f'Action {2}')  # type: ignore
-            ax_p2.set_xlabel("Iteration")  # type: ignore
-            ax_p2.set_ylabel("Probability")  # type: ignore
-            ax_p2.set_title("Wavelength step probability evolution")  # type: ignore
-            ax_p2.grid()
-            ax_p2.legend()  # type: ignore
 
             # update figure
             fig.tight_layout()  # type: ignore
