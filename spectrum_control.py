@@ -37,7 +37,10 @@ def main(
     if save_plots:
         save_dir = 'plots/experiments'
         os.makedirs(save_dir, exist_ok=True)
-        exp_name = f"lr{controller.learning_rate}_wd{controller.weight_decay}_b{controller.beta}_g{controller.gamma}.png"
+        if isinstance(controller, ctrl.BernoulliController):
+            exp_name = f"lr{controller.learning_rate}_wd{controller.weight_decay}_b{controller.beta}_g{controller.gamma}_ps{controller.power_step.mW}_ws{controller.wavelength_step.nm}.png"
+        else:
+            exp_name = 'experiment.png'
         exp_path = os.path.join(save_dir, exp_name)
 
     input_spectrum = ra.Spectrum(ct.Power)
@@ -105,12 +108,13 @@ def main(
                 ax.clear()
 
         if live_plot or (save_plots and curr_step == iterations - 1):
-            # --- Error over time ---
-            ax_err.plot(errors, label="Error mean", color="tab:red")  # type: ignore
+            # --- Reward over time ---
+            ax_err.plot(controller.rewards, label='Reward')  # type: ignore
+            ax_err.plot(controller.baseline, label='Baseline')  # type: ignore
             ax_err.set_xlabel("Iteration")  # type: ignore
-            ax_err.set_ylabel("Error (mean)")  # type: ignore
-            ax_err.set_title("Error over time")  # type: ignore
-            ax_err.grid()
+            ax_err.set_ylabel("Reward")  # type: ignore
+            ax_err.set_title("Reward over time")  # type: ignore
+            ax_err.grid()  # type: ignore
             ax_err.legend()  # type: ignore
 
             # --- Target vs Output spectrum ---
