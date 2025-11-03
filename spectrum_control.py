@@ -46,14 +46,18 @@ def main(
         input_spectrum.add_val(freq, ct.Power(10, 'mW'))
 
     target_spectrum = ra.Spectrum(ct.Power)
+    target_power = ct.Power(0.5, 'W')
+    # target_power.mW = np.random.randint(low=250, high=750)
+    target_wavelength = ct.Length(1450, 'nm')
+    # target_wavelength.nm = np.random.randint(low=1430, high=1470)
     # create values
     dummy_sytem = rs.RamanSystem()
     dummy_sytem.raman_amplifier = ra.RamanAmplifier()
     dummy_sytem.fiber = copy.deepcopy(raman_system.fiber)
     dummy_sytem.input_spectrum = copy.deepcopy(input_spectrum)
     dummy_sytem.output_spectrum = copy.deepcopy(input_spectrum)
-    dummy_sytem.raman_amplifier.pump_power.mW = 500
-    dummy_sytem.raman_amplifier.pump_wavelength.nm = 1450
+    dummy_sytem.raman_amplifier.pump_power.mW = target_power.mW
+    dummy_sytem.raman_amplifier.pump_wavelength.nm = target_wavelength.nm
 
     dummy_sytem.update()
 
@@ -77,7 +81,7 @@ def main(
 
     if live_plot or save_plots:
         fig, axes = plt.subplots(2, 3, figsize=(12, 8))  # type: ignore
-        ax_err, ax_spec, ax_pow, ax_wl, ax_err_2d, ax_p = axes.flatten()
+        ax_err, ax_spec, ax_pow, ax_p, ax_wl, ax_err_2d = axes.flatten()
 
     errors: list[float] = []
     powers: list[float] = []
@@ -101,7 +105,7 @@ def main(
                 ax.clear()
 
         if live_plot or (save_plots and curr_step == iterations - 1):
-            # --- subplot 1: Error over time ---
+            # --- Error over time ---
             ax_err.plot(errors, label="Error mean", color="tab:red")  # type: ignore
             ax_err.set_xlabel("Iteration")  # type: ignore
             ax_err.set_ylabel("Error (mean)")  # type: ignore
@@ -109,7 +113,7 @@ def main(
             ax_err.grid()
             ax_err.legend()  # type: ignore
 
-            # --- subplot 2: Target vs Output spectrum ---
+            # --- Target vs Output spectrum ---
             ax_spec.plot(
                 [f.Hz for f in control_loop.target.frequencies],
                 [val.value for val in control_loop.target.values],
@@ -128,8 +132,11 @@ def main(
 
             power_arr = np.array(powers)
             wl_arr = np.array(wavelengths)
-            # --- subplot 3: Parameter evolution in 2D ---
+            # --- Parameter evolution in 2D ---
             ax_err_2d.plot(power_arr, wl_arr)  # type: ignore
+            ax_err_2d.scatter(power_arr[-1], wl_arr[-1], label="Current")  # type: ignore
+            ax_err_2d.scatter(power_arr[0], wl_arr[0], label="Initial")  # type: ignore
+            ax_err_2d.scatter(target_power.W, target_wavelength.nm, label="Target")  # type: ignore
             ax_err_2d.set_xlabel("Power [W]")  # type: ignore
             ax_err_2d.set_ylabel("Wavelength [nm]")  # type: ignore
             ax_err_2d.set_ylim([1420, 1490])
@@ -138,26 +145,28 @@ def main(
             ax_err_2d.grid()  # type: ignore
             ax_err_2d.legend()  # type: ignore
 
-            # --- subplot 4: Power evolution ---
+            # --- Power evolution ---
             for i in range(power_arr.shape[1]):
-                ax_pow.plot(power_arr[:, i], label=f"Power {i}")  # type: ignore
+                ax_pow.plot(power_arr[::-1, i], range(len(power_arr[:, i])), label=f"Power {i}")  # type: ignore
             ax_pow.set_xlabel("Iteration")  # type: ignore
             ax_pow.set_ylabel("Power (W)")  # type: ignore
+            ax_pow.set_xlim([0, 1])
             ax_pow.set_title("Power evolution")  # type: ignore
             ax_pow.grid()
             ax_pow.legend()  # type: ignore
 
-            # --- subplot 5: Wavelength evolution ---
+            # --- Wavelength evolution ---
             for i in range(wl_arr.shape[1]):
                 ax_wl.plot(wl_arr[:, i], label=f"Wavelength {i}")  # type: ignore
             ax_wl.set_xlabel("Iteration")  # type: ignore
             ax_wl.set_ylabel("Wavelength (nm)")  # type: ignore
+            ax_wl.set_ylim([1420, 1490])
             ax_wl.set_title("Wavelength evolution")  # type: ignore
             ax_wl.grid()
             ax_wl.legend()  # type: ignore
 
             probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
-            # --- subplot 6: Step probability evolution ---
+            # --- Step probability evolution ---
             ax_p.plot(probs[:, 0], label=f'Power')  # type: ignore
             ax_p.plot(probs[:, 1], label=f'Wavelength')  # type: ignore
             ax_p.set_xlabel("Iteration")  # type: ignore

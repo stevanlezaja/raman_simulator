@@ -57,8 +57,6 @@ def main(
     
     for i, p in enumerate(powers):
         for j, w in enumerate(wavelengths):
-            print(p)
-            print(w)
             raman_system.raman_amplifier.pump_power = p
             raman_system.raman_amplifier.pump_wavelength = w
             raman_system.update()

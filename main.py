@@ -183,11 +183,11 @@ if __name__ == "__main__":
 
         controller = ctrl.BernoulliController(
             lr=1e-1,
-            power_step=ct.Power(2, 'mW'),
-            wavelength_step=ct.Length(2, 'nm'),
-            beta=100,
+            power_step=ct.Power(5, 'mW'),
+            wavelength_step=ct.Length(0.5, 'nm'),
+            beta=1000,
             gamma=0.99,
-            weight_decay=1e-3
+            weight_decay=1e-3,
         )
 
         spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller)
