@@ -85,10 +85,10 @@ class BernoulliController(torch.nn.Module, Controller):
         self._params['gamma'] = (float, gamma)
 
         self.input_dim = input_dim
-        self.logits = 0.2 * torch.randn(input_dim)
+        self.logits = 0.1 * torch.randn(input_dim)
         self.best_reward = None
-        self.baseline = 0.0
-        self.history = {'probs': [], 'rewards': []}
+        self._baseline = 0.0
+        self.history = {'probs': [], 'rewards': [], 'baseline': []}
         self.avg_sample = torch.zeros_like(self.logits)
         self.prev_error: ra.Spectrum[ct.Power] | None = None
         self.output_integral: float = 0.0
@@ -166,6 +166,14 @@ class BernoulliController(torch.nn.Module, Controller):
             The discount factor applied to the running baseline of rewards.
         """
         return self._params['gamma'][1]
+
+    @property
+    def rewards(self) -> list[float]:
+        return self.history['rewards']
+
+    @property
+    def baseline(self) -> list[float]:
+        return self.history['baseline']
 
     def get_control(
         self,
@@ -261,10 +269,13 @@ class BernoulliController(torch.nn.Module, Controller):
         else:
             reward = prev_loss - curr_loss
 
-        reward = - curr_loss
+        reward = -curr_loss
 
-        self.baseline = self.gamma * self.baseline + (1 - self.gamma) * reward
-        advantage = self.beta * (reward - self.baseline)
+        self.history['rewards'].append(reward)
+
+        self._baseline = self.gamma * self._baseline + (1 - self.gamma) * reward
+        self.history['baseline'].append(self._baseline)
+        advantage = self.beta * (reward - self._baseline)
 
         self.prev_error = error
 
