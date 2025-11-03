@@ -88,7 +88,7 @@ class BernoulliController(torch.nn.Module, Controller):
         self.logits = 0.1 * torch.randn(input_dim)
         self.best_reward = None
         self._baseline = 0.0
-        self.history = {'probs': [], 'rewards': [], 'baseline': []}
+        self.history: dict[str, list[float]] = {'probs': [], 'rewards': [], 'baseline': []}
         self.avg_sample = torch.zeros_like(self.logits)
         self.prev_error: ra.Spectrum[ct.Power] | None = None
         self.output_integral: float = 0.0
