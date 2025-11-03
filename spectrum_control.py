@@ -50,9 +50,9 @@ def main(
 
     target_spectrum = ra.Spectrum(ct.Power)
     target_power = ct.Power(0.5, 'W')
-    # target_power.mW = np.random.randint(low=250, high=750)
+    target_power.mW = np.random.randint(low=250, high=750)
     target_wavelength = ct.Length(1450, 'nm')
-    # target_wavelength.nm = np.random.randint(low=1430, high=1470)
+    target_wavelength.nm = np.random.randint(low=1430, high=1470)
     # create values
     dummy_sytem = rs.RamanSystem()
     dummy_sytem.raman_amplifier = ra.RamanAmplifier()
