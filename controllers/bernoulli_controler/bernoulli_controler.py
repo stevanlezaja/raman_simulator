@@ -85,7 +85,7 @@ class BernoulliController(torch.nn.Module, Controller):
         self._params['gamma'] = (float, gamma)
 
         self.input_dim = input_dim
-        self.logits = torch.zeros(input_dim)
+        self.logits = 0.2 * torch.randn(input_dim)
         self.best_reward = None
         self.baseline = 0.0
         self.history = {'probs': [], 'rewards': []}
@@ -260,6 +260,8 @@ class BernoulliController(torch.nn.Module, Controller):
             reward = 0.0
         else:
             reward = prev_loss - curr_loss
+
+        reward = - curr_loss
 
         self.baseline = self.gamma * self.baseline + (1 - self.gamma) * reward
         advantage = self.beta * (reward - self.baseline)
