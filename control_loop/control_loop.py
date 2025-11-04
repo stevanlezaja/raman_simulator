@@ -183,3 +183,22 @@ class ControlLoop:
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
 
+    def plot_spectrums(self, ax: matplotlib.axes.Axes):
+        assert self.target is not None
+        assert self.curr_output is not None
+        ax.plot( # type: ignore
+            [f.Hz for f in self.target.frequencies],
+            [val.value for val in self.target.values],
+            label="Target",
+        )
+        ax.plot( # type: ignore
+            [f.Hz for f in self.curr_output.frequencies],
+            [val.value for val in self.curr_output.values],
+            label="Current Output",
+        )
+        ax.set_xlabel("Frequency (Hz)")  # type: ignore
+        ax.set_ylabel("Power (mW)")  # type: ignore
+        ax.set_title("Target vs Current Output Spectrum")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
+

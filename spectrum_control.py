@@ -112,21 +112,7 @@ def main(
             control_loop.plot_loss(ax_err) # type: ignore
 
             # --- Target vs Output spectrum ---
-            ax_spec.plot(
-                [f.Hz for f in control_loop.target.frequencies],
-                [val.value for val in control_loop.target.values],
-                label="Target",
-            )  # type: ignore
-            ax_spec.plot(
-                [f.Hz for f in control_loop.curr_output.frequencies],
-                [val.value for val in control_loop.curr_output.values],
-                label="Current Output",
-            )  # type: ignore
-            ax_spec.set_xlabel("Frequency (Hz)")  # type: ignore
-            ax_spec.set_ylabel("Power (mW)")  # type: ignore
-            ax_spec.set_title("Target vs Current Output Spectrum")  # type: ignore
-            ax_spec.grid()
-            ax_spec.legend()  # type: ignore
+            control_loop.plot_spectrums(ax_spec)
 
             power_arr = np.array(powers)
             wl_arr = np.array(wavelengths)
