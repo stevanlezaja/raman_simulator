@@ -71,7 +71,7 @@ class ControlLoop:
         self.target: Optional[ra.Spectrum[ct.Power]] = None
         self.curr_control: ra.RamanInputs = ra.RamanInputs(n_pumps=1)
         self.curr_output: Optional[ra.Spectrum[ct.Power]] = None
-        self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': []}
+        self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': [], 'errors': []}
 
     def set_target(self, target: ra.Spectrum[ct.Power]):
         """
@@ -126,6 +126,7 @@ class ControlLoop:
         self.history['RamanInputs'].append(control)
         self.history['powers'].append([p.W for p in self.curr_control.powers])
         self.history['wavelengths'].append([w.nm for w in self.curr_control.wavelengths])
+        self.history['errors'].append(ra.mse(self.curr_output, self.target))
         return control
 
     def apply_control(self):
@@ -176,7 +177,7 @@ class ControlLoop:
         if hasattr(self.controller, 'plot_loss') and callable(self.controller.plot_loss):  # type: ignore
             self.controller.plot_loss(ax)  # type: ignore
             return
-        ax.plot(ra.mse(self.curr_output, self.target))  # type: ignore
+        ax.plot(self.history['errors'])  # type: ignore
         ax.set_xlabel("Iteration")  # type: ignore
         ax.set_ylabel("MSE")  # type: ignore
         ax.set_title("MSE over time")  # type: ignore
