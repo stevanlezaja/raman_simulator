@@ -18,6 +18,7 @@ Example:
 """
 
 import torch
+import matplotlib.axes
 
 import raman_amplifier as ra
 import custom_types as ct
@@ -289,3 +290,12 @@ class BernoulliController(torch.nn.Module, Controller):
         update = self.learning_rate * advantage * eligibility - self.weight_decay * self.logits
 
         self.logits += update
+
+    def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
+        ax.plot(self.rewards, label='Reward')  # type: ignore
+        ax.plot(self.baseline, label='Baseline')  # type: ignore
+        ax.set_xlabel("Iteration")  # type: ignore
+        ax.set_ylabel("Reward")  # type: ignore
+        ax.set_title("Reward over time")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
