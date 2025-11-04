@@ -130,14 +130,7 @@ def main(
             ax_err_2d.legend()  # type: ignore
 
             # --- Power evolution ---
-            for i in range(power_arr.shape[1]):
-                ax_pow.plot(power_arr[::-1, i], range(len(power_arr[:, i])), label=f"Power {i}")  # type: ignore
-            ax_pow.set_xlabel("Iteration")  # type: ignore
-            ax_pow.set_ylabel("Power (W)")  # type: ignore
-            ax_pow.set_xlim([0, 1])
-            ax_pow.set_title("Power evolution")  # type: ignore
-            ax_pow.grid()
-            ax_pow.legend()  # type: ignore
+            control_loop.plot_power_evolution(ax_pow)
 
             # --- Wavelength evolution ---
             for i in range(wl_arr.shape[1]):

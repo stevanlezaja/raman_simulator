@@ -202,3 +202,14 @@ class ControlLoop:
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
 
+
+    def plot_power_evolution(self, ax: matplotlib.axes.Axes):
+        power_arr = np.array(self.history['powers'])
+        for i in range(power_arr.shape[1]):
+            ax.plot(power_arr[::-1, i], range(len(power_arr[:, i])), label=f"Power {i}")  # type: ignore
+        ax.set_xlabel("Iteration")  # type: ignore
+        ax.set_ylabel("Power (W)")  # type: ignore
+        ax.set_xlim([0, 1])
+        ax.set_title("Power evolution")  # type: ignore
+        ax.grid()
+        ax.legend()  # type: ignore
