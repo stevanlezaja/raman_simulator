@@ -202,6 +202,20 @@ class ControlLoop:
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
 
+    def plot_parameter_2d(self, ax: matplotlib.axes.Axes):
+        power_arr = np.array(self.history['powers'])
+        wl_arr = np.array(self.history['wavelengths'])
+
+        ax.plot(power_arr, wl_arr)  # type: ignore
+        ax.scatter(power_arr[-1], wl_arr[-1], label="Current")  # type: ignore
+        ax.scatter(power_arr[0], wl_arr[0], label="Initial")  # type: ignore
+        ax.set_xlabel("Power [W]")  # type: ignore
+        ax.set_ylabel("Wavelength [nm]")  # type: ignore
+        ax.set_ylim(bottom=1420, top=1490)
+        ax.set_xlim(left=0.0, right=1.0)
+        ax.set_title("Wavelength step probability evolution")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
 
     def plot_power_evolution(self, ax: matplotlib.axes.Axes):
         power_arr = np.array(self.history['powers'])

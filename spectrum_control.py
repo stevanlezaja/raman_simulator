@@ -117,17 +117,7 @@ def main(
             power_arr = np.array(powers)
             wl_arr = np.array(wavelengths)
             # --- Parameter evolution in 2D ---
-            ax_err_2d.plot(power_arr, wl_arr)  # type: ignore
-            ax_err_2d.scatter(power_arr[-1], wl_arr[-1], label="Current")  # type: ignore
-            ax_err_2d.scatter(power_arr[0], wl_arr[0], label="Initial")  # type: ignore
-            ax_err_2d.scatter(target_power.W, target_wavelength.nm, label="Target")  # type: ignore
-            ax_err_2d.set_xlabel("Power [W]")  # type: ignore
-            ax_err_2d.set_ylabel("Wavelength [nm]")  # type: ignore
-            ax_err_2d.set_ylim([1420, 1490])
-            ax_err_2d.set_xlim([0, 1])
-            ax_err_2d.set_title("Wavelength step probability evolution")  # type: ignore
-            ax_err_2d.grid()  # type: ignore
-            ax_err_2d.legend()  # type: ignore
+            control_loop.plot_parameter_2d(ax_2d)
 
             # --- Power evolution ---
             control_loop.plot_power_evolution(ax_pow)
