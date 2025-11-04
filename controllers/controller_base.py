@@ -4,6 +4,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Any
+import matplotlib.axes
 
 import utils.parameter
 import raman_amplifier as ra
@@ -117,3 +118,6 @@ class Controller(ABC):
                 self._params[key] = (param_type, utils.parameter.get_unit_input(param, param, key))
             else:
                 raise Exception(f"Unhandled parameter type: {param_type}")
+
+    def plot_custom_data(self, ax: matplotlib.axes.Axes):
+        return

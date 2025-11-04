@@ -84,7 +84,7 @@ def main(
 
     if live_plot or save_plots:
         fig, axes = plt.subplots(2, 3, figsize=(12, 8))  # type: ignore
-        ax_err, ax_spec, ax_pow, ax_p, ax_wl, ax_err_2d = axes.flatten()
+        ax_err, ax_spec, ax_pow, ax_custom, ax_wl, ax_2d = axes.flatten()
 
     errors: list[float] = []
     powers: list[float] = []
@@ -108,77 +108,12 @@ def main(
                 ax.clear()
 
         if live_plot or (save_plots and curr_step == iterations - 1):
-            # --- Reward over time ---
-            ax_err.plot(controller.rewards, label='Reward')  # type: ignore
-            ax_err.plot(controller.baseline, label='Baseline')  # type: ignore
-            ax_err.set_xlabel("Iteration")  # type: ignore
-            ax_err.set_ylabel("Reward")  # type: ignore
-            ax_err.set_title("Reward over time")  # type: ignore
-            ax_err.grid()  # type: ignore
-            ax_err.legend()  # type: ignore
-
-            # --- Target vs Output spectrum ---
-            ax_spec.plot(
-                [f.Hz for f in control_loop.target.frequencies],
-                [val.value for val in control_loop.target.values],
-                label="Target",
-            )  # type: ignore
-            ax_spec.plot(
-                [f.Hz for f in control_loop.curr_output.frequencies],
-                [val.value for val in control_loop.curr_output.values],
-                label="Current Output",
-            )  # type: ignore
-            ax_spec.set_xlabel("Frequency (Hz)")  # type: ignore
-            ax_spec.set_ylabel("Power (mW)")  # type: ignore
-            ax_spec.set_title("Target vs Current Output Spectrum")  # type: ignore
-            ax_spec.grid()
-            ax_spec.legend()  # type: ignore
-
-            power_arr = np.array(powers)
-            wl_arr = np.array(wavelengths)
-            # --- Parameter evolution in 2D ---
-            ax_err_2d.plot(power_arr, wl_arr)  # type: ignore
-            ax_err_2d.scatter(power_arr[-1], wl_arr[-1], label="Current")  # type: ignore
-            ax_err_2d.scatter(power_arr[0], wl_arr[0], label="Initial")  # type: ignore
-            ax_err_2d.scatter(target_power.W, target_wavelength.nm, label="Target")  # type: ignore
-            ax_err_2d.set_xlabel("Power [W]")  # type: ignore
-            ax_err_2d.set_ylabel("Wavelength [nm]")  # type: ignore
-            ax_err_2d.set_ylim([1420, 1490])
-            ax_err_2d.set_xlim([0, 1])
-            ax_err_2d.set_title("Wavelength step probability evolution")  # type: ignore
-            ax_err_2d.grid()  # type: ignore
-            ax_err_2d.legend()  # type: ignore
-
-            # --- Power evolution ---
-            for i in range(power_arr.shape[1]):
-                ax_pow.plot(power_arr[::-1, i], range(len(power_arr[:, i])), label=f"Power {i}")  # type: ignore
-            ax_pow.set_xlabel("Iteration")  # type: ignore
-            ax_pow.set_ylabel("Power (W)")  # type: ignore
-            ax_pow.set_xlim([0, 1])
-            ax_pow.set_title("Power evolution")  # type: ignore
-            ax_pow.grid()
-            ax_pow.legend()  # type: ignore
-
-            # --- Wavelength evolution ---
-            for i in range(wl_arr.shape[1]):
-                ax_wl.plot(wl_arr[:, i], label=f"Wavelength {i}")  # type: ignore
-            ax_wl.set_xlabel("Iteration")  # type: ignore
-            ax_wl.set_ylabel("Wavelength (nm)")  # type: ignore
-            ax_wl.set_ylim([1420, 1490])
-            ax_wl.set_title("Wavelength evolution")  # type: ignore
-            ax_wl.grid()
-            ax_wl.legend()  # type: ignore
-
-            probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
-            # --- Step probability evolution ---
-            ax_p.plot(probs[:, 0], label=f'Power')  # type: ignore
-            ax_p.plot(probs[:, 1], label=f'Wavelength')  # type: ignore
-            ax_p.set_xlabel("Iteration")  # type: ignore
-            ax_p.set_ylabel("Probability")  # type: ignore
-            ax_p.set_title("Step probability evolution")  # type: ignore
-            ax_p.grid()
-            ax_p.legend()  # type: ignore
-
+            control_loop.plot_loss(ax_err) # type: ignore
+            control_loop.plot_spectrums(ax_spec)
+            control_loop.plot_parameter_2d(ax_2d)
+            control_loop.plot_power_evolution(ax_pow)
+            control_loop.plot_wavelength_evolution(ax_wl)
+            controller.plot_custom_data(ax_custom)
 
             # update figure
             fig.tight_layout()  # type: ignore

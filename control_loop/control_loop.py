@@ -7,7 +7,9 @@ spectrum. It maintains the current control inputs and the latest output
 spectrum at each step.
 """
 
-from typing import Optional
+import numpy as np
+import matplotlib.axes
+from typing import Optional, Any
 import logging
 
 import raman_amplifier as ra
@@ -69,6 +71,7 @@ class ControlLoop:
         self.target: Optional[ra.Spectrum[ct.Power]] = None
         self.curr_control: ra.RamanInputs = ra.RamanInputs(n_pumps=1)
         self.curr_output: Optional[ra.Spectrum[ct.Power]] = None
+        self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': []}
 
     def set_target(self, target: ra.Spectrum[ct.Power]):
         """
@@ -120,6 +123,9 @@ class ControlLoop:
         control = self.controller.get_control(curr_input=self.curr_control,
                                               curr_output=self.curr_output,
                                               target_output=self.target)
+        self.history['RamanInputs'].append(control)
+        self.history['powers'].append([p.W for p in self.curr_control.powers])
+        self.history['wavelengths'].append([w.nm for w in self.curr_control.wavelengths])
         return control
 
     def apply_control(self):
@@ -165,3 +171,70 @@ class ControlLoop:
         """
         valid = self.controller.is_valid ^ self.raman_system.is_valid
         return valid
+
+    def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
+        if hasattr(self.controller, 'plot_loss') and callable(self.controller.plot_loss):  # type: ignore
+            self.controller.plot_loss(ax)  # type: ignore
+            return
+        ax.plot(ra.mse(self.curr_output, self.target))  # type: ignore
+        ax.set_xlabel("Iteration")  # type: ignore
+        ax.set_ylabel("MSE")  # type: ignore
+        ax.set_title("MSE over time")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
+
+    def plot_spectrums(self, ax: matplotlib.axes.Axes):
+        assert self.target is not None
+        assert self.curr_output is not None
+        ax.plot( # type: ignore
+            [f.Hz for f in self.target.frequencies],
+            [val.value for val in self.target.values],
+            label="Target",
+        )
+        ax.plot( # type: ignore
+            [f.Hz for f in self.curr_output.frequencies],
+            [val.value for val in self.curr_output.values],
+            label="Current Output",
+        )
+        ax.set_xlabel("Frequency (Hz)")  # type: ignore
+        ax.set_ylabel("Power (mW)")  # type: ignore
+        ax.set_title("Target vs Current Output Spectrum")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
+
+    def plot_parameter_2d(self, ax: matplotlib.axes.Axes):
+        power_arr = np.array(self.history['powers'])
+        wl_arr = np.array(self.history['wavelengths'])
+
+        ax.plot(power_arr, wl_arr)  # type: ignore
+        ax.scatter(power_arr[-1], wl_arr[-1], label="Current")  # type: ignore
+        ax.scatter(power_arr[0], wl_arr[0], label="Initial")  # type: ignore
+        ax.set_xlabel("Power [W]")  # type: ignore
+        ax.set_ylabel("Wavelength [nm]")  # type: ignore
+        ax.set_ylim(bottom=1420, top=1490)
+        ax.set_xlim(left=0.0, right=1.0)
+        ax.set_title("Wavelength step probability evolution")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
+
+    def plot_power_evolution(self, ax: matplotlib.axes.Axes):
+        power_arr = np.array(self.history['powers'])
+        for i in range(power_arr.shape[1]):
+            ax.plot(power_arr[::-1, i], range(len(power_arr[:, i])), label=f"Power {i}")  # type: ignore
+        ax.set_xlabel("Iteration")  # type: ignore
+        ax.set_ylabel("Power (W)")  # type: ignore
+        ax.set_xlim(left=0.0, right=1.0)
+        ax.set_title("Power evolution")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
+
+    def plot_wavelength_evolution(self, ax: matplotlib.axes.Axes):
+        wl_arr = np.array(self.history['wavelengths'])
+        for i in range(wl_arr.shape[1]):
+            ax.plot(wl_arr[:, i], label=f"Wavelength {i}")  # type: ignore
+        ax.set_xlabel("Iteration")  # type: ignore
+        ax.set_ylabel("Wavelength (nm)")  # type: ignore
+        ax.set_ylim(bottom=1420, top=1490)
+        ax.set_title("Wavelength evolution")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore

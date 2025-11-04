@@ -17,7 +17,7 @@ class Power(Unit):
 
     @property
     def mW(self):
-        return self._value
+        return self._value * 1e3
 
     @mW.setter
     def mW(self, new: float):
