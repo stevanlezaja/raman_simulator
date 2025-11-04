@@ -188,3 +188,6 @@ class Spectrum(Generic[T]):
         if not self.spectrum:
             raise ValueError("Spectrum is empty")
         return max(self.spectrum.items(), key=lambda item: item[1].value)[0]
+
+def mse(current: Spectrum[T], target: Spectrum[T]) -> float:
+    return abs((current - target).mean)
