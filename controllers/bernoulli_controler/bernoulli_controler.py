@@ -19,6 +19,7 @@ Example:
 
 import torch
 import matplotlib.axes
+import numpy as np
 
 import raman_amplifier as ra
 import custom_types as ct
@@ -205,7 +206,7 @@ class BernoulliController(torch.nn.Module, Controller):
         """
 
         probs = torch.sigmoid(self.logits)
-        self.history['probs'].append(probs.detach().numpy())
+        self.history['probs'].append(probs.detach().numpy()) # type: ignore
 
         self.target_integral = 0.0
         for power in target_output.values:
@@ -297,5 +298,16 @@ class BernoulliController(torch.nn.Module, Controller):
         ax.set_xlabel("Iteration")  # type: ignore
         ax.set_ylabel("Reward")  # type: ignore
         ax.set_title("Reward over time")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
+
+    def plot_custom_data(self, ax: matplotlib.axes.Axes):
+        probs = np.array(self.history['probs'])  # shape: (steps, n_actions)
+        # --- Step probability evolution ---
+        ax.plot(probs[:, 0], label=f'Power')  # type: ignore
+        ax.plot(probs[:, 1], label=f'Wavelength')  # type: ignore
+        ax.set_xlabel("Iteration")  # type: ignore
+        ax.set_ylabel("Probability")  # type: ignore
+        ax.set_title("Step probability evolution")  # type: ignore
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore

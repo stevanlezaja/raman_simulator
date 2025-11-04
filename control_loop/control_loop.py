@@ -223,7 +223,18 @@ class ControlLoop:
             ax.plot(power_arr[::-1, i], range(len(power_arr[:, i])), label=f"Power {i}")  # type: ignore
         ax.set_xlabel("Iteration")  # type: ignore
         ax.set_ylabel("Power (W)")  # type: ignore
-        ax.set_xlim([0, 1])
+        ax.set_xlim(left=0.0, right=1.0)
         ax.set_title("Power evolution")  # type: ignore
-        ax.grid()
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
+
+    def plot_wavelength_evolution(self, ax: matplotlib.axes.Axes):
+        wl_arr = np.array(self.history['wavelengths'])
+        for i in range(wl_arr.shape[1]):
+            ax.plot(wl_arr[:, i], label=f"Wavelength {i}")  # type: ignore
+        ax.set_xlabel("Iteration")  # type: ignore
+        ax.set_ylabel("Wavelength (nm)")  # type: ignore
+        ax.set_ylim(bottom=1420, top=1490)
+        ax.set_title("Wavelength evolution")  # type: ignore
+        ax.grid()  # type: ignore
         ax.legend()  # type: ignore

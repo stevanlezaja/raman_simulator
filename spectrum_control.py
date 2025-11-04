@@ -121,27 +121,8 @@ def main(
 
             # --- Power evolution ---
             control_loop.plot_power_evolution(ax_pow)
-
-            # --- Wavelength evolution ---
-            for i in range(wl_arr.shape[1]):
-                ax_wl.plot(wl_arr[:, i], label=f"Wavelength {i}")  # type: ignore
-            ax_wl.set_xlabel("Iteration")  # type: ignore
-            ax_wl.set_ylabel("Wavelength (nm)")  # type: ignore
-            ax_wl.set_ylim([1420, 1490])
-            ax_wl.set_title("Wavelength evolution")  # type: ignore
-            ax_wl.grid()
-            ax_wl.legend()  # type: ignore
-
-            probs = np.array(control_loop.controller.history['probs'])  # shape: (steps, n_actions)
-            # --- Step probability evolution ---
-            ax_p.plot(probs[:, 0], label=f'Power')  # type: ignore
-            ax_p.plot(probs[:, 1], label=f'Wavelength')  # type: ignore
-            ax_p.set_xlabel("Iteration")  # type: ignore
-            ax_p.set_ylabel("Probability")  # type: ignore
-            ax_p.set_title("Step probability evolution")  # type: ignore
-            ax_p.grid()
-            ax_p.legend()  # type: ignore
-
+            control_loop.plot_wavelength_evolution(ax_wl)
+            controller.plot_custom_data(ax_custom)
 
             # update figure
             fig.tight_layout()  # type: ignore
