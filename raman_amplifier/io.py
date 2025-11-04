@@ -55,6 +55,11 @@ class RamanInputs:
         new_wavelengths = [w1 + w2 for w1, w2 in zip(self.wavelengths, other.wavelengths)]
         return RamanInputs(powers=new_powers, wavelengths=new_wavelengths)
 
+    def __sub__(self, other: "RamanInputs") -> "RamanInputs":
+        new_powers = [p1 - p2 for p1, p2 in zip(self.powers, other.powers)]
+        new_wavelengths = [w1 - w2 for w1, w2 in zip(self.wavelengths, other.wavelengths)]
+        return RamanInputs(powers=new_powers, wavelengths=new_wavelengths)
+
     def clamp_values(self) -> None:
         """Clamp powers and wavelengths to their defined ranges in-place."""
 
