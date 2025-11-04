@@ -109,13 +109,7 @@ def main(
 
         if live_plot or (save_plots and curr_step == iterations - 1):
             # --- Reward over time ---
-            ax_err.plot(controller.rewards, label='Reward')  # type: ignore
-            ax_err.plot(controller.baseline, label='Baseline')  # type: ignore
-            ax_err.set_xlabel("Iteration")  # type: ignore
-            ax_err.set_ylabel("Reward")  # type: ignore
-            ax_err.set_title("Reward over time")  # type: ignore
-            ax_err.grid()  # type: ignore
-            ax_err.legend()  # type: ignore
+            control_loop.plot_loss(ax_err) # type: ignore
 
             # --- Target vs Output spectrum ---
             ax_spec.plot(
