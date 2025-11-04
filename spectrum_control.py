@@ -84,7 +84,7 @@ def main(
 
     if live_plot or save_plots:
         fig, axes = plt.subplots(2, 3, figsize=(12, 8))  # type: ignore
-        ax_err, ax_spec, ax_pow, ax_p, ax_wl, ax_err_2d = axes.flatten()
+        ax_err, ax_spec, ax_pow, ax_custom, ax_wl, ax_2d = axes.flatten()
 
     errors: list[float] = []
     powers: list[float] = []
@@ -108,18 +108,9 @@ def main(
                 ax.clear()
 
         if live_plot or (save_plots and curr_step == iterations - 1):
-            # --- Reward over time ---
             control_loop.plot_loss(ax_err) # type: ignore
-
-            # --- Target vs Output spectrum ---
             control_loop.plot_spectrums(ax_spec)
-
-            power_arr = np.array(powers)
-            wl_arr = np.array(wavelengths)
-            # --- Parameter evolution in 2D ---
             control_loop.plot_parameter_2d(ax_2d)
-
-            # --- Power evolution ---
             control_loop.plot_power_evolution(ax_pow)
             control_loop.plot_wavelength_evolution(ax_wl)
             controller.plot_custom_data(ax_custom)
