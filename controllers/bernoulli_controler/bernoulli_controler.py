@@ -253,7 +253,13 @@ class BernoulliController(torch.nn.Module, Controller):
             self.output_integral += power.value
 
         dist = torch.distributions.Bernoulli(probs)
-        sample = dist.sample()
+
+        sample = torch.zeros_like(dist.sample())
+        num_samples = 10
+        for _ in range(num_samples):
+            sample += dist.sample()
+        sample /= num_samples
+
         power_sample = sample[:self.input_dim // 2]
         wavelength_sample = sample[self.input_dim // 2:]
 
