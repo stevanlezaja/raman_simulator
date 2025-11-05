@@ -237,6 +237,9 @@ class BernoulliController(torch.nn.Module, Controller):
         ra.RamanInputs
             The new control signal for pump powers and wavelengths.
         """
+        self.curr_input = curr_input
+        self.curr_output = curr_output
+        self.target_output = target_output
 
         probs = torch.sigmoid(self.logits)
         self.history['probs'].append(probs.detach().numpy()) # type: ignore
@@ -305,6 +308,7 @@ class BernoulliController(torch.nn.Module, Controller):
             reward = prev_loss - curr_loss
 
         reward = -curr_loss
+        reward = self.reward(self.curr_input, self.curr_output, self.target_output)
 
         self.history['rewards'].append(reward)
 
