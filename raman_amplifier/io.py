@@ -129,6 +129,15 @@ class Spectrum(Generic[T]):
     def __sub__(self, other: "Spectrum[T]") -> "Spectrum[T]":
         return self._linear_op(other, '-')
 
+    def __mul__(self, factor: float) -> "Spectrum[T]":
+        for comp in self.values:
+            current_value, unit = comp.value, comp.default_unit
+            comp.value = (current_value * factor, unit)
+        return self
+
+    def __truediv__(self, factor: float) -> "Spectrum[T]":
+        return self * (1 / factor)
+
     def __repr__(self) -> str:
         lines = [f"{f}: {g}" for f, g in self.spectrum.items()]
         return "Gain Spectrum:\n  " + "\n  ".join(lines)
