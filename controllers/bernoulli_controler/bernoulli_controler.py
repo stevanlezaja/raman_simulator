@@ -17,6 +17,7 @@ Example:
     >>> controller.populate_parameters()
 """
 
+import copy
 import torch
 import matplotlib.axes
 import numpy as np
@@ -176,6 +177,38 @@ class BernoulliController(torch.nn.Module, Controller):
     @property
     def baseline(self) -> list[float]:
         return self.history['baseline']
+
+    def reward(
+        self,
+        curr_input: ra.RamanInputs,
+        curr_output: ra.Spectrum[ct.Power],
+        target_output: ra.Spectrum[ct.Power],
+    ) -> float:
+
+        def shape_difference(spec1: ra.Spectrum[ct.Power], spec2: ra.Spectrum[ct.Power]):
+            int1 = ra.io.integral(spec1)
+            scaled_spec1 = copy.deepcopy(spec1)
+
+            int2 = ra.io.integral(spec2)
+            scaled_spec2 = copy.deepcopy(spec2)
+
+            difference_spec = scaled_spec1 / int1 - scaled_spec2 / int2
+
+            return difference_spec.mean
+
+        def integral_difference(spec1: ra.Spectrum[ct.Power], spec2: ra.Spectrum[ct.Power]):
+            int_dif = ra.io.integral(spec1) - ra.io.integral(spec2)
+            return int_dif if int_dif > 0 else - 10 * int_dif
+
+        sh_dif = 1000 * shape_difference(curr_output, target_output)
+
+        int_dif = integral_difference(curr_output, target_output)
+
+        loss = sh_dif + int_dif
+
+        # print(f"Reward is: {-loss}\n  Shape difference is {sh_dif/loss*100:.2f}%\n  Integral difference is {int_dif/loss*100:.2f}%\n")
+
+        return -loss
 
     def get_control(
         self,
