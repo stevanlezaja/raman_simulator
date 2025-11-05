@@ -182,12 +182,14 @@ if __name__ == "__main__":
         raman_system.raman_amplifier = ra.RamanAmplifier()
 
         controller = ctrl.BernoulliController(
-            lr=1e-1,
-            power_step=ct.Power(5, 'mW'),
-            wavelength_step=ct.Length(0.5, 'nm'),
-            beta=1000,
+            lr=1e-3,
+            power_step=ct.Power(20, 'mW'),
+            wavelength_step=ct.Length(2, 'nm'),
+            beta=100,
             gamma=0.99,
-            weight_decay=1e-3,
+            weight_decay=1e-2,
         )
 
-        spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller)
+        # controller = ctrl.DifferentialEvolutionController()
+
+        spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=10000)
