@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import custom_types as ct
 import custom_types.conversions as conv
 
+import controllers as ctrl
 import raman_system as rs
 import raman_amplifier as ra
 import fibers as fib
@@ -44,12 +45,14 @@ def main(
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
+    num_samples = 20
+
     powers: list[ct.Power] = []
-    for num in list(np.linspace(0, 1, 25)):
+    for num in list(np.linspace(0, 1, num_samples)):
         powers.append(ct.Power(num, 'W'))
 
     wavelengths: list [ct.Length] = []
-    for num in list(np.linspace(1420, 1490, 25)):
+    for num in list(np.linspace(1420, 1490, num_samples)):
         wavelengths.append(ct.Length(num, 'nm'))
 
 
@@ -59,11 +62,11 @@ def main(
         for j, w in enumerate(wavelengths):
             raman_system.raman_amplifier.pump_power = p
             raman_system.raman_amplifier.pump_wavelength = w
+            print(p, w)
             raman_system.update()
 
-            error_spectrum = target_spectrum - raman_system.output_spectrum
-            # Example: mean absolute error or squared error
-            error_val = error_spectrum.mean ** 0.5
+            error_val = -ctrl.BernoulliController.reward(ctrl.BernoulliController(), None, raman_system.output_spectrum, target_spectrum)
+
             errors[i, j] = error_val
 
     powers_W = np.array([p.W for p in powers])
@@ -74,6 +77,10 @@ def main(
 
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
     fig.suptitle('Error Analysis: Pump Power vs Wavelength', fontsize=14)
+
+    # Remove the default 2D axes at [1, 1] and replace it with a 3D one
+    fig.delaxes(axes[1, 1])
+    ax3d = fig.add_subplot(2, 2, 4, projection='3d')
 
     # --- (1) Main 2D error grid ---
     im = axes[0, 0].imshow(
@@ -99,6 +106,17 @@ def main(
     axes[1, 0].set_title(f'Error vs Power\n(Wavelength = {wavelengths_nm[mid_wave_idx]:.1f} nm)')
     axes[1, 0].set_xlabel('Pump Power [W]')
     axes[1, 0].set_ylabel('Mean Error')
+
+    p, w = np.meshgrid(powers_W, wavelengths_nm)
+
+    surf = ax3d.plot_surface(p, w, errors.T, cmap='viridis', edgecolor='none')
+
+    ax3d.set_title('3D Error Surface')
+    ax3d.set_xlabel('Pump Power [W]')
+    ax3d.set_ylabel('Pump Wavelength [nm]')
+    ax3d.set_zlabel('Mean Error')
+
+    fig.colorbar(surf, ax=ax3d, shrink=0.6, aspect=10, pad=0.1)
 
     plt.tight_layout()
     plt.show()
