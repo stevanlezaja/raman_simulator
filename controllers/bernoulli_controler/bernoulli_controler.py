@@ -244,14 +244,6 @@ class BernoulliController(torch.nn.Module, Controller):
         probs = torch.sigmoid(self.logits)
         self.history['probs'].append(probs.detach().numpy()) # type: ignore
 
-        self.target_integral = 0.0
-        for power in target_output.values:
-            self.target_integral += power.value
-
-        self.output_integral = 0.0
-        for power in curr_output.values:
-            self.output_integral += power.value
-
         dist = torch.distributions.Bernoulli(probs)
 
         sample = torch.zeros_like(dist.sample())
@@ -305,21 +297,12 @@ class BernoulliController(torch.nn.Module, Controller):
         update with optional weight decay and step clamping.
         """
 
-        curr_loss = abs(error.mean)
-        prev_loss = abs(self.prev_error.mean) if self.prev_error is not None else None
-
-        if prev_loss is None:
-            reward = 0.0
-        else:
-            reward = prev_loss - curr_loss
-
-        reward = -curr_loss
         reward = self.reward(self.curr_input, self.curr_output, self.target_output)
-
         self.history['rewards'].append(reward)
 
         self._baseline = self.gamma * self._baseline + (1 - self.gamma) * reward
         self.history['baseline'].append(self._baseline)
+
         advantage = self.beta * (reward - self._baseline)
 
         self.prev_error = error
