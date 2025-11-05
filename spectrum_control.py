@@ -32,13 +32,14 @@ def main(
         wavelength_range: tuple[float, float] = (LOWER, UPPER),
         raman_system: rs.RamanSystem = rs.RamanSystem(),
         controller: ctrl.Controller = ctrl.BernoulliController(),
+        number: int | None = None
 ) -> None:
 
     if save_plots:
         save_dir = 'plots/experiments'
         os.makedirs(save_dir, exist_ok=True)
         if isinstance(controller, ctrl.BernoulliController):
-            exp_name = f"lr{controller.learning_rate}_wd{controller.weight_decay}_b{controller.beta}_g{controller.gamma}_ps{controller.power_step.mW}_ws{controller.wavelength_step.nm}.png"
+            exp_name = f"lr{controller.learning_rate}_wd{controller.weight_decay}_b{controller.beta}_g{controller.gamma}_ps{controller.power_step.mW}_ws{controller.wavelength_step.nm}_{number}.png"
         else:
             exp_name = 'experiment.png'
         exp_path = os.path.join(save_dir, exp_name)
