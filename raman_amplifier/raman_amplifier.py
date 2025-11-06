@@ -122,15 +122,18 @@ class RamanAmplifier:
         self._pumping_ratios = pumping_ratios
 
         self._pump_powers: list[ct.Power] = []
+        self.pump_wavelengths: list[ct.Length] = []
+        self.pump_pairs: list[tuple[Pump, Pump]] = []
+
         for _ in range(num_pumps):
             self._pump_powers.append(ct.Power(0.0, 'W'))
 
-        self.pump_wavelength = ct.Length(1455, 'nm')
-        self.pump_pairs: list[tuple[Pump, Pump]] = []
-        for _ in range(num_pumps):
+            self.pump_wavelengths.append(ct.Length(0.0, 'm'))
+
             forward_pump = Pump()
             backward_pump = Pump()
             self.pump_pairs.append((forward_pump, backward_pump))
+
         self.update_pumps()
 
     def update_pumps(self) -> None:
@@ -142,8 +145,8 @@ class RamanAmplifier:
             forward_pump, backward_pump = pump_pair
             forward_pump.power = ct.Power(self._pump_powers[i].W * self._pumping_ratios[i], 'W')
             backward_pump.power = ct.Power(self._pump_powers[i].W * (1 - self._pumping_ratios[i]), 'W')
-            forward_pump.wavelength = self.pump_wavelength
-            backward_pump.wavelength = self.pump_wavelength
+            forward_pump.wavelength = self.pump_wavelengths[i]
+            backward_pump.wavelength = self.pump_wavelengths[i]
 
     @property
     def pump_powers(self) -> list[ct.Power]:
