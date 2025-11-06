@@ -24,6 +24,28 @@ SAMPLES = 40
 
 NUM_STEPS = 200
 
+def _make_flat_spectrum() -> ra.Spectrum[ct.Power]:
+    target_spectrum = ra.Spectrum(ct.Power)
+    print(target_spectrum)
+    return target_spectrum
+
+def _make_multipump_spectrum(
+        raman_system: rs.RamanSystem,
+        target_powers: list[ct.Power],
+        target_wavelengths: list[ct.Length]
+    ) -> ra.Spectrum[ct.Power]:
+
+    dummy_sytem = rs.RamanSystem()
+    dummy_sytem.raman_amplifier = ra.RamanAmplifier()
+    dummy_sytem.fiber = copy.deepcopy(raman_system.fiber)
+    dummy_sytem.input_spectrum = copy.deepcopy(raman_system.input_spectrum)
+    dummy_sytem.output_spectrum = copy.deepcopy(raman_system.input_spectrum)
+    dummy_sytem.raman_amplifier.pump_powers = target_powers
+    dummy_sytem.raman_amplifier.pump_wavelengths = target_wavelengths
+    dummy_sytem.update()
+
+    return dummy_sytem.output_spectrum
+
 def main(
         save_plots: bool = True,
         live_plot: bool = False,
@@ -49,23 +71,7 @@ def main(
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
         input_spectrum.add_val(freq, ct.Power(10, 'mW'))
 
-    target_spectrum = ra.Spectrum(ct.Power)
-    target_power = ct.Power(0.5, 'W')
-    target_power.mW = np.random.randint(low=250, high=750)
-    target_wavelength = ct.Length(1450, 'nm')
-    target_wavelength.nm = np.random.randint(low=1430, high=1470)
-    # create values
-    dummy_sytem = rs.RamanSystem()
-    dummy_sytem.raman_amplifier = ra.RamanAmplifier()
-    dummy_sytem.fiber = copy.deepcopy(raman_system.fiber)
-    dummy_sytem.input_spectrum = copy.deepcopy(input_spectrum)
-    dummy_sytem.output_spectrum = copy.deepcopy(input_spectrum)
-    dummy_sytem.raman_amplifier.pump_power.mW = target_power.mW
-    dummy_sytem.raman_amplifier.pump_wavelength.nm = target_wavelength.nm
-
-    dummy_sytem.update()
-
-    target_spectrum = dummy_sytem.output_spectrum
+    target_spectrum = _make_flat_spectrum()
 
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = copy.deepcopy(input_spectrum)
