@@ -140,7 +140,7 @@ class Spectrum(Generic[T]):
 
     def __repr__(self) -> str:
         lines = [f"{f}: {g}" for f, g in self.spectrum.items()]
-        return "Gain Spectrum:\n  " + "\n  ".join(lines)
+        return f"{self.value_cls.__name__} Spectrum:\n  " + "\n  ".join(lines)
 
     def __iter__(self) -> Iterator[tuple[ct.Frequency, T]]:
         """
