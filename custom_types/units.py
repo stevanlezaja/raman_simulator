@@ -151,6 +151,15 @@ class Unit(ABC, UnitProtocol):
         result.value = (self.value - other.value, self.default_unit)
         return result
 
+    def __mul__(self: T, factor: float | int) -> T:
+        result = self.__class__(value=self.value, unit=self.default_unit)
+        result.value = (self.value * factor, self.default_unit)
+        return result
+
+    def __truediv__(self: T, factor: float | int) -> T:
+        factor = 1 / factor
+        return self * factor
+
     def __neg__(self: T) -> T:
         new = self.__class__.__new__(self.__class__)
         new.__dict__ = self.__dict__.copy()
