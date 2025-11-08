@@ -138,13 +138,13 @@ class ControlLoop:
         """
         self.curr_control.clamp_values()
 
-        log.debug("Old pump power: %s", self.raman_system.raman_amplifier.pump_power)
-        self.raman_system.raman_amplifier.pump_power = self.curr_control.powers[0]
-        log.debug("New pump power: %s", self.raman_system.raman_amplifier.pump_power)
+        log.debug("Old pump power: %s", self.raman_system.raman_amplifier.pump_powers)
+        self.raman_system.raman_amplifier.pump_powers = self.curr_control.powers
+        log.debug("New pump power: %s", self.raman_system.raman_amplifier.pump_powers)
 
-        log.debug("Old pump wavelength: %s", self.raman_system.raman_amplifier.pump_wavelength)
-        self.raman_system.raman_amplifier.pump_wavelength = self.curr_control.wavelengths[0]
-        log.debug("New pump wavelength: %s", self.raman_system.raman_amplifier.pump_wavelength)
+        log.debug("Old pump wavelength: %s", self.raman_system.raman_amplifier.pump_wavelengths)
+        self.raman_system.raman_amplifier.pump_wavelengths = self.curr_control.wavelengths
+        log.debug("New pump wavelength: %s", self.raman_system.raman_amplifier.pump_wavelengths)
 
     def step(self):
         """
