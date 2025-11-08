@@ -80,12 +80,13 @@ def main(
     control_loop = loop.ControlLoop(raman_system, controller)
     control_loop.set_target(target_spectrum)
 
-    initial_power = ct.Power(0, 'W')
-    initial_power.mW = np.random.randint(low=250, high=750)
-    initial_wavelength = ct.Length(0, 'm')
-    initial_wavelength.nm = np.random.randint(low=1430, high=1470)
+    initial_powers: list[ct.Power] = []
+    initial_wavelengths: list[ct.Length] = []
+    for _ in range(len(raman_system.raman_amplifier.pump_pairs)):
+        initial_powers.append(ct.Power(np.random.randint(low=250, high=750), 'mW'))
+        initial_wavelengths.append(ct.Length(np.random.randint(low=1430, high=1470), 'nm'))
 
-    control_loop.curr_control = ra.RamanInputs(powers=[initial_power], wavelengths=[initial_wavelength])
+    control_loop.curr_control = ra.RamanInputs(powers=initial_powers, wavelengths=initial_wavelengths)
 
     if live_plot:
         plt.ion()  # type: ignore
