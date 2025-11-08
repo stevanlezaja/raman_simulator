@@ -126,9 +126,9 @@ class RamanAmplifier:
         self.pump_pairs: list[tuple[Pump, Pump]] = []
 
         for _ in range(num_pumps):
-            self._pump_powers.append(ct.Power(0.0, 'W'))
+            self._pump_powers.append(ct.Power(0.5, 'W'))
 
-            self.pump_wavelengths.append(ct.Length(0.0, 'm'))
+            self.pump_wavelengths.append(ct.Length(1450, 'nm'))
 
             forward_pump = Pump()
             backward_pump = Pump()
@@ -206,4 +206,4 @@ class RamanAmplifier:
         return valid
 
     def __repr__(self) -> str:
-        return f"Raman Amplifier object\n  Pump powers: {self.pump_powers}, ratio: {self.pumping_ratios}\n  Pump wavelengths: {self.pump_wavelength}"
+        return f"Raman Amplifier object\n  Pump powers: {self.pump_powers}, ratio: {self.pumping_ratios}\n  Pump wavelengths: {self.pump_wavelengths}"
