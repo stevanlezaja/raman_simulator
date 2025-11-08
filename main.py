@@ -179,7 +179,7 @@ if __name__ == "__main__":
 
         raman_system = rs.RamanSystem()
         raman_system.fiber = fib.StandardSingleModeFiber()
-        raman_system.raman_amplifier = ra.RamanAmplifier()
+        raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3)
 
         controller = ctrl.BernoulliController(
             lr=1e-3,
@@ -188,6 +188,7 @@ if __name__ == "__main__":
             beta=100,
             gamma=0.99,
             weight_decay=1e-2,
+            input_dim=6,
         )
 
         # controller = ctrl.DifferentialEvolutionController()
