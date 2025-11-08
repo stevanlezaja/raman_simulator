@@ -24,9 +24,10 @@ SAMPLES = 40
 
 NUM_STEPS = 200
 
-def _make_flat_spectrum() -> ra.Spectrum[ct.Power]:
+def _make_flat_spectrum(input_spectrum: ra.Spectrum[ct.Power]) -> ra.Spectrum[ct.Power]:
     target_spectrum = ra.Spectrum(ct.Power)
-    print(target_spectrum)
+    for freq in input_spectrum.frequencies:
+        target_spectrum.add_val(freq, ct.Power(100, 'mW'))
     return target_spectrum
 
 def _make_multipump_spectrum(
@@ -71,7 +72,7 @@ def main(
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
         input_spectrum.add_val(freq, ct.Power(10, 'mW'))
 
-    target_spectrum = _make_flat_spectrum()
+    target_spectrum = _make_flat_spectrum(input_spectrum)
 
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = copy.deepcopy(input_spectrum)
