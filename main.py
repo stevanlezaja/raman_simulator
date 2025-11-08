@@ -138,8 +138,8 @@ def main():
     # caluclate_G_on_off()
     # plot_raman_efficiencies()
     # net_gain_experiment()
-    fibers = [StandardSingleModeFiber(), NonZeroDispersionFiber(), SuperLargeEffectiveArea()]
-    fig, axes = plt.subplots(2, 2)
+    fibers: list[fib.Fiber] = [StandardSingleModeFiber(), NonZeroDispersionFiber(), SuperLargeEffectiveArea()]
+    fig, axes = plt.subplots(2, 2)  # type: ignore
     axes = axes.flatten()
     for fiber, ax in zip(fibers, axes):
         validation_experiment(fiber, ax)
@@ -148,7 +148,7 @@ def main():
         ax.legend()
         ax.grid()
         ax.set_title(fiber.__name__)
-    plt.show()
+    plt.show()  # type: ignore
 
 
 if __name__ == "__main__":
