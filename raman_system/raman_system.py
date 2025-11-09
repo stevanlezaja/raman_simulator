@@ -12,6 +12,7 @@ The RamanSystem provides properties to access and set the amplifier, fiber, and 
 and an `update` method to propagate the input spectrum through the system.
 """
 
+from itertools import product
 from typing import Optional
 
 import raman_amplifier as ra
@@ -207,14 +208,21 @@ class RamanSystem:
                             raman_amplifier) is not initialized.
         """
 
-        for freq, power in self.input_spectrum:  # pylint: disable=not-an-iterable
+        for input_component in self.input_spectrum:
+            freq, power = input_component
             signal = sig.Signal()
             signal.power = power
             signal.wavelength = conv.frequency_to_wavelenth(freq)
+            self.output_spectrum[freq] = ct.Power(0, 'W')
 
-            experiment = exp.Experiment(self.fiber, signal, self.raman_amplifier)
+            for pump_pair in self.raman_amplifier.pump_pairs:  # pylint: disable=not-an-iterable
 
-            self.output_spectrum[freq] = experiment.get_signal_power_at_distance(self.fiber.length)
+                experiment = exp.Experiment(self.fiber, signal, pump_pair)
+
+                if self.output_spectrum[freq] is None:  # type: ignore
+                    self.output_spectrum[freq] = experiment.get_signal_power_at_distance(self.fiber.length)
+                else:
+                    self.output_spectrum[freq] += experiment.get_signal_power_at_distance(self.fiber.length)
 
     @property
     def is_valid(self) -> bool:

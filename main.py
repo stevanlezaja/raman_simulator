@@ -138,8 +138,8 @@ def main():
     # caluclate_G_on_off()
     # plot_raman_efficiencies()
     # net_gain_experiment()
-    fibers = [StandardSingleModeFiber(), NonZeroDispersionFiber(), SuperLargeEffectiveArea()]
-    fig, axes = plt.subplots(2, 2)
+    fibers: list[fib.Fiber] = [StandardSingleModeFiber(), NonZeroDispersionFiber(), SuperLargeEffectiveArea()]
+    fig, axes = plt.subplots(2, 2)  # type: ignore
     axes = axes.flatten()
     for fiber, ax in zip(fibers, axes):
         validation_experiment(fiber, ax)
@@ -148,7 +148,7 @@ def main():
         ax.legend()
         ax.grid()
         ax.set_title(fiber.__name__)
-    plt.show()
+    plt.show()  # type: ignore
 
 
 if __name__ == "__main__":
@@ -179,7 +179,7 @@ if __name__ == "__main__":
 
         raman_system = rs.RamanSystem()
         raman_system.fiber = fib.StandardSingleModeFiber()
-        raman_system.raman_amplifier = ra.RamanAmplifier()
+        raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
         controller = ctrl.BernoulliController(
             lr=1e-3,
@@ -188,6 +188,7 @@ if __name__ == "__main__":
             beta=100,
             gamma=0.99,
             weight_decay=1e-2,
+            input_dim=6,
         )
 
         # controller = ctrl.DifferentialEvolutionController()

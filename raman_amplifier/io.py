@@ -2,7 +2,7 @@
 This module contains Input and Output types for a Raman Amplifier
 """
 
-from typing import TypeVar, Generic, Type, Iterator, Optional
+from typing import TypeVar, Generic, Type, Iterator, Optional, Any
 
 import custom_types as ct
 import custom_logging as clog
@@ -17,8 +17,8 @@ class RamanInputs:
         It contains the Wavelength - Power pairs representing the Pump state
     """
 
-    MAX_POWER_W = 0.75
-    MIN_POWER_W = 0.25
+    MAX_POWER_W = 0.8
+    MIN_POWER_W = 0.2
 
     MAX_WAVELENGTH_NM = 1490
     MIN_WAVELENGTH_NM = 1420
@@ -129,18 +129,24 @@ class Spectrum(Generic[T]):
     def __sub__(self, other: "Spectrum[T]") -> "Spectrum[T]":
         return self._linear_op(other, '-')
 
-    def __mul__(self, factor: float) -> "Spectrum[T]":
-        for comp in self.values:
-            current_value, unit = comp.value, comp.default_unit
-            comp.value = (current_value * factor, unit)
-        return self
+    def __mul__(self, other: Any) -> "Spectrum[T]":
+        if isinstance(other, float):
+            for comp in self.values:
+                current_value, unit = comp.value, comp.default_unit
+                comp.value = (current_value * other, unit)
+            return self
+        elif isinstance(other, Spectrum):
+            return self._linear_op(other, '*')
+        else:
+            raise NotImplementedError
+
 
     def __truediv__(self, factor: float) -> "Spectrum[T]":
         return self * (1 / factor)
 
     def __repr__(self) -> str:
         lines = [f"{f}: {g}" for f, g in self.spectrum.items()]
-        return "Gain Spectrum:\n  " + "\n  ".join(lines)
+        return f"{self.value_cls.__name__} Spectrum:\n  " + "\n  ".join(lines)
 
     def __iter__(self) -> Iterator[tuple[ct.Frequency, T]]:
         """

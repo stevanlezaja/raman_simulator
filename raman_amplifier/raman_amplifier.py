@@ -78,7 +78,7 @@ class Pump:
         return (self.power.value > 0) ^ (self.wavelength.value > 0)
 
 
-def _validate_ratio(pumping_ratio: float):
+def _validate_ratios(pumping_ratios: list[float]):
     """
     Validate that the pumping ratio is within the allowed range [0.0, 1.0].
 
@@ -88,8 +88,9 @@ def _validate_ratio(pumping_ratio: float):
     Raises:
         ValueError: If the pumping ratio is outside [0.0, 1.0].
     """
-    if pumping_ratio < 0 or pumping_ratio > 1.0:
-        raise ValueError("Pumping ratio can only be in range [0.0, 1.0]")
+    for pumping_ratio in pumping_ratios:
+        if pumping_ratio < 0 or pumping_ratio > 1.0:
+            raise ValueError("Pumping ratio can only be in range [0.0, 1.0]")
 
 
 class RamanAmplifier:
@@ -103,20 +104,36 @@ class RamanAmplifier:
         forward_pump (Pump): Forward pump of the amplifier.
         backward_pump (Pump): Backward pump of the amplifier.
     """
-    def __init__(self, pumping_ratio: float=1.0):
+    def __init__(self, num_pumps: int = 1, pumping_ratios: list[float] | None = None):
         """
         Initialize a RamanAmplifier with a given pumping ratio.
 
         Args:
             pumping_ratio (float, optional): Fraction of power for forward pump.
-                Must be in [0.0, 1.0]. Defaults to 1.0.
+                Must be in [0.0, 1.0]. Defaults to 0.5.
         """
-        _validate_ratio(pumping_ratio)
-        self._pumping_ratio = pumping_ratio
-        self._pump_power = ct.Power(0.5, 'W')
-        self.pump_wavelength = ct.Length(1455, 'nm')
-        self.forward_pump = Pump()
-        self.backward_pump = Pump()
+
+        if pumping_ratios is None:
+            pumping_ratios = []
+            for _ in range(num_pumps):
+                pumping_ratios.append(0.5)
+
+        _validate_ratios(pumping_ratios)
+        self._pumping_ratios = pumping_ratios
+
+        self._pump_powers: list[ct.Power] = []
+        self._pump_wavelengths: list[ct.Length] = []
+        self.pump_pairs: list[tuple[Pump, Pump]] = []
+
+        for _ in range(num_pumps):
+            self._pump_powers.append(ct.Power(0.5, 'W'))
+
+            self._pump_wavelengths.append(ct.Length(1450, 'nm'))
+
+            forward_pump = Pump()
+            backward_pump = Pump()
+            self.pump_pairs.append((forward_pump, backward_pump))
+
         self.update_pumps()
 
     def update_pumps(self) -> None:
@@ -124,46 +141,71 @@ class RamanAmplifier:
         Update the forward and backward pump powers based on the current
         pumping ratio and base pump power.
         """
-        self.forward_pump.power = ct.Power(self._pump_power.W * self._pumping_ratio, 'W')
-        self.backward_pump.power = ct.Power(self._pump_power.W * (1 - self._pumping_ratio), 'W')
-        self.forward_pump.wavelength = self.pump_wavelength
-        self.backward_pump.wavelength = self.pump_wavelength
+        for i, pump_pair in enumerate(self.pump_pairs):
+            forward_pump, backward_pump = pump_pair
+            forward_pump.power = ct.Power(self._pump_powers[i].W * self._pumping_ratios[i], 'W')
+            backward_pump.power = ct.Power(self._pump_powers[i].W * (1 - self._pumping_ratios[i]), 'W')
+            forward_pump.wavelength = self._pump_wavelengths[i]
+            backward_pump.wavelength = self._pump_wavelengths[i]
 
     @property
-    def pump_power(self) -> ct.Power:
+    def pump_powers(self) -> list[ct.Power]:
         """
         Power of the amplifier pumps.
 
         Returns:
             Power: The current base pump power.
         """
-        return self._pump_power
+        return self._pump_powers
 
-    @pump_power.setter
-    def pump_power(self, new: ct.Power) -> None:
+    @pump_powers.setter
+    def pump_powers(self, new: list[ct.Power]) -> None:
         """
         Set a new base pump power and update forward/backward pump powers.
 
         Args:
             new (Power): New base pump power.
         """
-        if new == self._pump_power:
+        if new == self._pump_powers:
             return
-        self._pump_power = new
+        self._pump_powers = new
         self.update_pumps()
 
     @property
-    def pumping_ratio(self) -> float:
+    def pump_wavelengths(self) -> list[ct.Length]:
+        """
+        Power of the amplifier pumps.
+
+        Returns:
+            Power: The current base pump power.
+        """
+        return self._pump_wavelengths
+
+    @pump_wavelengths.setter
+    def pump_wavelengths(self, new: list[ct.Length]) -> None:
+        """
+        Set a new base pump wavelength and update forward/backward pump wavelengths.
+
+        Args:
+            new (Length): New base pump wavelength.
+        """
+        if new == self._pump_wavelengths:
+            return
+        self._pump_wavelengths = new
+        self.update_pumps()
+
+    @property
+    def pumping_ratios(self) -> list[float]:
         """
         Fraction of total power allocated to the forward pump.
 
         Returns:
             float: Current pumping ratio in [0.0, 1.0].
         """
-        return self._pumping_ratio
+        return self._pumping_ratios
 
-    @pumping_ratio.setter
-    def pumping_ratio(self, new: float) -> None:
+    @pumping_ratios.setter
+    def pumping_ratios(self, new: list[float]) -> None:
         """
         Set a new pumping ratio and update forward/backward pump powers.
 
@@ -173,16 +215,18 @@ class RamanAmplifier:
         Raises:
             ValueError: If the new pumping ratio is outside [0.0, 1.0].
         """
-        if new == self._pumping_ratio:
+        if new == self._pumping_ratios:
             return
-        _validate_ratio(new)
-        self._pumping_ratio = new
+        _validate_ratios(new)
+        self._pumping_ratios = new
         self.update_pumps()
 
     @property
     def is_valid(self) -> bool:
-        valid = self.backward_pump.is_valid ^ self.forward_pump.is_valid
+        valid = True
+        for pump_pair in self.pump_pairs:
+            valid ^= pump_pair[0].is_valid ^ pump_pair[1].is_valid
         return valid
 
     def __repr__(self) -> str:
-        return f"Raman Amplifier object\n  Pump powers: {self.pump_power}, ratio: {self.pumping_ratio}\n  Pump wavelengths: {self.pump_wavelength}"
+        return f"Raman Amplifier object\n  Pump powers: {self.pump_powers}, ratio: {self.pumping_ratios}\n  Pump wavelengths: {self.pump_wavelengths}"
