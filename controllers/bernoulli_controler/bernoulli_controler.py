@@ -21,6 +21,7 @@ import copy
 import torch
 import matplotlib.axes
 import numpy as np
+import itertools
 
 import raman_amplifier as ra
 import custom_types as ct
@@ -200,11 +201,19 @@ class BernoulliController(torch.nn.Module, Controller):
             int_dif = ra.io.integral(spec1) - ra.io.integral(spec2)
             return int_dif if int_dif > 0 else - 10 * int_dif
 
+        def wavelength_spread(wavelengths: list[ct.Length]):
+            spread = 0
+            for w1, w2 in itertools.combinations(wavelengths, 2):
+                spread += abs(w1.nm - w2.nm) **0.5
+            return spread
+
         sh_dif = 1000 * shape_difference(curr_output, target_output)
 
         int_dif = integral_difference(curr_output, target_output)
 
-        loss = sh_dif + int_dif
+        wl_spread = 0.1 * wavelength_spread(curr_input.wavelengths)
+
+        loss = sh_dif + int_dif - wl_spread
 
         # print(f"Reward is: {-loss}\n  Shape difference is {sh_dif/loss*100:.2f}%\n  Integral difference is {int_dif/loss*100:.2f}%\n")
 
@@ -330,12 +339,7 @@ class BernoulliController(torch.nn.Module, Controller):
     def plot_custom_data(self, ax: matplotlib.axes.Axes):
         probs = np.array(self.history['probs'])  # shape: (steps, n_actions)
         # --- Step probability evolution ---
-        ax.plot(probs[:, 0], label=f'Power 0')  # type: ignore
-        ax.plot(probs[:, 1], label=f'Power 1')  # type: ignore
-        ax.plot(probs[:, 2], label=f'Power 2')  # type: ignore
-        ax.plot(probs[:, 3], label=f'Wavelength 0')  # type: ignore
-        ax.plot(probs[:, 4], label=f'Wavelength 1')  # type: ignore
-        ax.plot(probs[:, 5], label=f'Wavelength 2')  # type: ignore
+        ax.plot(probs[:, :])  # type: ignore
         ax.set_xlabel("Iteration")  # type: ignore
         ax.set_ylabel("Probability")  # type: ignore
         ax.set_title("Step probability evolution")  # type: ignore
