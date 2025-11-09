@@ -17,8 +17,8 @@ class RamanInputs:
         It contains the Wavelength - Power pairs representing the Pump state
     """
 
-    MAX_POWER_W = 0.75
-    MIN_POWER_W = 0.25
+    MAX_POWER_W = 0.8
+    MIN_POWER_W = 0.2
 
     MAX_WAVELENGTH_NM = 1490
     MIN_WAVELENGTH_NM = 1420
