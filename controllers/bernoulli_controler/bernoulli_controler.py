@@ -330,8 +330,12 @@ class BernoulliController(torch.nn.Module, Controller):
     def plot_custom_data(self, ax: matplotlib.axes.Axes):
         probs = np.array(self.history['probs'])  # shape: (steps, n_actions)
         # --- Step probability evolution ---
-        ax.plot(probs[:, 0], label=f'Power')  # type: ignore
-        ax.plot(probs[:, 1], label=f'Wavelength')  # type: ignore
+        ax.plot(probs[:, 0], label=f'Power 0')  # type: ignore
+        ax.plot(probs[:, 1], label=f'Power 1')  # type: ignore
+        ax.plot(probs[:, 2], label=f'Power 2')  # type: ignore
+        ax.plot(probs[:, 3], label=f'Wavelength 0')  # type: ignore
+        ax.plot(probs[:, 4], label=f'Wavelength 1')  # type: ignore
+        ax.plot(probs[:, 5], label=f'Wavelength 2')  # type: ignore
         ax.set_xlabel("Iteration")  # type: ignore
         ax.set_ylabel("Probability")  # type: ignore
         ax.set_title("Step probability evolution")  # type: ignore
