@@ -110,7 +110,7 @@ class RamanAmplifier:
 
         Args:
             pumping_ratio (float, optional): Fraction of power for forward pump.
-                Must be in [0.0, 1.0]. Defaults to 1.0.
+                Must be in [0.0, 1.0]. Defaults to 0.5.
         """
 
         if pumping_ratios is None:
