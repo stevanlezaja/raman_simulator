@@ -1,5 +1,5 @@
 from abc import ABC
-from typing import TypeVar, Protocol, Self
+from typing import TypeVar, Protocol, Self, Any
 
 import custom_logging as clog
 
@@ -151,9 +151,23 @@ class Unit(ABC, UnitProtocol):
         result.value = (self.value - other.value, self.default_unit)
         return result
 
-    def __mul__(self: T, factor: float | int) -> T:
+    def __mul__(self: T, other: Any) -> T:
+        if isinstance(other, (int, float)):
+            return self.mul_with_number(factor=other)
+        elif isinstance(other, Unit):
+            return self.mul_with_unit(other=other)  # type: ignore
+        else:
+            raise NotImplementedError
+
+    def mul_with_number(self: T, factor: float | int) -> T:
         result = self.__class__(value=self.value, unit=self.default_unit)
         result.value = (self.value * factor, self.default_unit)
+        return result
+
+    def mul_with_unit(self: T, other: T) -> T:
+        assert isinstance(other, self.__class__), (f"Both operands need to be type {self.__class__.__name__}")
+        result = self.__class__(value=self.value, unit=self.default_unit)
+        result.value = (self.value * other.value, self.default_unit)
         return result
 
     def __truediv__(self: T, factor: float | int) -> T:
