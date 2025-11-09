@@ -2,7 +2,7 @@
 This module contains Input and Output types for a Raman Amplifier
 """
 
-from typing import TypeVar, Generic, Type, Iterator, Optional
+from typing import TypeVar, Generic, Type, Iterator, Optional, Any
 
 import custom_types as ct
 import custom_logging as clog
@@ -129,11 +129,17 @@ class Spectrum(Generic[T]):
     def __sub__(self, other: "Spectrum[T]") -> "Spectrum[T]":
         return self._linear_op(other, '-')
 
-    def __mul__(self, factor: float) -> "Spectrum[T]":
-        for comp in self.values:
-            current_value, unit = comp.value, comp.default_unit
-            comp.value = (current_value * factor, unit)
-        return self
+    def __mul__(self, other: Any) -> "Spectrum[T]":
+        if isinstance(other, float):
+            for comp in self.values:
+                current_value, unit = comp.value, comp.default_unit
+                comp.value = (current_value * other, unit)
+            return self
+        elif isinstance(other, Spectrum):
+            return self._linear_op(other, '*')
+        else:
+            raise NotImplementedError
+
 
     def __truediv__(self, factor: float) -> "Spectrum[T]":
         return self * (1 / factor)
