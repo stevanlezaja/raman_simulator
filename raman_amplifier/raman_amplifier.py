@@ -122,13 +122,13 @@ class RamanAmplifier:
         self._pumping_ratios = pumping_ratios
 
         self._pump_powers: list[ct.Power] = []
-        self.pump_wavelengths: list[ct.Length] = []
+        self._pump_wavelengths: list[ct.Length] = []
         self.pump_pairs: list[tuple[Pump, Pump]] = []
 
         for _ in range(num_pumps):
             self._pump_powers.append(ct.Power(0.5, 'W'))
 
-            self.pump_wavelengths.append(ct.Length(1450, 'nm'))
+            self._pump_wavelengths.append(ct.Length(1450, 'nm'))
 
             forward_pump = Pump()
             backward_pump = Pump()
@@ -145,8 +145,8 @@ class RamanAmplifier:
             forward_pump, backward_pump = pump_pair
             forward_pump.power = ct.Power(self._pump_powers[i].W * self._pumping_ratios[i], 'W')
             backward_pump.power = ct.Power(self._pump_powers[i].W * (1 - self._pumping_ratios[i]), 'W')
-            forward_pump.wavelength = self.pump_wavelengths[i]
-            backward_pump.wavelength = self.pump_wavelengths[i]
+            forward_pump.wavelength = self._pump_wavelengths[i]
+            backward_pump.wavelength = self._pump_wavelengths[i]
 
     @property
     def pump_powers(self) -> list[ct.Power]:
@@ -169,6 +169,29 @@ class RamanAmplifier:
         if new == self._pump_powers:
             return
         self._pump_powers = new
+        self.update_pumps()
+
+    @property
+    def pump_wavelengths(self) -> list[ct.Length]:
+        """
+        Power of the amplifier pumps.
+
+        Returns:
+            Power: The current base pump power.
+        """
+        return self._pump_wavelengths
+
+    @pump_wavelengths.setter
+    def pump_wavelengths(self, new: list[ct.Length]) -> None:
+        """
+        Set a new base pump wavelength and update forward/backward pump wavelengths.
+
+        Args:
+            new (Length): New base pump wavelength.
+        """
+        if new == self._pump_wavelengths:
+            return
+        self._pump_wavelengths = new
         self.update_pumps()
 
     @property
