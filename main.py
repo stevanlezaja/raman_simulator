@@ -179,7 +179,7 @@ if __name__ == "__main__":
 
         raman_system = rs.RamanSystem()
         raman_system.fiber = fib.StandardSingleModeFiber()
-        raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3)
+        raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
         controller = ctrl.BernoulliController(
             lr=1e-3,
