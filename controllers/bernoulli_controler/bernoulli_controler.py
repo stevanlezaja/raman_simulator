@@ -88,7 +88,7 @@ class BernoulliController(torch.nn.Module, Controller):
         self._params['gamma'] = (float, gamma)
 
         self.input_dim = input_dim
-        self.logits = 0.1 * torch.randn(input_dim)
+        self.logits = 0.01 * torch.randn(input_dim)
         self.best_reward = None
         self._baseline = 0.0
         self.history: dict[str, list[float]] = {'probs': [], 'rewards': [], 'baseline': []}
@@ -247,7 +247,7 @@ class BernoulliController(torch.nn.Module, Controller):
         dist = torch.distributions.Bernoulli(probs)
 
         sample = torch.zeros_like(dist.sample())
-        num_samples = 10
+        num_samples = 50
         for _ in range(num_samples):
             sample += dist.sample()
         sample /= num_samples
