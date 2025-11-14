@@ -345,3 +345,18 @@ class BernoulliController(torch.nn.Module, Controller):
         ax.set_title("Step probability evolution")  # type: ignore
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
+
+    def converged(self, thresholds: tuple[float, float], num_steps: int, min_steps: int) -> bool:
+        converged = False
+        assert min_steps > num_steps
+        if len(self.history['probs']) > min_steps:
+            converged = True
+            for x in self.history['probs'][::-num_steps]:
+                for y in x:
+                    if not (thresholds[0] < y < thresholds[1]):
+                        converged = False
+                        break
+        if converged:
+            print(self.history['probs'][:num_steps])
+            print(self.history['probs'])
+        return converged

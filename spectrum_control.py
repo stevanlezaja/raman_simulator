@@ -102,6 +102,12 @@ def main(
     wavelengths: list[float] = []
 
     for curr_step in tqdm.tqdm(range(iterations)):
+        final_step = curr_step == iterations - 1
+        if isinstance(control_loop.controller, ctrl.BernoulliController):
+            if control_loop.controller.converged((0.48, 0.52), 50, 60):
+                print("Converged")
+                final_step = True
+
         control_loop.step()
 
         assert control_loop.curr_output is not None and control_loop.target is not None
@@ -118,7 +124,7 @@ def main(
             for ax in axes.flatten():
                 ax.clear()
 
-        if live_plot or (save_plots and curr_step == iterations - 1):
+        if live_plot or (save_plots and final_step):
             control_loop.plot_loss(ax_err) # type: ignore
             control_loop.plot_spectrums(ax_spec)
             control_loop.plot_parameter_2d(ax_2d)
@@ -132,6 +138,9 @@ def main(
         if live_plot:
             fig.canvas.draw()  # type: ignore
             fig.canvas.flush_events()  # type: ignore
+
+        if final_step:
+            break
 
     if live_plot:
         plt.ioff()  # type: ignore

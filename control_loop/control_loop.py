@@ -72,6 +72,7 @@ class ControlLoop:
         self.curr_control: ra.RamanInputs = ra.RamanInputs(n_pumps=1)
         self.curr_output: Optional[ra.Spectrum[ct.Power]] = None
         self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': [], 'errors': []}
+        self.converged = False
 
     def set_target(self, target: ra.Spectrum[ct.Power]):
         """
