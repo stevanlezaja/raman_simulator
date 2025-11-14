@@ -10,14 +10,14 @@ import raman_amplifier as ra
 
 
 def main():
-    learning_rates: list[float] = [1e-3]
-    weight_decays: list[float] = [0]
+    learning_rates: list[float] = [1e-2]
+    weight_decays: list[float] = [1e-1]
     betas: list[float] = [100]
-    gammas: list[float] = [0.999]
+    gammas: list[float] = [0.99]
     scale = [1]
 
     for params in itertools.product(learning_rates, weight_decays, betas, gammas, scale):
-        for i in range(10):
+        for i in range(5):
             params_dict: dict[str, Any]= {
                 'lr': params[0],
                 'weight_decay': params[1],
@@ -29,11 +29,11 @@ def main():
             controller = ctrl.BernoulliController(input_dim=6)
             controller.populate_parameters(params_dict)
             raman_system = rs.RamanSystem()
-            fiber = fib.StandardSingleModeFiber()
-            raman_system.fiber = fiber
+            raman_system.fiber = fib.StandardSingleModeFiber()
+            raman_system.fiber.length.km = 80
             raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
-            spectrum_control.main(save_plots=True, iterations=500, raman_system=raman_system, controller=controller, number=i)
+            spectrum_control.main(save_plots=True, iterations=2000, raman_system=raman_system, controller=controller, number=i)
 
 
 if __name__ == "__main__":
