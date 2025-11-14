@@ -190,16 +190,23 @@ class ControlLoop:
         assert self.curr_output is not None
         ax.plot( # type: ignore
             [f.Hz for f in self.target.frequencies],
-            [val.value for val in self.target.values],
+            [val.mW for val in self.target.values],
             label="Target",
         )
         ax.plot( # type: ignore
             [f.Hz for f in self.curr_output.frequencies],
-            [val.value for val in self.curr_output.values],
+            [val.mW for val in self.curr_output.values],
             label="Current Output",
         )
         ax.set_xlabel("Frequency (Hz)")  # type: ignore
         ax.set_ylabel("Power (mW)")  # type: ignore
+        ax.set_ylim(
+            0,
+            1.05 * max(
+                max(val.mW for val in self.target.values),
+                max(val.mW for val in self.curr_output.values),
+            ),
+        )
         ax.set_title("Target vs Current Output Spectrum")  # type: ignore
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
