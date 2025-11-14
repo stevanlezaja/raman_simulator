@@ -12,3 +12,8 @@
 - plot error function as a 2d grid of power and wavelength
 - multi pump scenario
 - model realism - interactions between wavelenghts - think about it later
+
+13.11.2025
+- implement forward model based on simulator - use it for gradient descent
+- reduce wavelength ceiling
+- optimize gains instead of power
