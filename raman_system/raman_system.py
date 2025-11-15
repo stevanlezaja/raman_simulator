@@ -92,6 +92,41 @@ class RamanSystem:
         self._raman_amplifier = new
 
     @property
+    def raman_inputs(self):
+        """
+        Get the system's Raman inputs.
+
+        Returns:
+            ra.RamanInputs: current set of input values.
+
+        Raises:
+            AttributeError: If there are no Raman Inputs.
+        """
+
+        if self._raman_inputs is None:
+            log.error(
+                "Attempted to access uninitialized property '%s' on %s",
+                "raman_inputs",
+                self.__class__.__name__,
+            )
+            raise AttributeError(
+                f"Property 'raman_inputs' on {self.__class__.__name__} "
+                f"was accessed before initialization"
+            )
+        return self._raman_inputs
+
+    @raman_inputs.setter
+    def raman_inputs(self, new: ra.RamanInputs):
+        """
+        Set the Raman inputs.
+
+        Args:
+            new (ra.RamanInputs): The Raman inputs to assign.
+        """
+
+        self._raman_inputs = new
+
+    @property
     def fiber(self):
         """
         Get the fiber connecting the pumps.
