@@ -1,12 +1,16 @@
 import numpy as np
 
 from .units import Unit
+from .conversions import db_to_linear_power
 
 
 class PowerGain(Unit):
     default_unit = ' '
 
     def __init__(self, value: float = 0.0, unit: str = ' '):
+        if unit == 'dB':
+            value = db_to_linear_power(value)
+            unit = ' '
         super().__init__(value=value, unit=unit)
 
     @property
