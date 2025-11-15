@@ -220,7 +220,7 @@ class ControlLoop:
         ax.scatter(power_arr[0], wl_arr[0], label="Initial")  # type: ignore
         ax.set_xlabel("Power [W]")  # type: ignore
         ax.set_ylabel("Wavelength [nm]")  # type: ignore
-        ax.set_ylim(bottom=1420, top=1490)
+        ax.set_ylim(bottom=1420, top=1480)
         ax.set_xlim(left=0.0, right=1.0)
         ax.set_title("Wavelength step probability evolution")  # type: ignore
         ax.grid()  # type: ignore
@@ -243,7 +243,7 @@ class ControlLoop:
             ax.plot(wl_arr[:, i], label=f"Wavelength {i}")  # type: ignore
         ax.set_xlabel("Iteration")  # type: ignore
         ax.set_ylabel("Wavelength (nm)")  # type: ignore
-        ax.set_ylim(bottom=1420, top=1490)
+        ax.set_ylim(bottom=1420, top=1480)
         ax.set_title("Wavelength evolution")  # type: ignore
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore

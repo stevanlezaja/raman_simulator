@@ -52,7 +52,7 @@ def main(
         powers.append(ct.Power(num, 'W'))
 
     wavelengths: list [ct.Length] = []
-    for num in list(np.linspace(1420, 1490, num_samples)):
+    for num in list(np.linspace(1420, 1480, num_samples)):
         wavelengths.append(ct.Length(num, 'nm'))
 
 

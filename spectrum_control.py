@@ -84,8 +84,8 @@ def main(
     initial_wavelengths: list[ct.Length] = []
     for i in range(len(raman_system.raman_amplifier.pump_pairs)):
         initial_powers.append(ct.Power(np.random.randint(low=250, high=750), 'mW'))
-        wl_low = 1420 + i * (1490 - 1420) / len(raman_system.raman_amplifier.pump_pairs)
-        wl_high = 1420 + (i + 1) * (1490 - 1420) / len(raman_system.raman_amplifier.pump_pairs)
+        wl_low = 1420 + i * (1480 - 1420) / len(raman_system.raman_amplifier.pump_pairs)
+        wl_high = 1420 + (i + 1) * (1480 - 1420) / len(raman_system.raman_amplifier.pump_pairs)
         initial_wavelengths.append(ct.Length(np.random.randint(low=wl_low, high=wl_high), 'nm'))
 
     control_loop.curr_control = ra.RamanInputs(powers=initial_powers, wavelengths=initial_wavelengths)
