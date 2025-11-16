@@ -3,6 +3,8 @@ import numpy as np
 import scipy.io
 
 import custom_types as ct
+import custom_types.constants as c
+import custom_types.conversions as conv
 import raman_system as rs
 import raman_amplifier as ra
 
