@@ -24,9 +24,10 @@ def load_data(file_name: str, spectrum_frequencies: list[ct.Frequency]) -> tuple
     power_list_ct: list[list[ct.Power]] = [[ct.Power(float(x), 'mW') for x in pumps] for pumps in power_list]
     wavelength_list_ct: list[list[ct.Length]] = [[ct.Length(float(x), 'nm') for x in pumps] for pumps in wavelength_list]
 
-    print(gain_pg)
+    assert len(power_list_ct) == len(wavelength_list)
+    assert len(power_list_ct[0]) == len(wavelength_list[0])
 
-    assert False
+    raman_inputs_list: list[ra.RamanInputs] = [ra.RamanInputs(powers, wavelengths) for powers, wavelengths in zip(power_list_ct, wavelength_list_ct)]
 
     reshaped_gain_cell = []
     reshaped_pump_pwer_cell = []
