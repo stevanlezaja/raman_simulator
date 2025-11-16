@@ -1,1 +1,3 @@
 LIGHT_SPEED =  3 * 1e8
+
+C_BAND = (1530, 1565)
