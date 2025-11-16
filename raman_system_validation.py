@@ -29,43 +29,14 @@ def load_data(file_name: str, spectrum_frequencies: list[ct.Frequency]) -> tuple
 
     raman_inputs_list: list[ra.RamanInputs] = [ra.RamanInputs(powers, wavelengths) for powers, wavelengths in zip(power_list_ct, wavelength_list_ct)]
 
-    reshaped_gain_cell = []
-    reshaped_pump_pwer_cell = []
-    reshaped_pump_wavelength_cell = []
+    spectrum_list: list[ra.Spectrum[ct.PowerGain]] = []
+    for gains in gain_list_ct:
+        assert len(gains) == len(spectrum_frequencies)
 
-    for i in range(len(gain_cell)):
-        reshaped_gain_cell.append(gain_cell[i].squeeze())
-        reshaped_pump_pwer_cell.append(pump_pwer_cell[i].squeeze())
-        reshaped_pump_wavelength_cell.append(pump_wavelength_cell[i].squeeze())
-        
-    Y = torch.tensor(np.array(reshaped_gain_cell)).float()
-    pump_pwer_cell = torch.tensor(np.array(reshaped_pump_pwer_cell))
-    pump_wavelength_cell = torch.tensor(np.array(reshaped_pump_wavelength_cell))
-
-    # Compute overall min and max
-    overall_min_pwr = pump_pwer_cell.min().item()
-    overall_max_pwr = pump_pwer_cell.max().item()
-    overall_min_wavelen = pump_wavelength_cell.min().item()
-    overall_max_wavelen = pump_wavelength_cell.max().item()
-
-    # Set ranges: 3 powers, 3 wavelengths
-    pump_pwr_ranges = [(overall_min_pwr, overall_max_pwr)] * pump_pwer_cell.shape[1]
-    pump_wavelen_ranges = [(overall_min_wavelen, overall_max_wavelen)] * pump_wavelength_cell.shape[1]
-
-    ranges = pump_pwr_ranges + pump_wavelen_ranges
-    RaInputs.min_val = min(overall_min_pwr, overall_min_wavelen)
-    RaInputs.max_val = max(overall_max_pwr, overall_max_wavelen)
-
-    X = torch.cat((pump_pwer_cell, pump_wavelength_cell), dim=1).float()
-        
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
-    
-    X_train = [RaInputs(x) for x in X_train]
-    X_test = [RaInputs(x) for x in X_test]
-    Y_train = [GainSpectrum(x) for x in Y_train]
-    Y_test = [GainSpectrum(x) for x in Y_test]
-    
-    return X_train, Y_train, X_test, Y_test, ranges
+        spectrum = ra.Spectrum(ct.PowerGain)
+        for freq, gain in zip(spectrum_frequencies, gains):
+            spectrum.add_val(freq, gain)
+        spectrum_list.append(spectrum)
 
 
 file_name_1 = 'res_SMF_2pumps_Lspan100_Pch0dBm_5000runs_Dataset.mat'
