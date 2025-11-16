@@ -134,9 +134,9 @@ class RamanAmplifier:
             backward_pump = Pump()
             self.pump_pairs.append((forward_pump, backward_pump))
 
-        self.update_pumps()
+        self._update_pumps()
 
-    def update_pumps(self) -> None:
+    def _update_pumps(self) -> None:
         """
         Update the forward and backward pump powers based on the current
         pumping ratio and base pump power.
@@ -169,7 +169,7 @@ class RamanAmplifier:
         if new == self._pump_powers:
             return
         self._pump_powers = new
-        self.update_pumps()
+        self._update_pumps()
 
     @property
     def pump_wavelengths(self) -> list[ct.Length]:
@@ -192,7 +192,7 @@ class RamanAmplifier:
         if new == self._pump_wavelengths:
             return
         self._pump_wavelengths = new
-        self.update_pumps()
+        self._update_pumps()
 
     @property
     def pumping_ratios(self) -> list[float]:
@@ -219,7 +219,7 @@ class RamanAmplifier:
             return
         _validate_ratios(new)
         self._pumping_ratios = new
-        self.update_pumps()
+        self._update_pumps()
 
     @property
     def is_valid(self) -> bool:
