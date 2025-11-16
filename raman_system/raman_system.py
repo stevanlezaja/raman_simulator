@@ -12,7 +12,6 @@ The RamanSystem provides properties to access and set the amplifier, fiber, and 
 and an `update` method to propagate the input spectrum through the system.
 """
 
-from itertools import product
 from typing import Optional
 
 import raman_amplifier as ra
@@ -118,13 +117,15 @@ class RamanSystem:
     @raman_inputs.setter
     def raman_inputs(self, new: ra.RamanInputs):
         """
-        Set the Raman inputs.
+        Set the Raman inputs. and updates the pumps
 
         Args:
             new (ra.RamanInputs): The Raman inputs to assign.
         """
 
         self._raman_inputs = new
+        self.raman_amplifier.pump_powers = new.powers
+        self.raman_amplifier.pump_wavelengths = new.wavelengths
 
     @property
     def fiber(self):
