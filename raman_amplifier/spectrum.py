@@ -66,9 +66,31 @@ class Spectrum(Generic[T]):
         else:
             raise NotImplementedError
 
+    def __truediv__(self, other: Any) -> "Spectrum[Any]":
+        if isinstance(other, float):
+            return self * (1 / other)
+        elif isinstance(other, Spectrum):
+            return self._spectrum_div(other)
+        else:
+            raise NotImplementedError
 
-    def __truediv__(self, factor: float) -> "Spectrum[T]":
-        return self * (1 / factor)
+    def _spectrum_div(self: "Spectrum[ct.Power]", other: "Spectrum[ct.Power]") -> "Spectrum[ct.PowerGain]":
+
+        if list(self.spectrum.keys()) != list(other.spectrum.keys()):
+            raise ValueError("Spectrum division requires matching frequency samples.")
+
+        result = Spectrum(ct.PowerGain)
+
+        for f in self.spectrum:
+            p_out = self.spectrum[f].value
+            p_in  = other.spectrum[f].value
+
+            gain_linear = p_out / p_in
+            gain = ct.PowerGain(gain_linear, ' ')
+
+            result.spectrum[f] = gain
+
+        return result
 
     def __repr__(self) -> str:
         lines = [f"{f}: {g}" for f, g in self.spectrum.items()]
