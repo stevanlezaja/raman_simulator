@@ -38,6 +38,7 @@ def load_data(file_name: str, spectrum_frequencies: list[ct.Frequency]) -> tuple
             spectrum.add_val(freq, gain)
         spectrum_list.append(spectrum)
 
+    return (raman_inputs_list, spectrum_list)
 
 file_name_1 = 'res_SMF_2pumps_Lspan100_Pch0dBm_5000runs_Dataset.mat'
 file_name_2 = 'res_SMF_3pumps_Dataset.mat'
