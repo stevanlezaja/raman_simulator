@@ -46,4 +46,9 @@ file_name_3 = 'res_SMF_3pumps_Lspan100_Pch0dBm_5000runs_Dataset.mat'
 
 file_path = os.path.join('data', file_name_2)
 
-_ = load_data(file_path)
+input_spectrum = ra.Spectrum(ct.Power)
+for num in list(np.linspace(c.C_BAND[0], c.C_BAND[1], 40)):
+    freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
+    input_spectrum.add_val(freq, ct.Power(1000, 'mW'))
+
+_ = load_data(file_path, input_spectrum.frequencies)
