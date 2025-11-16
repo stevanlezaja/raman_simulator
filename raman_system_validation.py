@@ -20,7 +20,9 @@ def load_data(file_name: str, spectrum_frequencies: list[ct.Frequency]) -> tuple
     power_list: list[list[float]] = [p.squeeze().tolist() for p in pump_pwer_cell] # type: ignore
     wavelength_list: list[list[float]] = [w.squeeze().tolist() for w in pump_wavelength_cell] # type: ignore
 
-    gain_pg = [[ct.PowerGain(float(x), 'dB') for x in spectrum] for spectrum in gain_list]
+    gain_list_ct: list[list[ct.PowerGain]] = [[ct.PowerGain(float(x), 'dB') for x in spectrum] for spectrum in gain_list]
+    power_list_ct: list[list[ct.Power]] = [[ct.Power(float(x), 'mW') for x in pumps] for pumps in power_list]
+    wavelength_list_ct: list[list[ct.Length]] = [[ct.Length(float(x), 'nm') for x in pumps] for pumps in wavelength_list]
 
     print(gain_pg)
 
