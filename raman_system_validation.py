@@ -9,7 +9,7 @@ import raman_system as rs
 import raman_amplifier as ra
 
 
-def load_data(file_name: str, spectrum_frequencies: list[ct.Frequency] = None) -> tuple[list[ra.RamanInputs], list[ra.Spectrum[ct.PowerGain]]]:
+def load_data(file_name: str, spectrum_frequencies: list[ct.Frequency]) -> tuple[list[ra.RamanInputs], list[ra.Spectrum[ct.PowerGain]]]:
     pumps = scipy.io.loadmat(file_name)  # type: ignore
 
     gain_cell = pumps['Gain_cell'].squeeze()  # type: ignore
