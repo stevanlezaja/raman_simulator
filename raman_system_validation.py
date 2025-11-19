@@ -43,75 +43,90 @@ def load_data(file_name: str, spectrum_frequencies: list[ct.Frequency]) -> tuple
 
     return (raman_inputs_list, spectrum_list)
 
-file_name_1 = 'res_SMF_2pumps_Lspan100_Pch0dBm_5000runs_Dataset.mat'
-file_name_2 = 'res_SMF_3pumps_Dataset.mat'
-file_name_3 = 'res_SMF_3pumps_Lspan100_Pch0dBm_5000runs_Dataset.mat'
+def main():
 
-file_path = os.path.join('data', file_name_2)
+    file_name_1 = 'res_SMF_2pumps_Lspan100_Pch0dBm_5000runs_Dataset.mat'
+    file_name_2 = 'res_SMF_3pumps_Dataset.mat'
+    file_name_3 = 'res_SMF_3pumps_Lspan100_Pch0dBm_5000runs_Dataset.mat'
 
-input_spectrum = ra.Spectrum(ct.Power)
-for num in list(np.linspace(c.C_BAND[0], c.C_BAND[1], 40)):
-    freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
-    input_spectrum.add_val(freq, ct.Power(100, 'mW'))
+    file_path = os.path.join('data', file_name_2)
 
-raman_inputs_list, spectrum_list = load_data(file_path, input_spectrum.frequencies)
+    input_spectrum = ra.Spectrum(ct.Power)
+    for num in list(np.linspace(c.C_BAND[0], c.C_BAND[1], 40)):
+        freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
+        input_spectrum.add_val(freq, ct.Power(100, 'mW'))
 
-num_pumps = 2 if file_name_1 in file_path else 3
-pumping_ratios = [0.5 for _ in range(num_pumps)]
-raman_amplifier = ra.RamanAmplifier(num_pumps, pumping_ratios)
+    raman_inputs_list, spectrum_list = load_data(file_path, input_spectrum.frequencies)
 
-raman_system = rs.RamanSystem()
-raman_system.raman_amplifier = raman_amplifier
-raman_system.fiber = fib.StandardSingleModeFiber(length=ct.Length(1, 'km'))
-raman_system.input_spectrum = input_spectrum
-raman_system.output_spectrum = copy.deepcopy(input_spectrum)
-raman_system.update()
+    num_pumps = 2 if file_name_1 in file_path else 3
+    pumping_ratios = [0.0 for _ in range(num_pumps)]
+    raman_amplifier = ra.RamanAmplifier(num_pumps, pumping_ratios)
 
-for raman_inputs, gain_spectrum in zip(raman_inputs_list, spectrum_list):
-    raman_system.raman_inputs = raman_inputs
+    raman_system = rs.RamanSystem()
+    raman_system.raman_amplifier = raman_amplifier
+    raman_system.fiber = fib.StandardSingleModeFiber(length=ct.Length(100, 'km'))
+    raman_system.input_spectrum = input_spectrum
+    raman_system.output_spectrum = copy.deepcopy(input_spectrum)
     raman_system.update()
 
-    simulated_power_spectrum = raman_system.output_spectrum
-    simulated_gain_spectrum = simulated_power_spectrum / input_spectrum
+    for raman_inputs, gain_spectrum in zip(raman_inputs_list, spectrum_list):
+        # Creating the ON spectrum
+        raman_system.raman_inputs = raman_inputs
+        raman_system.update()
 
-    error = ra.spectrum.mse(gain_spectrum, simulated_gain_spectrum)
+        simulated_power_spectrum_on = copy.deepcopy(raman_system.output_spectrum)
 
-    print(gain_spectrum.values[0])
-    print(simulated_gain_spectrum.values[0].dB)
+        # Creating the OFF spectrum
+        no_power = ct.Power(0.0, 'W')
+        raman_system.raman_inputs = ra.RamanInputs(powers=[no_power, no_power, no_power], wavelengths=raman_inputs.wavelengths)
+        raman_system.update()
+
+        simulated_power_spectrum_off = raman_system.output_spectrum
+
+        # Calculating gain
+
+        print(simulated_power_spectrum_on)
+        print(simulated_power_spectrum_off)
+
+        simulated_gain_spectrum = simulated_power_spectrum_on / simulated_power_spectrum_off
+        error = ra.spectrum.mse(gain_spectrum, simulated_gain_spectrum)
+
+        print(gain_spectrum.values[0])
+        print(simulated_gain_spectrum.values[0].dB)
 
 
 
 
 
 
-    plt.ion()  # type: ignore
+        plt.ion()  # type: ignore
 
-    fig, ax = plt.subplots(1, 1, figsize=(12, 8))  # type: ignore
+        fig, ax = plt.subplots(1, 1, figsize=(12, 8))  # type: ignore
 
-    ax.plot( # type: ignore
-        [f.Hz for f in gain_spectrum.frequencies],
-        [val.dB for val in gain_spectrum.values],
-        label="Measured",
-    )
-    ax.plot( # type: ignore
-        [f.Hz for f in simulated_gain_spectrum.frequencies],
-        [val.dB for val in simulated_gain_spectrum.values],
-        label="Simulated",
-    )
-    ax.set_xlabel("Frequency (Hz)")  # type: ignore
-    ax.set_ylabel("Power (dB)")  # type: ignore
-    # ax.set_ylim( # type: ignore
-    #     0,
-    #     1.05 * max(
-    #         max(val.dB for val in gain_spectrum.values),
-    #         max(val.value for val in simulated_gain_spectrum.values),
-    #     ),
-    # )
-    ax.set_title("Target vs Current Output Spectrum")  # type: ignore
-    ax.grid()  # type: ignore
-    ax.legend()  # type: ignore
+        ax.plot( # type: ignore
+            [f.Hz for f in gain_spectrum.frequencies],
+            [val.dB for val in gain_spectrum.values],
+            label="Measured",
+        )
+        ax.plot( # type: ignore
+            [f.Hz for f in simulated_gain_spectrum.frequencies],
+            [val.dB for val in simulated_gain_spectrum.values],
+            label="Simulated",
+        )
+        ax.set_xlabel("Frequency (Hz)")  # type: ignore
+        ax.set_ylabel("Power (dB)")  # type: ignore
+        # ax.set_ylim( # type: ignore
+        #     0,
+        #     1.05 * max(
+        #         max(val.dB for val in gain_spectrum.values),
+        #         max(val.value for val in simulated_gain_spectrum.values),
+        #     ),
+        # )
+        ax.set_title("Target vs Current Output Spectrum")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
 
-    fig.canvas.draw()  # type: ignore
-    fig.canvas.flush_events()  # type: ignore
+        fig.canvas.draw()  # type: ignore
+        fig.canvas.flush_events()  # type: ignore
 
-    _ = input()
+        _ = input()
