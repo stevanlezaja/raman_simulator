@@ -157,6 +157,11 @@ class Fiber(ABC):
 class StandardSingleModeFiber(Fiber):
     """Standard single-mode fiber with measured Raman gain efficiency in the C-band."""
 
+    def __init__(self, length: ct.Length = ct.Length(25.0, 'km')):
+        super().__init__(length=length)
+        self.alpha_p.dB_km = 0.25
+        self.alpha_s.dB_km = 0.2
+
     @property
     def raman_efficiency(self) -> dict[ct.Frequency, float]:
         data: dict[ct.Frequency, float] = {}
