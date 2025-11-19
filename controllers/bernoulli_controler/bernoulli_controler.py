@@ -187,10 +187,10 @@ class BernoulliController(torch.nn.Module, Controller):
     ) -> float:
 
         def shape_difference(spec1: ra.Spectrum[ct.Power], spec2: ra.Spectrum[ct.Power]):
-            int1 = ra.io.integral(spec1)
+            int1 = ra.spectrum.integral(spec1)
             scaled_spec1 = copy.deepcopy(spec1)
 
-            int2 = ra.io.integral(spec2)
+            int2 = ra.spectrum.integral(spec2)
             scaled_spec2 = copy.deepcopy(spec2)
 
             difference_spec = scaled_spec1 / int1 - scaled_spec2 / int2
@@ -198,7 +198,7 @@ class BernoulliController(torch.nn.Module, Controller):
             return difference_spec.mean
 
         def integral_difference(spec1: ra.Spectrum[ct.Power], spec2: ra.Spectrum[ct.Power]):
-            int_dif = ra.io.integral(spec1) - ra.io.integral(spec2)
+            int_dif = ra.spectrum.integral(spec1) - ra.spectrum.integral(spec2)
             return int_dif if int_dif > 0 else - 10 * int_dif
 
         def wavelength_spread(wavelengths: list[ct.Length]):
