@@ -23,3 +23,11 @@ class Power(Unit):
     def mW(self, new: float):
         self.value = (new, 'mW')
 
+    @property
+    def uW(self):
+        return self._value * 1e6
+
+    @uW.setter
+    def uW(self, new: float):
+        self.value = (new, 'uW')
+
