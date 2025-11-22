@@ -80,3 +80,15 @@ class RamanInputs:
 
     def __repr__(self):
         return f"Raman inputs: \n Powers: {self.powers},\n Wavelengths: {self.wavelengths}.\n"
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "powers_mW": [p.mW for p in self.powers],
+            "wavelengths_nm": [w.nm for w in self.wavelengths],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]):
+        powers = [ct.Power(float(v), 'mW') for v in data["powers_mW"]]
+        wavelengths = [ct.Length(float(w), 'nm') for w in data["wavelengths_nm"]]
+        return cls(powers, wavelengths)
