@@ -14,16 +14,16 @@ def main():
     input_spectrum = ra.Spectrum(ct.Power)
     for num in list(np.linspace(1530, 1560, 40)):
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
-        input_spectrum.add_val(freq, ct.Power(1000, 'mW'))
+        input_spectrum.add_val(freq, ct.Power(25, 'uW'))
 
 
     num_pumps = 3
-    pumping_ratios = [0.0 for _ in range(num_pumps)]
+    pumping_ratios = [1.0 for _ in range(num_pumps)]
     raman_amplifier = ra.RamanAmplifier(num_pumps, pumping_ratios)
 
     raman_system = rs.RamanSystem()
     raman_system.raman_amplifier = raman_amplifier
-    raman_system.fiber = fib.StandardSingleModeFiber(length=ct.Length(200, 'km'))
+    raman_system.fiber = fib.StandardSingleModeFiber(length=ct.Length(100, 'km'))
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = copy.deepcopy(input_spectrum)
     raman_system.update()
@@ -70,3 +70,6 @@ def main():
     fig.canvas.flush_events()  # type: ignore
 
     _ = input()
+
+if __name__ == "__main__":
+    main()
