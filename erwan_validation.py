@@ -14,7 +14,7 @@ def main():
     input_spectrum = ra.Spectrum(ct.Power)
     for num in list(np.linspace(1530, 1560, 40)):
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
-        input_spectrum.add_val(freq, ct.Power(25, 'uW'))
+        input_spectrum.add_val(freq, ct.Power(250, 'uW'))
 
 
     num_pumps = 3
