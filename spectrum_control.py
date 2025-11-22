@@ -27,7 +27,7 @@ NUM_STEPS = 200
 def _make_flat_spectrum(input_spectrum: ra.Spectrum[ct.Power]) -> ra.Spectrum[ct.Power]:
     target_spectrum = ra.Spectrum(ct.Power)
     for freq in input_spectrum.frequencies:
-        target_spectrum.add_val(freq, ct.Power(60, 'mW'))
+        target_spectrum.add_val(freq, ct.Power(25, 'uW'))
     return target_spectrum
 
 def _make_multipump_spectrum(
@@ -70,7 +70,7 @@ def main(
     input_spectrum = ra.Spectrum(ct.Power)
     for num in list(np.linspace(wavelength_range[0], wavelength_range[1], num_samples)):
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
-        input_spectrum.add_val(freq, ct.Power(1000, 'mW'))
+        input_spectrum.add_val(freq, ct.Power(25, 'uW'))
 
     target_spectrum = _make_flat_spectrum(input_spectrum)
 
@@ -103,10 +103,10 @@ def main(
 
     for curr_step in tqdm.tqdm(range(iterations)):
         final_step = curr_step == iterations - 1
-        if isinstance(control_loop.controller, ctrl.BernoulliController):
-            if control_loop.controller.converged((0.48, 0.52), 50, 60):
-                print("Converged")
-                final_step = True
+        # if isinstance(control_loop.controller, ctrl.BernoulliController):
+        #     if control_loop.controller.converged((0.48, 0.52), 50, 60):
+        #         print("Converged")
+        #         final_step = True
 
         control_loop.step()
 

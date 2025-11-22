@@ -12,7 +12,7 @@ import raman_amplifier as ra
 def main():
     learning_rates: list[float] = [1e-2]
     weight_decays: list[float] = [1e-1]
-    betas: list[float] = [100]
+    betas: list[float] = [1000]
     gammas: list[float] = [0.99]
     scale = [1]
 
@@ -33,7 +33,7 @@ def main():
             raman_system.fiber.length.km = 80
             raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
-            spectrum_control.main(save_plots=True, iterations=2000, raman_system=raman_system, controller=controller, number=i)
+            spectrum_control.main(save_plots=True, iterations=200, raman_system=raman_system, controller=controller, number=i)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 from custom_types.power import Power
-from raman_amplifier.io import RamanInputs, Spectrum
+from raman_amplifier import RamanInputs, Spectrum
 from ..controller_base import Controller
 
 class DifferentialEvolutionController(Controller):

@@ -43,9 +43,9 @@ class Fiber(ABC):
     Defines common fiber attributes such as length, signal/pump attenuation,
     and requires subclasses to implement Raman efficiency and effective area.
     """
-    def __init__(self):
+    def __init__(self, length: ct.Length = ct.Length(25.0, 'km')):
         """Initialize default fiber parameters."""
-        self.length = ct.Length(25.0, 'km')
+        self.length = length
         self.__alpha_p = ct.FiberAttenuation(0.0437, '1/km')
         self.__alpha_s = ct.FiberAttenuation(0.0576, '1/km')
 
@@ -156,6 +156,11 @@ class Fiber(ABC):
 
 class StandardSingleModeFiber(Fiber):
     """Standard single-mode fiber with measured Raman gain efficiency in the C-band."""
+
+    def __init__(self, length: ct.Length = ct.Length(25.0, 'km')):
+        super().__init__(length=length)
+        self.alpha_p.dB_km = 0.25
+        self.alpha_s.dB_km = 0.2
 
     @property
     def raman_efficiency(self) -> dict[ct.Frequency, float]:

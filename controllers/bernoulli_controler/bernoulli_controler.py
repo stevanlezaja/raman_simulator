@@ -92,7 +92,7 @@ class BernoulliController(torch.nn.Module, Controller):
         self.logits = 0.01 * torch.randn(input_dim)
         self.best_reward = None
         self._baseline = 0.0
-        self.history: dict[str, list[float]] = {'probs': [], 'rewards': [], 'baseline': []}
+        self.history: dict[str, list[float]|dict[str, list[float]]] = {'probs': [], 'rewards': {'total': [], 'shape_loss': [], 'integral_loss': [], 'mse_loss': [], 'wavelength_spread': []}, 'baseline': []}
         self.avg_sample = torch.zeros_like(self.logits)
         self.prev_error: ra.Spectrum[ct.Power] | None = None
         self.output_integral: float = 0.0
@@ -173,7 +173,7 @@ class BernoulliController(torch.nn.Module, Controller):
 
     @property
     def rewards(self) -> list[float]:
-        return self.history['rewards']
+        return self.history['rewards']['total']
 
     @property
     def baseline(self) -> list[float]:
@@ -187,10 +187,10 @@ class BernoulliController(torch.nn.Module, Controller):
     ) -> float:
 
         def shape_difference(spec1: ra.Spectrum[ct.Power], spec2: ra.Spectrum[ct.Power]):
-            int1 = ra.io.integral(spec1)
+            int1 = ra.spectrum.integral(spec1).W
             scaled_spec1 = copy.deepcopy(spec1)
 
-            int2 = ra.io.integral(spec2)
+            int2 = ra.spectrum.integral(spec2).W
             scaled_spec2 = copy.deepcopy(spec2)
 
             difference_spec = scaled_spec1 / int1 - scaled_spec2 / int2
@@ -198,7 +198,7 @@ class BernoulliController(torch.nn.Module, Controller):
             return difference_spec.mean
 
         def integral_difference(spec1: ra.Spectrum[ct.Power], spec2: ra.Spectrum[ct.Power]):
-            int_dif = ra.io.integral(spec1) - ra.io.integral(spec2)
+            int_dif = ra.spectrum.integral(spec1).W - ra.spectrum.integral(spec2).W
             return int_dif if int_dif > 0 else - 10 * int_dif
 
         def wavelength_spread(wavelengths: list[ct.Length]):
@@ -207,11 +207,15 @@ class BernoulliController(torch.nn.Module, Controller):
                 spread += abs(w1.nm - w2.nm) **0.5
             return spread
 
-        sh_dif = 1000 * shape_difference(curr_output, target_output)
+        sh_dif = 1 * shape_difference(curr_output, target_output)
 
         int_dif = integral_difference(curr_output, target_output)
 
-        wl_spread = 0.1 * wavelength_spread(curr_input.wavelengths)
+        wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
+
+        self.history['rewards']['shape_loss'].append(sh_dif)
+        self.history['rewards']['integral_loss'].append(int_dif)
+        self.history['rewards']['wavelength_spread'].append(wl_spread)
 
         loss = sh_dif + int_dif - wl_spread
 
@@ -307,7 +311,10 @@ class BernoulliController(torch.nn.Module, Controller):
         """
 
         reward = self.reward(self.curr_input, self.curr_output, self.target_output)
-        self.history['rewards'].append(reward)
+        self.history['rewards']['total'].append(reward)
+
+        mse = ra.spectrum.mse(self.curr_output, self.target_output)
+        self.history['rewards']['mse_loss'].append(mse)
 
         self._baseline = self.gamma * self._baseline + (1 - self.gamma) * reward
         self.history['baseline'].append(self._baseline)
@@ -330,6 +337,9 @@ class BernoulliController(torch.nn.Module, Controller):
     def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
         ax.plot(self.rewards, label='Reward')  # type: ignore
         ax.plot(self.baseline, label='Baseline')  # type: ignore
+        # ax.plot(self.history['rewards']['mse_loss'], label='MSE Loss')  # type: ignore
+        ax.plot([-x for x in self.history['rewards']['integral_loss']], label='Integral Loss')  # type: ignore
+        ax.plot([-x for x in self.history['rewards']['shape_loss']], label='Shape Loss')  # type: ignore
         ax.set_xlabel("Iteration")  # type: ignore
         ax.set_ylabel("Reward")  # type: ignore
         ax.set_title("Reward over time")  # type: ignore

@@ -1,5 +1,3 @@
-import numpy as np
-
 from .units import Unit
 
 
@@ -11,11 +9,11 @@ class FiberAttenuation(Unit):
 
     @property
     def km(self):
-        return self.value * 1e3
+        return self.m * 1e3
 
     @km.setter
     def km(self, new: float):
-        self.value = (new, '1/km')
+        self.m = new / 1e3
 
     @property
     def m(self):
@@ -27,11 +25,12 @@ class FiberAttenuation(Unit):
 
     @property
     def dB_km(self):
-        return (10 / np.log(10)) * np.asarray(self.value)
+        return 4.343 * self.km
 
     @dB_km.setter
     def dB_km(self, new: float):
-        self.value = ((np.log(10) / 10) * np.asarray(new), '1/km')
+        self.km = new / 4.343
+
 
 if __name__ == "__main__":
     att = FiberAttenuation(0.1, '1/km')

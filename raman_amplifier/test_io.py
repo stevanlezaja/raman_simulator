@@ -6,7 +6,8 @@ import pytest
 
 import custom_types as ct
 
-from .io import RamanInputs, Spectrum
+from .raman_inputs import RamanInputs
+from .spectrum import Spectrum
 
 
 def test_ramaninputs_default_init():
