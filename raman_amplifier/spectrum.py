@@ -56,7 +56,7 @@ class Spectrum(Generic[T]):
         return self._linear_op(other, '-')
 
     def __mul__(self, other: Any) -> "Spectrum[T]":
-        if isinstance(other, float):
+        if isinstance(other, float | int):
             for comp in self.values:
                 current_value, unit = comp.value, comp.default_unit
                 comp.value = (current_value * other, unit)
