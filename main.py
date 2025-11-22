@@ -183,10 +183,10 @@ if __name__ == "__main__":
         raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
         controller = ctrl.BernoulliController(
-            lr=1e-2,
+            lr=1e-1,
             power_step=ct.Power(20, 'mW'),
             wavelength_step=ct.Length(2, 'nm'),
-            beta=100,
+            beta=1000,
             gamma=0.99,
             weight_decay=1e-1,
             input_dim=6,

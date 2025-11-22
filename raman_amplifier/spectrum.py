@@ -155,8 +155,11 @@ class Spectrum(Generic[T]):
 def mse(current: Spectrum[T], target: Spectrum[T]) -> float:
     return abs((current - target).mean)
 
-def integral(spec: Spectrum[T]) -> float:
-    sum_value = 0
-    for comp in spec.values:
-        sum_value += comp.value
-    return sum_value
+def integral(spec: Spectrum[T]) -> Any:
+    if spec.value_cls == ct.Power:
+        sum_value = ct.Power(0, 'W')
+        for comp in spec.values:
+            assert isinstance(comp, ct.Power)
+            sum_value += comp
+        return sum_value
+    raise NotImplementedError
