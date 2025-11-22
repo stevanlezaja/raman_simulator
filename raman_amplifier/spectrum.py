@@ -16,9 +16,13 @@ class Spectrum(Generic[T]):
     """
     operations = ['+', '-']
 
-    def __init__(self, value_cls: Type[T]):
+    def __init__(self, value_cls: Type[T],* , frequencies: list[ct.Frequency] = [], values: list[ct.Power|ct.PowerGain] = []):
         self.value_cls: Type[T] = value_cls  # store class type
+        assert len(frequencies) == len(values)
         self.spectrum: dict[ct.Frequency, T] = {}
+        for freq, val in zip(frequencies, values):
+            assert isinstance(val, self.value_cls)
+            self.add_val(freq, val)
 
     def _linear_op(self, other: "Spectrum[T]", operation: str) -> "Spectrum[T]":
         """
@@ -150,6 +154,30 @@ class Spectrum(Generic[T]):
         if not self.spectrum:
             raise ValueError("Spectrum is empty")
         return max(self.spectrum.items(), key=lambda item: item[1].value)[0]
+
+    def to_dict(self) -> dict[str, Any]:
+        result = {"frequencies_Hz": [f.Hz for f in self.frequencies],}
+        if self.value_cls == ct.Power:
+            result["values_mW"] = [v.mW for v in self.values]
+        elif self.value_cls == ct.PowerGain:
+            result['values_dB'] = [v.dB for v in self.values]
+        else:
+            raise TypeError("Unsupported Spectrum value type")
+        return result
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        freqs = [ct.Frequency(float(f), 'Hz') for f in data['frequencies_Hz']]
+        if 'values_mW' in data.keys():
+            vals = [ct.Power(float(v), 'mW') for v in data["values_mW"]]
+            cls_type = ct.Power
+        elif 'values_dB' in data.keys():
+            vals = [ct.PowerGain(float(v), 'dB') for v in data["values_dB"]]
+            cls_type = ct.PowerGain
+        else:
+            raise TypeError("Unsupported Spectrum value type")
+        return cls(cls_type, frequencies=freqs, values=vals)
+
 
 def mse(current: Spectrum[T], target: Spectrum[T]) -> float:
     return abs((current - target).mean)
