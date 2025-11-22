@@ -1,4 +1,3 @@
-
 from typing import TypeVar, Generic, Type, Iterator, Any
 
 import custom_types as ct
