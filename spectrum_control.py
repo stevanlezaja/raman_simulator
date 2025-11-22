@@ -103,10 +103,10 @@ def main(
 
     for curr_step in tqdm.tqdm(range(iterations)):
         final_step = curr_step == iterations - 1
-        if isinstance(control_loop.controller, ctrl.BernoulliController):
-            if control_loop.controller.converged((0.48, 0.52), 50, 60):
-                print("Converged")
-                final_step = True
+        # if isinstance(control_loop.controller, ctrl.BernoulliController):
+        #     if control_loop.controller.converged((0.48, 0.52), 50, 60):
+        #         print("Converged")
+        #         final_step = True
 
         control_loop.step()
 
