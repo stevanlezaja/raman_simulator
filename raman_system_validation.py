@@ -23,7 +23,9 @@ def load_data(file_name: str, spectrum_frequencies: list[ct.Frequency]) -> tuple
     power_list: list[list[float]] = [p.squeeze().tolist() for p in pump_pwer_cell] # type: ignore
     wavelength_list: list[list[float]] = [w.squeeze().tolist() for w in pump_wavelength_cell] # type: ignore
 
-    gain_list_ct: list[list[ct.PowerGain]] = [[ct.PowerGain(float(x), 'dB') for x in spectrum] for spectrum in gain_list.reverse()]
+    gain_list.reverse()
+
+    gain_list_ct: list[list[ct.PowerGain]] = [[ct.PowerGain(float(x), 'dB') for x in spectrum] for spectrum in gain_list]
     power_list_ct: list[list[ct.Power]] = [[ct.Power(float(x), 'mW') for x in pumps] for pumps in power_list]
     wavelength_list_ct: list[list[ct.Length]] = [[ct.Length(float(x), 'nm') for x in pumps] for pumps in wavelength_list]
 
@@ -54,7 +56,7 @@ def main():
     input_spectrum = ra.Spectrum(ct.Power)
     for num in list(np.linspace(c.C_BAND[0], c.C_BAND[1], 40)):
         freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
-        input_spectrum.add_val(freq, ct.Power(100, 'mW'))
+        input_spectrum.add_val(freq, ct.Power(25, 'uW'))
 
     raman_inputs_list, spectrum_list = load_data(file_path, input_spectrum.frequencies)
 
@@ -81,23 +83,11 @@ def main():
         raman_system.raman_inputs = ra.RamanInputs(powers=[no_power, no_power, no_power], wavelengths=raman_inputs.wavelengths)
         raman_system.update()
 
-        simulated_power_spectrum_off = raman_system.output_spectrum
+        simulated_power_spectrum_off = copy.deepcopy(raman_system.output_spectrum)
 
         # Calculating gain
-
-        print(simulated_power_spectrum_on)
-        print(simulated_power_spectrum_off)
-
         simulated_gain_spectrum = simulated_power_spectrum_on / simulated_power_spectrum_off
         error = ra.spectrum.mse(gain_spectrum, simulated_gain_spectrum)
-
-        print(gain_spectrum.values[0])
-        print(simulated_gain_spectrum.values[0].dB)
-
-
-
-
-
 
         plt.ion()  # type: ignore
 
@@ -129,4 +119,5 @@ def main():
         fig.canvas.draw()  # type: ignore
         fig.canvas.flush_events()  # type: ignore
 
-        _ = input()
+if __name__ == "__main__":
+    main()
