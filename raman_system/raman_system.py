@@ -255,10 +255,7 @@ class RamanSystem:
 
                 experiment = exp.Experiment(self.fiber, signal, pump_pair)
 
-                if self.output_spectrum[freq] is None:  # type: ignore
-                    self.output_spectrum[freq] = experiment.get_signal_power_at_distance(self.fiber.length)
-                else:
-                    self.output_spectrum[freq] += experiment.get_signal_power_at_distance(self.fiber.length)
+                self.output_spectrum[freq] += experiment.get_signal_power_at_distance(self.fiber.length)
 
     @property
     def is_valid(self) -> bool:
