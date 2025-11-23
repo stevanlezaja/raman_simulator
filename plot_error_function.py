@@ -25,7 +25,7 @@ def main(
 
     input_spectrum = ra.Spectrum(ct.Power)
     for num in list(np.linspace(wavelength_range[0], wavelength_range[1], num_samples)):
-        freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
+        freq = conv.wavelength_to_frequency(ct.Length(num, 'nm'))
         input_spectrum.add_val(freq, ct.Power(10, 'mW'))
 
     target_spectrum = ra.Spectrum(ct.Power)

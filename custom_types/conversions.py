@@ -5,7 +5,7 @@ from .frequency import Frequency
 from .constants import *
 
 
-def wavelenth_to_frequency(wav: Length) -> Frequency:
+def wavelength_to_frequency(wav: Length) -> Frequency:
     return Frequency(LIGHT_SPEED / wav.m, 'Hz')
 
 def frequency_to_wavelenth(freq: Frequency) -> Length:

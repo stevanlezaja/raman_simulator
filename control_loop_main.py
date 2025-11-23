@@ -28,7 +28,7 @@ def main():
     control_loop = loop.ControlLoop(raman_system, controller)
 
     target = ra.Spectrum(ct.Power)
-    target.add_val(conv.wavelenth_to_frequency(signal.wavelength), ct.Power(15, 'mW'))
+    target.add_val(conv.wavelength_to_frequency(signal.wavelength), ct.Power(15, 'mW'))
 
     control_loop.set_target(target)
 

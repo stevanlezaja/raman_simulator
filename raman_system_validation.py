@@ -55,7 +55,7 @@ def main():
 
     input_spectrum = ra.Spectrum(ct.Power)
     for num in list(np.linspace(c.C_BAND[0], c.C_BAND[1], 40)):
-        freq = conv.wavelenth_to_frequency(ct.Length(num, 'nm'))
+        freq = conv.wavelength_to_frequency(ct.Length(num, 'nm'))
         input_spectrum.add_val(freq, ct.Power(25, 'uW'))
 
     raman_inputs_list, spectrum_list = load_data(file_path, input_spectrum.frequencies)
