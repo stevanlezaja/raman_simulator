@@ -6,6 +6,7 @@ from typing import Any
 
 import numpy as np
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 import custom_types as ct
 import custom_types.conversions as conv
@@ -49,6 +50,9 @@ def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, file_p
     data_batch: list[dict[str, Any]] = []
     batch_size = 10
 
+    plt.ion()  # turn on interactive mode
+    fig, ax = plt.subplots()
+
     for _ in tqdm(range(num_samples)):
         raman_inputs = sample_raman_inputs(num_pumps, power_range, wavelength_range)
 
@@ -66,16 +70,52 @@ def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, file_p
         # Write batch
         if len(data_batch) >= batch_size:
             write_data(data_batch, file_path)
+            visualize_data_batch(data_batch, ax)
             data_batch = []
 
     # Write remaining
     if data_batch:
         write_data(data_batch, file_path)
 
+
+def _plot_single_raman_input(raman_inputs: ra.RamanInputs, ax: Any) -> None:
+    powers = [p.mW for p in raman_inputs.powers]
+    wavelengths = [w.nm for w in raman_inputs.wavelengths]
+    ax.scatter(powers, wavelengths, s=10)
+
+
+def visualize_data_batch(data_batch: list[dict[str, Any]], ax: Any) -> None:
+    for item in data_batch:
+        raman_inputs = ra.RamanInputs.from_dict(item['inputs'])
+        _plot_single_raman_input(raman_inputs, ax)
+    plt.pause(0.001)
+
+
+def visualize_data(file_path: str, update_every: int = 10):
+    from utils.loading_data_from_file import load_raman_dataset
+
+    plt.ion()
+    fig, ax = plt.subplots()
+
+    ax.set_xlabel("Pump Power (mW)")
+    ax.set_ylabel("Pump Wavelength (nm)")
+    ax.set_title("Streaming Raman Inputs")
+    ax.grid(True)
+
+    for i, (raman_inputs, _) in enumerate(load_raman_dataset(file_path)):
+        _plot_single_raman_input(raman_inputs, ax)
+
+        if i % update_every == 0:
+            plt.pause(0.001)
+
+    plt.ioff()
+    plt.show()
+
+
 def main():
     num_pumps = 3
     pumping_ratio = 1.0
-    generate_data(num_samples=2, num_pumps=num_pumps, pumping_ratio=pumping_ratio, file_path=f'data/raman_simulator_{num_pumps}_pumps_{pumping_ratio}_ratio.json')
+    generate_data(num_samples=10000, num_pumps=num_pumps, pumping_ratio=pumping_ratio, file_path=f'data/raman_simulator_{num_pumps}_pumps_{pumping_ratio}_ratio.json')
 
 if __name__ == "__main__":
     main()
