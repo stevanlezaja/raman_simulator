@@ -1,9 +1,11 @@
 import torch
 
-from custom_types.power import Power
-from raman_amplifier.raman_inputs import RamanInputs
-from raman_amplifier.spectrum import Spectrum
+import raman_amplifier as ra
+import custom_types as ct
+from utils.loading_data_from_file import load_raman_dataset
+
 from ..controller_base import Controller
+from .forward_nn import ForwardNN
 
 class GradientDescentController(Controller, torch.nn.Module):
     def __init__(self):
