@@ -48,5 +48,23 @@ class GradientDescentController(Controller):
 
             print(f"[GDController] epoch {epoch+1}/{epochs}, loss={total/len(loader):.6f}")
 
+
+    def get_control(
+        self,
+        curr_input: ra.RamanInputs,
+        curr_output: ra.Spectrum[ct.Power],
+        target_output: ra.Spectrum[ct.Power]
+    ) -> ra.RamanInputs:
+
+        x = torch.tensor(curr_input.as_array(), dtype=torch.float32, requires_grad=True)
+        target = torch.tensor(target_output.as_array(), dtype=torch.float32)
+        y_pred = self.model(x)
+        loss = torch.nn.functional.mse_loss(y_pred, target)
+        loss.backward()
+        with torch.no_grad():
+            grad_x = x.grad
+            x_new = x - self.control_lr * grad_x
+        return ra.RamanInputs.from_array(x_new.detach().numpy())
+
     def update_controller(self, error: ra.Spectrum[ct.Power], control_delta: ra.RamanInputs) -> None:
         pass
