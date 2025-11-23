@@ -40,6 +40,7 @@ from .pid_controller import PidController
 from .controller_base import Controller
 from .manual_controller import ManualController
 from .controller_cli import ControllerCli
+from .gradient_descent_controller import GradientDescentController
 
 __all__ = ["ControllerCli", "ManualController", "BernoulliController", "PidController",
-           "Controller"]
+           "Controller", "GradientDescentController"]
