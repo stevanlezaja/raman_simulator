@@ -6,7 +6,7 @@ import custom_types as ct
 import raman_amplifier as ra
 
 
-def load_jsonl(path: str) -> Iterator[dict]:
+def _load_jsonl(path: str) -> Iterator[dict]:
     """
     Loads the dataset file line-by-line.
     Each line is a separate JSON dict.
@@ -26,7 +26,7 @@ def load_raman_dataset(path: str):
     """
     Loads the dataset and reconstructs RamanInputs and Spectrum objects.
     """
-    for entry in load_jsonl(path):
+    for entry in _load_jsonl(path):
 
         inputs_dict = entry["inputs"]
         spectrum_dict = entry["spectrum"]
