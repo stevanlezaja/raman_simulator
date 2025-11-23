@@ -1,4 +1,5 @@
 from typing import TypeVar, Generic, Type, Iterator, Any
+import numpy as np
 
 import custom_types as ct
 import custom_logging as clog
@@ -148,6 +149,57 @@ class Spectrum(Generic[T]):
         Property that retuns the spectrum values as a list
         """
         return list(self.spectrum.values())
+
+    def as_array(self) -> np.ndarray:
+        """
+        Convert Spectrum into a flat array:
+            [frequencies_Hz..., values...]
+        Values use the appropriate unit:
+            Power → W
+            PowerGain → dB
+        """
+        freqs = [f.Hz for f in self.frequencies]
+
+        if self.value_cls == ct.Power:
+            vals = [v.W for v in self.values]
+        elif self.value_cls == ct.PowerGain:
+            vals = [v.dB for v in self.values]
+        else:
+            raise TypeError(f"Unsupported Spectrum value type: {self.value_cls}")
+
+        return np.array(freqs + vals, dtype=float)
+
+    @classmethod
+    def from_array(cls, value_cls: Type[T], arr: np.ndarray) -> "Spectrum[T]":
+        """
+        Reconstruct Spectrum from a flat array:
+            [f1, f2, ..., fN, v1, v2, ..., vN]
+        Frequencies in Hz, values depend on value_cls.
+
+        Example:
+            Spectrum.from_array(ct.Power, arr)
+        """
+
+        arr = np.asarray(arr, dtype=float)
+        n = len(arr)
+
+        assert n % 2 == 0, "Array must contain N freqs + N values"
+
+        half = n // 2
+        freq_part = arr[:half]
+        val_part  = arr[half:]
+
+        frequencies = [ct.Frequency(float(f), "Hz") for f in freq_part]
+
+        if value_cls == ct.Power:
+            values = [ct.Power(float(v), "W") for v in val_part]
+        elif value_cls == ct.PowerGain:
+            values = [ct.PowerGain(float(v), "dB") for v in val_part]
+        else:
+            raise TypeError(f"Unsupported Spectrum value type: {value_cls}")
+
+        return cls(value_cls, frequencies=frequencies, values=values)
+
 
     def peak_frequency(self) -> ct.Frequency:
         """Return the frequency with the maximum value in the spectrum."""
