@@ -25,8 +25,8 @@ class Experiment:
 
     @functools.cached_property
     def C_R(self):
-        f_s = conv.wavelenth_to_frequency(self.signal.wavelength)
-        f_p = conv.wavelenth_to_frequency(self.pump_wavelength)
+        f_s = conv.wavelength_to_frequency(self.signal.wavelength)
+        f_p = conv.wavelength_to_frequency(self.pump_wavelength)
 
         freq_diff = Frequency(abs(f_p.Hz - f_s.Hz), 'Hz')
 
