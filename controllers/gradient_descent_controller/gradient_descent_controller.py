@@ -23,7 +23,9 @@ class GradientDescentController(Controller):
 
         for raman_inputs, spectrum in samples:
             x = torch.tensor(raman_inputs.as_array(), dtype=torch.float32)
-            y = torch.tensor(spectrum.as_array(), dtype=torch.float32)
+            arr = spectrum.as_array()
+            values = arr[len(arr)//2:]
+            y = torch.tensor(values, dtype=torch.float32)
 
             X_list.append(x)
             Y_list.append(y)
@@ -57,7 +59,10 @@ class GradientDescentController(Controller):
     ) -> ra.RamanInputs:
 
         x = torch.tensor(curr_input.as_array(), dtype=torch.float32, requires_grad=True)
-        target = torch.tensor(target_output.as_array(), dtype=torch.float32)
+
+        arr = target_output.as_array()
+        values = arr[len(arr)//2:]
+        target = torch.tensor(values, dtype=torch.float32)
         y_pred = self.model(x)
         loss = torch.nn.functional.mse_loss(y_pred, target)
         loss.backward()
