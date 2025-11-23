@@ -2,7 +2,8 @@
 This module contains Input and Output types for a Raman Amplifier
 """
 
-from typing import TypeVar, Generic, Type, Iterator, Optional, Any
+from typing import Optional, Any
+import numpy as np
 
 import custom_types as ct
 import custom_logging as clog
@@ -80,6 +81,39 @@ class RamanInputs:
 
     def __repr__(self):
         return f"Raman inputs: \n Powers: {self.powers},\n Wavelengths: {self.wavelengths}.\n"
+
+    def as_array(self) -> np.ndarray:
+        """
+        Convert RamanInputs to a flat numpy array:
+            [powers..., wavelengths...]
+        Powers in W, wavelengths in nm.
+        """
+
+        power_values = [p.W for p in self.powers]
+        wavelength_values = [wl.nm for wl in self.wavelengths]
+
+        return np.array(power_values + wavelength_values, dtype=float)
+
+    @classmethod
+    def from_array(cls, arr: np.ndarray) -> "RamanInputs":
+        """
+        Reconstruct RamanInputs from a flat array:
+            [P1, ..., Pn, λ1, ..., λn]
+        """
+
+        arr = np.asarray(arr, dtype=float)
+        total = len(arr)
+        assert total % 2 == 0, "Input array must have even length: N powers + N wavelengths"
+
+        n_pumps = total // 2
+
+        powers_vals = arr[:n_pumps]
+        wavelengths_vals = arr[n_pumps:]
+
+        powers = [ct.Power(float(p), 'W') for p in powers_vals]
+        wavelengths = [ct.Length(float(wl), 'nm') for wl in wavelengths_vals]
+
+        return cls(powers=powers, wavelengths=wavelengths)
 
     def to_dict(self) -> dict[str, Any]:
         return {
