@@ -15,11 +15,38 @@ class GradientDescentController(Controller):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr_model)
         self.control_lr = lr_control
 
-    def train_controller(self, file_path: str):
-        pass
+    def train_controller(self, file_path: str, epochs: int = 40, batch_size: int = 32):
+        samples = list(load_raman_dataset(file_path))
 
-    def get_control(self, curr_input: RamanInputs, curr_output: Spectrum[Power], target_output: Spectrum[Power]) -> RamanInputs:
-        pass
+        X_list = []
+        Y_list = []
 
-    def update_controller(self, error: Spectrum[Power], control_delta: RamanInputs) -> None:
+        for raman_inputs, spectrum in samples:
+            x = torch.tensor(raman_inputs.as_array(), dtype=torch.float32)
+            y = torch.tensor(spectrum.as_array(), dtype=torch.float32)
+
+            X_list.append(x)
+            Y_list.append(y)
+
+        X = torch.stack(X_list)
+        Y = torch.stack(Y_list)
+
+        dataset = torch.utils.data.TensorDataset(X, Y)
+        loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+
+        loss_fn = torch.nn.MSELoss()
+
+        for epoch in range(epochs):
+            total = 0.0
+            for xb, yb in loader:
+                self.optimizer.zero_grad()
+                pred = self.model(xb)
+                loss = loss_fn(pred, yb)
+                loss.backward()
+                self.optimizer.step()
+                total += loss.item()
+
+            print(f"[GDController] epoch {epoch+1}/{epochs}, loss={total/len(loader):.6f}")
+
+    def update_controller(self, error: ra.Spectrum[ct.Power], control_delta: ra.RamanInputs) -> None:
         pass
