@@ -126,3 +126,42 @@ class RamanInputs:
         powers = [ct.Power(float(v), 'mW') for v in data["powers_mW"]]
         wavelengths = [ct.Length(float(w), 'nm') for w in data["wavelengths_nm"]]
         return cls(powers, wavelengths)
+
+    def normalize(self) -> None:
+        """
+        Normalize powers and wavelengths in-place to [0, 1] based on defined ranges.
+        After normalization both powers[i] and wavelengths[i] become unitless
+        ct.Power/ct.Length values whose .value is within [0, 1].
+        """
+
+        p_min, p_max = self.power_range
+        wl_min, wl_max = self.wavelength_range
+        power_span = p_max.value - p_min.value
+        for i, p in enumerate(self.powers):
+            norm_val = (p.value - p_min.value) / power_span
+            self.powers[i] = ct.Power(norm_val, p.default_unit)
+        wl_span = wl_max.value - wl_min.value
+        for i, wl in enumerate(self.wavelengths):
+            norm_val = (wl.value - wl_min.value) / wl_span
+            print(norm_val)
+            self.wavelengths[i] = ct.Length(norm_val, wl.default_unit)
+        self.value_dict = dict(zip(self.wavelengths, self.powers))
+
+    def denormalize(self) -> None:
+        """
+        Convert a normalized RamanInputs object (values in [0,1]) back into
+        physical units based on defined ranges.
+        """
+
+        p_min, p_max = self.power_range
+        wl_min, wl_max = self.wavelength_range
+        power_span = p_max.value - p_min.value
+        wl_span = wl_max.value - wl_min.value
+        self.powers = [
+            ct.Power(p.value * power_span + p_min.value, "W")
+            for p in self.powers
+        ]
+        self.wavelengths = [
+            ct.Length(w.value * wl_span + wl_min.value, 'm')
+            for w in self.wavelengths
+        ]
