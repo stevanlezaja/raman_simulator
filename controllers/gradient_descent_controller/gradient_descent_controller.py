@@ -27,7 +27,7 @@ class GradientDescentController(Controller):
         Y_list = []
 
         for raman_inputs, spectrum in samples:
-            x = torch.tensor(raman_inputs.as_array(), dtype=torch.float32)
+            x = torch.tensor(raman_inputs.normalize().as_array(), dtype=torch.float32)
             arr = spectrum.as_array()
             values = arr[len(arr)//2:]
             y = torch.tensor(values, dtype=torch.float32)
@@ -63,7 +63,7 @@ class GradientDescentController(Controller):
         target_output: ra.Spectrum[ct.Power]
     ) -> ra.RamanInputs:
 
-        x = torch.tensor(curr_input.as_array(), dtype=torch.float32, requires_grad=True)
+        x = torch.tensor(curr_input.normalize().as_array(), dtype=torch.float32, requires_grad=True)
 
         arr = target_output.as_array()
         values = arr[len(arr)//2:]
@@ -77,7 +77,9 @@ class GradientDescentController(Controller):
         with torch.no_grad():
             x_new = x - self.control_lr * grad_x
 
-        return ra.RamanInputs.from_array(x_new.detach().numpy())
+        control = ra.RamanInputs.from_array(x_new.detach().numpy()).denormalize()
+        print("CONTROL \n", control)
+        return control
 
     def update_controller(self, error: ra.Spectrum[ct.Power], control_delta: ra.RamanInputs) -> None:
         pass
