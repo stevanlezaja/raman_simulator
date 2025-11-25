@@ -15,7 +15,12 @@ class GradientDescentController(Controller):
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr_model)
         self.control_lr = lr_control
 
-    def train_controller(self, file_path: str, epochs: int = 40, batch_size: int = 32):
+    def train_controller(self, file_path: str, epochs: int = 100, batch_size: int = 32):
+        """
+        Train ForwardNN to approximate the real Raman simulator.
+        Dataset entries: (RamanInputs, Spectrum[Power])
+        """
+
         samples = list(load_raman_dataset(file_path))
 
         X_list = []
