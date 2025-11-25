@@ -6,16 +6,14 @@ import pytest
 
 import custom_types as ct
 
-from .raman_inputs import RamanInputs
-from .spectrum import Spectrum
-
+import raman_amplifier as ra
 
 def test_ramaninputs_default_init():
     """
     Default initialization with n_pumps only
     """
     n_pumps = 3
-    inp = RamanInputs(n_pumps=n_pumps)
+    inp = ra.RamanInputs(n_pumps=n_pumps)
     assert len(inp.powers) == n_pumps
     assert len(inp.wavelengths) == n_pumps
     assert all(p.value == 0.0 for p in inp.powers)
@@ -27,7 +25,7 @@ def test_ramaninputs_custom_values():
     """
     powers = [ct.Power(1.0, 'W'), ct.Power(2.0, 'W')]
     wavelengths = [ct.Length(1.5, 'm'), ct.Length(2.0, 'm')]
-    inp = RamanInputs(powers=powers, wavelengths=wavelengths)
+    inp = ra.RamanInputs(powers=powers, wavelengths=wavelengths)
     assert inp.powers == powers
     assert inp.wavelengths == wavelengths
     # Check value_dict
@@ -40,13 +38,13 @@ def test_ramaninputs_partial_init_raises():
     """
     powers = [ct.Power(1.0, 'W')]
     with pytest.raises(AssertionError):
-        RamanInputs(powers=powers)
+        ra.RamanInputs(powers=powers)
 
 def test_spectrum_creation():
     """
     Creation
     """
-    spec = Spectrum(ct.Power)
+    spec = ra.Spectrum(ct.Power)
     assert spec.value_cls == ct.Power
     assert not spec.spectrum
 
@@ -54,7 +52,7 @@ def test_spectrum_add_val():
     """
     Adding values
     """
-    spec = Spectrum(ct.Power)
+    spec = ra.Spectrum(ct.Power)
     f1 = ct.Frequency(1.0, 'THz')
     p1 = ct.Power(0.5, 'W')
     spec.add_val(f1, p1)
@@ -66,8 +64,8 @@ def test_spectrum_add_sub():
     """
     Linear operations (+, -)
     """
-    spec1 = Spectrum(ct.Power)
-    spec2 = Spectrum(ct.Power)
+    spec1 = ra.Spectrum(ct.Power)
+    spec2 = ra.Spectrum(ct.Power)
     f1 = ct.Frequency(1.0, 'THz')
     spec1.add_val(f1, ct.Power(1.0, 'W'))
     spec2.add_val(f1, ct.Power(2.0, 'W'))
@@ -82,7 +80,7 @@ def test_spectrum_mean():
     """
     Mean property
     """
-    spec = Spectrum(ct.Power)
+    spec = ra.Spectrum(ct.Power)
     spec.add_val(ct.Frequency(1.0, 'THz'), ct.Power(1.0, 'W'))
     spec.add_val(ct.Frequency(2.0, 'THz'), ct.Power(3.0, 'W'))
     assert spec.mean == (1 ** 2 + 3 ** 2) ** 0.5 / 2
@@ -91,8 +89,8 @@ def test_spectrum_mismatched_keys():
     """
     Mismatched frequencies
     """
-    spec1 = Spectrum(ct.Power)
-    spec2 = Spectrum(ct.Power)
+    spec1 = ra.Spectrum(ct.Power)
+    spec2 = ra.Spectrum(ct.Power)
     spec1.add_val(ct.Frequency(1.0, 'THz'), ct.Power(1.0, 'W'))
     spec2.add_val(ct.Frequency(2.0, 'THz'), ct.Power(1.0, 'W'))
     with pytest.raises(AssertionError):

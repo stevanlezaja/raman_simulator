@@ -143,7 +143,6 @@ class RamanInputs:
         wl_span = wl_max.value - wl_min.value
         for i, wl in enumerate(self.wavelengths):
             norm_val = (wl.value - wl_min.value) / wl_span
-            print(norm_val)
             self.wavelengths[i] = ct.Length(norm_val, wl.default_unit)
         self.value_dict = dict(zip(self.wavelengths, self.powers))
 
