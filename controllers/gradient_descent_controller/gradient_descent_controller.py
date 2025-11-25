@@ -64,11 +64,14 @@ class GradientDescentController(Controller):
         values = arr[len(arr)//2:]
         target = torch.tensor(values, dtype=torch.float32)
         y_pred = self.model(x)
+
         loss = torch.nn.functional.mse_loss(y_pred, target)
         loss.backward()
+        grad_x = x.grad
+
         with torch.no_grad():
-            grad_x = x.grad
             x_new = x - self.control_lr * grad_x
+
         return ra.RamanInputs.from_array(x_new.detach().numpy())
 
     def update_controller(self, error: ra.Spectrum[ct.Power], control_delta: ra.RamanInputs) -> None:
