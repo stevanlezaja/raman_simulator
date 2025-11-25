@@ -127,7 +127,7 @@ class RamanInputs:
         wavelengths = [ct.Length(float(w), 'nm') for w in data["wavelengths_nm"]]
         return cls(powers, wavelengths)
 
-    def normalize(self) -> None:
+    def normalize(self) -> 'RamanInputs':
         """
         Normalize powers and wavelengths in-place to [0, 1] based on defined ranges.
         After normalization both powers[i] and wavelengths[i] become unitless
@@ -146,7 +146,9 @@ class RamanInputs:
             self.wavelengths[i] = ct.Length(norm_val, wl.default_unit)
         self.value_dict = dict(zip(self.wavelengths, self.powers))
 
-    def denormalize(self) -> None:
+        return self
+
+    def denormalize(self) -> 'RamanInputs':
         """
         Convert a normalized RamanInputs object (values in [0,1]) back into
         physical units based on defined ranges.
@@ -164,3 +166,5 @@ class RamanInputs:
             ct.Length(w.value * wl_span + wl_min.value, 'm')
             for w in self.wavelengths
         ]
+
+        return self
