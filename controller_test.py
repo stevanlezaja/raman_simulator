@@ -11,6 +11,8 @@ def main():
 
     # Use gradient descent controller
     controller = ctl.GradientDescentController()
+    if isinstance(controller, ctl.GradientDescentController):
+        controller.train_controller('data/raman_simulator_3_pumps_1.0_ratio.json')
 
     # Initialize RamanInputs with 3 pumps (typical for your setup)
     n_pumps = 3
