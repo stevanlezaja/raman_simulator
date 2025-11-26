@@ -194,7 +194,10 @@ if __name__ == "__main__":
 
         # controller = ctrl.DifferentialEvolutionController()
 
-        controller = ctrl.GradientDescentController()
-        controller.train_controller('data/raman_simulator_3_pumps_1.0_ratio.json')
+        # controller = ctrl.GradientDescentController()
+        # controller.train_controller('data/raman_simulator_3_pumps_1.0_ratio.json')
+
+        controller = ctrl.RLController()
+        ra.Spectrum.set_normalization_limits(0.0, 0.1)
 
         spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=10000)
