@@ -61,7 +61,7 @@ def main():
         [conv.frequency_to_wavelenth(f).nm for f in simulated_gain_spectrum.frequencies],
         [val.dB for val in simulated_gain_spectrum.values],
     )
-    ax.set_xlabel("Frequency (Hz)")  # type: ignore
+    ax.set_xlabel("Wavelength (nm)")  # type: ignore
     ax.set_ylabel("Power (dB)")  # type: ignore
     ax.set_ylim(bottom=-2, top=16) # type: ignore
     ax.set_title("ON/OFF Gain")  # type: ignore
