@@ -182,16 +182,19 @@ if __name__ == "__main__":
         raman_system.fiber.length.km = 80
         raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
-        controller = ctrl.BernoulliController(
-            lr=1e-1,
-            power_step=ct.Power(20, 'mW'),
-            wavelength_step=ct.Length(2, 'nm'),
-            beta=1000,
-            gamma=0.99,
-            weight_decay=1e-1,
-            input_dim=6,
-        )
+        # controller = ctrl.BernoulliController(
+        #     lr=1e-1,
+        #     power_step=ct.Power(20, 'mW'),
+        #     wavelength_step=ct.Length(2, 'nm'),
+        #     beta=1000,
+        #     gamma=0.99,
+        #     weight_decay=1e-1,
+        #     input_dim=6,
+        # )
 
         # controller = ctrl.DifferentialEvolutionController()
+
+        controller = ctrl.GradientDescentController()
+        controller.train_controller('data/raman_simulator_3_pumps_1.0_ratio.json')
 
         spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=10000)
