@@ -148,23 +148,41 @@ class RamanInputs:
 
         return self
 
-    def denormalize(self) -> 'RamanInputs':
+    def denormalize_without_bias(self) -> 'RamanInputs':
         """
         Convert a normalized RamanInputs object (values in [0,1]) back into
-        physical units based on defined ranges.
+        physical units based on defined span.
         """
 
         p_min, p_max = self.power_range
         wl_min, wl_max = self.wavelength_range
         power_span = p_max.value - p_min.value
-        wl_span = wl_max.value - wl_min.value
+        wl_span = wl_max.nm - wl_min.nm
         self.powers = [
-            ct.Power(p.value * power_span + p_min.value, "W")
+            ct.Power(p.value * power_span, "W")
             for p in self.powers
         ]
         self.wavelengths = [
-            ct.Length(w.value * wl_span + wl_min.value, 'm')
+            ct.Length(w.value * wl_span, 'm')
             for w in self.wavelengths
         ]
 
+        return self
+
+    def denormalize(self) -> 'RamanInputs':
+        """
+        Convert a normalized RamanInputs object (values in [0,1]) back into
+        physical units based on defined ranges.
+        """
+        p_min, _ = self.power_range
+        wl_min, _ = self.wavelength_range
+        self.denormalize_without_bias()
+        self.powers = [
+            ct.Power(p.value + p_min.value, "W")
+            for p in self.powers
+        ]
+        self.wavelengths = [
+            ct.Length(w.value + wl_min.value, 'm')
+            for w in self.wavelengths
+        ]
         return self

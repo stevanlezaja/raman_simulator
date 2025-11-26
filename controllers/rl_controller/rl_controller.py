@@ -13,12 +13,12 @@ from ..controller_base import Controller
 class RLController(Controller):
     def __init__(self):
         super().__init__()
-        self.sequence_length = 4 * 10 ** 3
+        self.sequence_length = 1000
         self.input_nodes = 6
         self.output_nodes = 6
         self.curr_reward = np.array([2, 0])
         self.step_size_dict: dict[str, ct.UnitProtocol] = {'power': ct.Power(0.2, 'mW'), 'wavelength': ct.Length(2, 'nm')}
-        self.learning_rate = 1e-1
+        self.learning_rate = 1e-2
         self.weight_decay = 1e-1
         self.baseline = 1
         self.weights = np.zeros((self.input_nodes, self.output_nodes))
@@ -27,8 +27,8 @@ class RLController(Controller):
     def build_step_vector(self, n_pumps: int) -> np.ndarray:
         power_step = self.step_size_dict['power'].value
         wl_step = self.step_size_dict['wavelength'].value
-        power_step = 0.002
-        wl_step = 0.002
+        power_step = 0.001
+        wl_step = 0.001
 
         return np.array(
             [power_step] * n_pumps + [wl_step] * n_pumps,
@@ -62,16 +62,16 @@ class RLController(Controller):
             for w1, w2 in itertools.combinations(wavelengths, 2):
                 spread += abs(w1.nm - w2.nm) ** 0.5
             return spread
-        
-        sh_dif = 1 * shape_difference(curr_output, target_output)
 
-        int_dif = integral_difference(curr_output, target_output)
+        # sh_dif = 1 * shape_difference(curr_output, target_output)
 
-        wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
+        # int_dif = integral_difference(curr_output, target_output)
 
-        loss = sh_dif + int_dif - wl_spread
+        # wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
 
-        return -loss
+        # loss = sh_dif + int_dif - wl_spread
+
+        return -ra.mse(curr_output, target_output)
 
     def get_control(self, curr_input: ra.RamanInputs, curr_output: ra.Spectrum[ct.Power], target_output: ra.Spectrum[ct.Power]) -> ra.RamanInputs:
         weight_history = np.zeros((self.sequence_length, self.input_nodes, self.output_nodes)) 
@@ -100,11 +100,10 @@ class RLController(Controller):
         
         self.weights = np.copy(weight_history[-1])
 
-        print(input_state[-1])
+        control = ra.RamanInputs.from_array(input_state[-1])
 
-        control = ra.RamanInputs.from_array(input_state[-1]).denormalize()
+        control.denormalize_without_bias()
 
-        print(control)
         return control
 
     def update_controller(self, error: ra.Spectrum[ct.Power], control_delta: ra.RamanInputs) -> None:
