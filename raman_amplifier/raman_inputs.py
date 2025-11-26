@@ -157,7 +157,7 @@ class RamanInputs:
         p_min, p_max = self.power_range
         wl_min, wl_max = self.wavelength_range
         power_span = p_max.value - p_min.value
-        wl_span = wl_max.nm - wl_min.nm
+        wl_span = wl_max.value - wl_min.value
         self.powers = [
             ct.Power(p.value * power_span, "W")
             for p in self.powers
