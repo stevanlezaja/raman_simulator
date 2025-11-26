@@ -16,9 +16,11 @@ class Spectrum(Generic[T]):
         Id consists of a spectrum dict that stores the pairs of Frequency and value
     """
     operations = ['+', '-']
+    norm_min: float | None = None
+    norm_max: float | None = None
 
     def __init__(self, value_cls: Type[T],* , frequencies: list[ct.Frequency] = [], values: list[ct.Power|ct.PowerGain] = []):
-        self.value_cls: Type[T] = value_cls  # store class type
+        self.value_cls: Type[T] = value_cls
         assert len(frequencies) == len(values)
         self.spectrum: dict[ct.Frequency, T] = {}
         for freq, val in zip(frequencies, values):
@@ -229,6 +231,40 @@ class Spectrum(Generic[T]):
         else:
             raise TypeError("Unsupported Spectrum value type")
         return cls(cls_type, frequencies=freqs, values=vals)
+
+    @classmethod
+    def set_normalization_limits(cls, min_val: float, max_val: float):
+        cls.norm_min = min_val
+        cls.norm_max = max_val
+
+    def normalize(self) -> "Spectrum[T]":
+        """
+        Normalize spectrum values in-place to [0, 1] using the provided limits.
+        """
+        assert isinstance(Spectrum.norm_max, float) and isinstance(Spectrum.norm_min, float)
+        denom = Spectrum.norm_max - Spectrum.norm_min
+        if denom == 0:
+            raise ValueError("Cannot normalize when min_val == max_val")
+
+        for f, v in self.spectrum.items():
+            x = (v.value - Spectrum.norm_min) / denom
+            self.spectrum[f] = self.value_cls(x, v.default_unit)
+        return self
+
+
+    def denormalize(self) -> "Spectrum[T]":
+        """
+        Denormalize spectrum values in-place using the provided limits.
+        """
+        assert isinstance(Spectrum.norm_max, float) and isinstance(Spectrum.norm_min, float)
+        denom = Spectrum.norm_max - Spectrum.norm_min
+        if denom == 0:
+            raise ValueError("Cannot denormalize when min_val == max_val")
+
+        for f, v in self.spectrum.items():
+            x = v.value * denom + Spectrum.norm_min
+            self.spectrum[f] = self.value_cls(x, v.default_unit)
+        return self
 
 
 def mse(current: Spectrum[T], target: Spectrum[T]) -> float:
