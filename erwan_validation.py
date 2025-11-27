@@ -31,7 +31,7 @@ def main():
 
     # Creating the ON spectrum
     raman_system.raman_inputs = ra.RamanInputs(
-        powers=[ct.Power(650, 'mW'), ct.Power(650, 'mW'), ct.Power(650, 'mW')],
+        powers=[ct.Power(200, 'mW'), ct.Power(200, 'mW'), ct.Power(200, 'mW')],
         wavelengths=[ct.Length(1455, 'nm'), ct.Length(1440, 'nm'), ct.Length(1420, 'nm')]
     )
     print("Total input signal power:", ra.spectrum.integral(input_spectrum))

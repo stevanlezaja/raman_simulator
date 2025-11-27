@@ -161,6 +161,7 @@ class StandardSingleModeFiber(Fiber):
         super().__init__(length=length)
         self.alpha_p.dB_km = 0.25
         self.alpha_s.dB_km = 0.2
+        self.peak_efficiency = 0.42
 
     @property
     def raman_efficiency(self) -> dict[ct.Frequency, float]:
@@ -178,6 +179,17 @@ class StandardSingleModeFiber(Fiber):
                     freq = ct.Frequency(abs(float(row[0])), 'THz')
                     value = float(row[1])
                     data[freq] = value
+
+        values = list(data.values())
+        vmin = min(values)
+        vmax = max(values)
+        denom = vmax - vmin if vmax != vmin else 1.0
+
+        data = {
+            f: ((v - vmin) / denom) * self.peak_efficiency
+            for f, v in data.items()
+        }
+
         return data
 
     @property
