@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-import scipy.io  # type: ignore
+import csv
 import matplotlib.pyplot as plt
 
 import custom_types as ct
@@ -11,9 +11,28 @@ import fibers as fib
 
 
 def main():
+
+    measured_on_off_gain_list: list[ct.PowerGain] = []
+    wavelengths: list[ct.Length] = []
+    with open("data/Raman_Gain_NF_stevan_Lezaja_November2025.csv", "r", encoding="utf-8") as f:
+        reader = csv.reader(f, delimiter=';')
+
+        for row in reader:
+            if len(row) < 3:
+                continue
+            try:
+                float(row[1])
+            except ValueError:
+                continue
+
+            wavelength = float(row[1])
+            on_off_gain = float(row[2])
+            wavelengths.append(ct.Length(wavelength, 'nm'))
+            measured_on_off_gain_list.append(ct.PowerGain(on_off_gain, 'dB'))
+
     input_spectrum = ra.Spectrum(ct.Power)
-    for num in list(np.linspace(1530, 1560, 40)):
-        freq = conv.wavelength_to_frequency(ct.Length(num, 'nm'))
+    for wl in wavelengths:
+        freq = conv.wavelength_to_frequency(wl)
         input_spectrum.add_val(freq, ct.Power(250, 'uW'))
 
 
@@ -50,16 +69,20 @@ def main():
     simulated_power_spectrum_off = raman_system.output_spectrum
 
     # Calculating gain
-
     simulated_gain_spectrum: ra.Spectrum[ct.PowerGain] = simulated_power_spectrum_on / simulated_power_spectrum_off
-
-    plt.ion()  # type: ignore
+    measured_on_off_gain: ra.Spectrum[ct.PowerGain] = ra.Spectrum(ct.PowerGain, frequencies=simulated_gain_spectrum.frequencies, values=measured_on_off_gain_list)  # type: ignore
 
     fig, ax = plt.subplots(1, 1, figsize=(12, 8))  # type: ignore
 
     ax.plot( # type: ignore
         [conv.frequency_to_wavelenth(f).nm for f in simulated_gain_spectrum.frequencies],
         [val.dB for val in simulated_gain_spectrum.values],
+        label="Stevan's simulator"
+    )
+    ax.plot( # type: ignore
+        [conv.frequency_to_wavelenth(f).nm for f in measured_on_off_gain.frequencies],
+        [val.dB for val in measured_on_off_gain.values],
+        label="Erwan's data"
     )
     ax.set_xlabel("Wavelength (nm)")  # type: ignore
     ax.set_ylabel("Power (dB)")  # type: ignore
@@ -68,8 +91,7 @@ def main():
     ax.grid()  # type: ignore
     ax.legend()  # type: ignore
 
-    fig.canvas.draw()  # type: ignore
-    fig.canvas.flush_events()  # type: ignore
+    fig.show()
 
     _ = input()
 
