@@ -222,7 +222,7 @@ class ControlLoop:
         ax.set_ylabel("Wavelength [nm]")  # type: ignore
         ax.set_ylim(bottom=1420, top=1480)
         ax.set_xlim(left=0.0, right=1.0)
-        ax.set_title("Wavelength step probability evolution")  # type: ignore
+        ax.set_title("Input evolution")  # type: ignore
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
 

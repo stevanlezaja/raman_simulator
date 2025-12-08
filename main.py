@@ -194,6 +194,6 @@ if __name__ == "__main__":
 
         # controller = ctrl.DifferentialEvolutionController()
 
-        controller = ctrl.GradientDescentController(training_data='data/raman_simulator_3_pumps_1.0_ratio.json', epochs=60)
+        controller = ctrl.GradientDescentController(training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_1.0_ratio.json', epochs=250)
 
         spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=100)

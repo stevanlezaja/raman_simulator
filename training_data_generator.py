@@ -20,8 +20,8 @@ def sample_raman_inputs(num_pumps: int, power_range: tuple[ct.Power, ct.Power], 
     powers: list[ct.Power] = []
     wavelengths: list[ct.Length] = []
     for _ in range(num_pumps):
-        powers.append(ct.Power(random.randint(round(power_range[0].mW), round(power_range[1].mW)), 'mW'))
-        wavelengths.append(ct.Length(random.randint(round(wavelength_range[0].nm), round(wavelength_range[1].nm)), 'nm'))
+        powers.append(ct.Power(random.uniform(round(power_range[0].mW), round(power_range[1].mW)), 'mW'))
+        wavelengths.append(ct.Length(random.uniform(round(wavelength_range[0].nm), round(wavelength_range[1].nm)), 'nm'))
     return ra.RamanInputs(powers, wavelengths)
 
 
@@ -116,9 +116,9 @@ def visualize_data(file_path: str, update_every: int = 10):
 def main():
     num_pumps = 3
     pumping_ratio = 1.0
-    file_path = f'data/raman_simulator_{num_pumps}_pumps_{pumping_ratio}_ratio.json'
+    file_path = f'controllers/gradient_descent_controller/data/raman_simulator_{num_pumps}_pumps_{pumping_ratio}_ratio.json'
     generate_data(num_samples=10000, num_pumps=num_pumps, pumping_ratio=pumping_ratio, file_path=file_path)
 
 if __name__ == "__main__":
     # main()
-    visualize_data(file_path=f'data/raman_simulator_3_pumps_1.0_ratio.json')
+    visualize_data(file_path=f'controllers/gradient_descent_controller/data/raman_simulator_3_pumps_1.0_ratio.json')
