@@ -13,7 +13,7 @@ class GradientDescentController(Controller):
         model_path: str = "controllers/gradient_descent_controller/models/",
         training_data: str | None = None,
         lr_model: float = 1e-3,
-        lr_control: float = 1e-10,
+        lr_control: float = 100,
         epochs: int = 200,
         batch_size: int = 32,
     ):
@@ -75,6 +75,7 @@ class GradientDescentController(Controller):
             x_new = x - self.control_lr * x.grad
 
         control = ra.RamanInputs.from_array(x_new.detach().numpy()).denormalize()
+        control -= curr_input
         return control
 
     def update_controller(self, error: ra.Spectrum[ct.Power], control_delta: ra.RamanInputs) -> None:
