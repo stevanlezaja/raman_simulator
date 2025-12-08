@@ -34,7 +34,7 @@ def write_data(data: list[dict[str, Any]], file_path: str) -> None:
             json.dump(sample, f)
             f.write("\n")
 
-def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, file_path: str) -> None:
+def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, file_path: str, plot: bool = False) -> None:
     raman_system = rs.RamanSystem()
     raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps, [pumping_ratio for _ in range(num_pumps)])
     raman_system.fiber = fib.StandardSingleModeFiber(ct.Length(100, 'km'))
@@ -50,8 +50,9 @@ def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, file_p
     data_batch: list[dict[str, Any]] = []
     batch_size = 10
 
-    plt.ion()  # turn on interactive mode
-    fig, ax = plt.subplots()
+    if plot:
+        plt.ion()  # turn on interactive mode
+        fig, ax = plt.subplots()
 
     for _ in tqdm(range(num_samples)):
         raman_inputs = sample_raman_inputs(num_pumps, power_range, wavelength_range)
@@ -70,7 +71,7 @@ def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, file_p
         # Write batch
         if len(data_batch) >= batch_size:
             write_data(data_batch, file_path)
-            visualize_data_batch(data_batch, ax)
+            if plot: visualize_data_batch(data_batch, ax)
             data_batch = []
 
     # Write remaining
@@ -115,7 +116,9 @@ def visualize_data(file_path: str, update_every: int = 10):
 def main():
     num_pumps = 3
     pumping_ratio = 1.0
-    generate_data(num_samples=10000, num_pumps=num_pumps, pumping_ratio=pumping_ratio, file_path=f'data/raman_simulator_{num_pumps}_pumps_{pumping_ratio}_ratio.json')
+    file_path = f'data/raman_simulator_{num_pumps}_pumps_{pumping_ratio}_ratio.json'
+    generate_data(num_samples=10000, num_pumps=num_pumps, pumping_ratio=pumping_ratio, file_path=file_path)
 
 if __name__ == "__main__":
-    main()
+    # main()
+    visualize_data(file_path=f'data/raman_simulator_3_pumps_1.0_ratio.json')
