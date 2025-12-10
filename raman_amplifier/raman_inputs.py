@@ -168,3 +168,25 @@ class RamanInputs:
         ]
 
         return self
+
+class RamanInputControl(RamanInputs):
+    def denormalize(self) -> RamanInputs:
+        """
+        Convert a normalized RamanInputControl object (values in [0,1]) back into
+        physical units based on defined ranges.
+        """
+
+        p_min, p_max = self.power_range
+        wl_min, wl_max = self.wavelength_range
+        power_span = p_max.value - p_min.value
+        wl_span = wl_max.value - wl_min.value
+        self.powers = [
+            ct.Power(p.value * power_span, "W")
+            for p in self.powers
+        ]
+        self.wavelengths = [
+            ct.Length(w.value * wl_span, 'm')
+            for w in self.wavelengths
+        ]
+
+        return self
