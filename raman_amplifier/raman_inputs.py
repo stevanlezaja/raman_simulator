@@ -18,8 +18,8 @@ class RamanInputs:
         It contains the Wavelength - Power pairs representing the Pump state
     """
 
-    MAX_POWER_W = 0.99
-    MIN_POWER_W = 0.0
+    MAX_POWER_W = 0.5
+    MIN_POWER_W = 0.2
 
     MAX_WAVELENGTH_NM = 1480
     MIN_WAVELENGTH_NM = 1420
@@ -90,7 +90,7 @@ class RamanInputs:
         """
 
         power_values = [p.W for p in self.powers]
-        wavelength_values = [wl.nm for wl in self.wavelengths]
+        wavelength_values = [wl.m for wl in self.wavelengths]
 
         return np.array(power_values + wavelength_values, dtype=float)
 
@@ -111,7 +111,7 @@ class RamanInputs:
         wavelengths_vals = arr[n_pumps:]
 
         powers = [ct.Power(float(p), 'W') for p in powers_vals]
-        wavelengths = [ct.Length(float(wl), 'nm') for wl in wavelengths_vals]
+        wavelengths = [ct.Length(float(wl), 'm') for wl in wavelengths_vals]
 
         return cls(powers=powers, wavelengths=wavelengths)
 
