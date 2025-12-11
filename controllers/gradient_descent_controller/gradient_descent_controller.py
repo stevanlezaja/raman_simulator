@@ -1,5 +1,7 @@
 import os
 import torch
+import copy
+
 import raman_amplifier as ra
 import custom_types as ct
 
@@ -50,33 +52,36 @@ class GradientDescentController(Controller):
         fname = f"forward_E{epochs}_L{loss:.4f}_dataset-{dataset_name}.pt"
         return os.path.join(base_dir, fname)
 
-
     def get_control(
         self,
         curr_input: ra.RamanInputs,
         curr_output: ra.Spectrum[ct.Power],
         target_output: ra.Spectrum[ct.Power]
     ) -> ra.RamanInputs:
+        x0 = copy.deepcopy(curr_input).normalize().as_array()
+        x_leaf = torch.tensor(x0, dtype=torch.float32, requires_grad=True)
+        x = x_leaf.unsqueeze(0)
 
-        x_leaf = torch.tensor(curr_input.normalize().as_array(), dtype=torch.float32, requires_grad=True)
-        x = x_leaf.unsqueeze(0)  # batch dim
-
-        arr = target_output.as_array()
-        target = torch.tensor(arr[-40:], dtype=torch.float32).unsqueeze(0)
+        target_arr = target_output.as_array()[-40:]       # SAFETY: ensure this matches model output dim
+        target = torch.tensor(target_arr, dtype=torch.float32).unsqueeze(0)
 
         y_pred = self.model(x)
         loss = torch.nn.functional.mse_loss(y_pred, target)
         loss.backward()
 
-        with torch.no_grad():
-            x_new = x_leaf - self.control_lr * x_leaf.grad
-            x_new = x_new.clamp(0.0, 1.0)
-            print(x_new)
+        grad = x_leaf.grad
 
-        control = ra.RamanInputs.from_array(x_new.numpy()).denormalize()
-        control -= curr_input
-        print(control)
-        return control
+        with torch.no_grad():
+            x_delta = - self.control_lr * grad
+
+        x_new_np = x_leaf.detach() + x_delta.detach()
+
+        next_input = ra.RamanInputs.from_array(x_new_np).denormalize()
+
+        control_delta = copy.deepcopy(next_input)
+        control_delta -= curr_input
+
+        return control_delta
 
     def update_controller(self, error: ra.Spectrum[ct.Power], control_delta: ra.RamanInputs) -> None:
         pass
