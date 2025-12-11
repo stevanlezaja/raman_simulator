@@ -25,7 +25,7 @@ class GradientDescentController(Controller):
 
         # If the path is a directory, check if it contains any .pt model
         if os.path.isdir(model_path):
-            existing = [f for f in os.listdir(model_path) if f.endswith(".pt")]
+            existing = [f for f in os.listdir(model_path) if f.endswith(".pt") and str(epochs) in f]
             if existing:
                 latest = sorted(existing)[-1]   # or pick the best, or newest
                 full_path = os.path.join(model_path, latest)
