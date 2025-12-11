@@ -1,68 +1,56 @@
+import os
 import torch
-import numpy as np
+import copy
 
 import raman_amplifier as ra
 import custom_types as ct
-from utils.loading_data_from_file import load_raman_dataset
 
 from ..controller_base import Controller
 from .forward_nn import ForwardNN
 
 
 class GradientDescentController(Controller):
-    def __init__(self, lr_model: float = 1e-3, lr_control: float = 5e-2):
+    def __init__(
+        self,
+        model_path: str = "controllers/gradient_descent_controller/models/",
+        training_data: str | None = None,
+        lr_model: float = 1e-3,
+        lr_control: float = 100,
+        epochs: int = 200,
+        batch_size: int = 32,
+    ):
         super().__init__()
-        self.model = ForwardNN()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr_model)
+        self.model = ForwardNN(lr=lr_model)
         self.control_lr = lr_control
 
-    def train_controller(self, file_path: str, epochs: int = 200, batch_size: int = 32):
-        """
-        Train ForwardNN to approximate the real Raman simulator.
-        Dataset entries: (RamanInputs, Spectrum[Power])
-        """
+        # If the path is a directory, check if it contains any .pt model
+        if os.path.isdir(model_path):
+            existing = [f for f in os.listdir(model_path) if f.endswith(".pt") and str(epochs) in f]
+            if existing:
+                latest = sorted(existing)[-1]   # or pick the best, or newest
+                full_path = os.path.join(model_path, latest)
 
-        samples = list(load_raman_dataset(file_path))
+                print(f"[GDController] Found existing model — loading {latest}")
+                self.model.load(full_path)
+                return
 
-        all_spec_vals  = []
-        for _, spec in samples:
-            arr = spec.as_array()
-            all_spec_vals.append(arr[len(arr)//2:])
-        all_spec_vals = np.vstack(all_spec_vals)
-        ra.Spectrum.set_normalization_limits(min_val=all_spec_vals.min(), max_val=all_spec_vals.max())
+        # No existing model found → need to train
+        if training_data is None:
+            raise ValueError("No model found and no training data provided.")
 
-        X_list = []
-        Y_list = []
+        print("[GDController] No model found — training a new one...")
 
-        for raman_inputs, spectrum in samples:
-            x = torch.tensor(raman_inputs.normalize().as_array(), dtype=torch.float32)
-            arr = spectrum.normalize().as_array()
-            values = arr[len(arr)//2:]
-            y = torch.tensor(values, dtype=torch.float32)
+        final_loss = self.model.fit(training_data, epochs=epochs, batch_size=batch_size)
+        save_path = self._make_model_filename(model_path, training_data, epochs, final_loss)
 
-            X_list.append(x)
-            Y_list.append(y)
+        self.model.save(save_path)
+        print(f"[GDController] Model saved as: {save_path}")
 
-        X = torch.stack(X_list)
-        Y = torch.stack(Y_list)
-
-        dataset = torch.utils.data.TensorDataset(X, Y)
-        loader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-        loss_fn = torch.nn.MSELoss()
-
-        for epoch in range(epochs):
-            total = 0.0
-            for xb, yb in loader:
-                self.optimizer.zero_grad()
-                pred = self.model(xb)
-                loss = loss_fn(pred, yb)
-                loss.backward()
-                self.optimizer.step()
-                total += loss.item()
-
-            print(f"[GDController] epoch {epoch+1}/{epochs}, loss={total/len(loader):.6f}")
-
+    def _make_model_filename(self, base_dir: str, dataset: str, epochs: int, loss: float):
+        os.makedirs(base_dir, exist_ok=True)
+        dataset_name = os.path.splitext(os.path.basename(dataset))[0]
+        fname = f"forward_E{epochs}_L{loss:.4f}_dataset-{dataset_name}.pt"
+        return os.path.join(base_dir, fname)
 
     def get_control(
         self,
@@ -70,24 +58,30 @@ class GradientDescentController(Controller):
         curr_output: ra.Spectrum[ct.Power],
         target_output: ra.Spectrum[ct.Power]
     ) -> ra.RamanInputs:
+        x0 = copy.deepcopy(curr_input).normalize().as_array()
+        x_leaf = torch.tensor(x0, dtype=torch.float32, requires_grad=True)
+        x = x_leaf.unsqueeze(0)
 
-        x = torch.tensor(curr_input.normalize().as_array(), dtype=torch.float32, requires_grad=True)
+        target_arr = target_output.as_array()[-40:]       # SAFETY: ensure this matches model output dim
+        target = torch.tensor(target_arr, dtype=torch.float32).unsqueeze(0)
 
-        arr = target_output.as_array()
-        values = arr[len(arr)//2:]
-        target = torch.tensor(values, dtype=torch.float32)
         y_pred = self.model(x)
-
         loss = torch.nn.functional.mse_loss(y_pred, target)
         loss.backward()
-        grad_x = x.grad
+
+        grad = x_leaf.grad
 
         with torch.no_grad():
-            x_new = x - self.control_lr * grad_x
+            x_delta = - self.control_lr * grad
 
-        control = ra.RamanInputs.from_array(x_new.detach().numpy()).denormalize()
-        print("CONTROL \n", control)
-        return control
+        x_new_np = x_leaf.detach() + x_delta.detach()
+
+        next_input = ra.RamanInputs.from_array(x_new_np).denormalize()
+
+        control_delta = copy.deepcopy(next_input)
+        control_delta -= curr_input
+
+        return control_delta
 
     def update_controller(self, error: ra.Spectrum[ct.Power], control_delta: ra.RamanInputs) -> None:
         pass

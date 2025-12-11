@@ -18,8 +18,8 @@ class RamanInputs:
         It contains the Wavelength - Power pairs representing the Pump state
     """
 
-    MAX_POWER_W = 0.99
-    MIN_POWER_W = 0.0
+    MAX_POWER_W = 0.5
+    MIN_POWER_W = 0.2
 
     MAX_WAVELENGTH_NM = 1480
     MIN_WAVELENGTH_NM = 1420
@@ -90,7 +90,7 @@ class RamanInputs:
         """
 
         power_values = [p.W for p in self.powers]
-        wavelength_values = [wl.nm for wl in self.wavelengths]
+        wavelength_values = [wl.m for wl in self.wavelengths]
 
         return np.array(power_values + wavelength_values, dtype=float)
 
@@ -111,7 +111,7 @@ class RamanInputs:
         wavelengths_vals = arr[n_pumps:]
 
         powers = [ct.Power(float(p), 'W') for p in powers_vals]
-        wavelengths = [ct.Length(float(wl), 'nm') for wl in wavelengths_vals]
+        wavelengths = [ct.Length(float(wl), 'm') for wl in wavelengths_vals]
 
         return cls(powers=powers, wavelengths=wavelengths)
 
@@ -164,28 +164,6 @@ class RamanInputs:
         ]
         self.wavelengths = [
             ct.Length(w.value * wl_span + wl_min.value, 'm')
-            for w in self.wavelengths
-        ]
-
-        return self
-
-class RamanInputControl(RamanInputs):
-    def denormalize(self) -> RamanInputs:
-        """
-        Convert a normalized RamanInputControl object (values in [0,1]) back into
-        physical units based on defined ranges.
-        """
-
-        p_min, p_max = self.power_range
-        wl_min, wl_max = self.wavelength_range
-        power_span = p_max.value - p_min.value
-        wl_span = wl_max.value - wl_min.value
-        self.powers = [
-            ct.Power(p.value * power_span, "W")
-            for p in self.powers
-        ]
-        self.wavelengths = [
-            ct.Length(w.value * wl_span, 'm')
             for w in self.wavelengths
         ]
 

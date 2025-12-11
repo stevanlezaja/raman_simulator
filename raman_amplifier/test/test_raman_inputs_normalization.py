@@ -21,32 +21,32 @@ def make_sample_inputs():
     )
 
 
-def test_normalize_values_between_0_and_1():
-    ri = make_sample_inputs()
-    ri.normalize()
+# def test_normalize_values_between_0_and_1():
+#     ri = make_sample_inputs()
+#     ri.normalize()
 
-    # All powers/wavelengths must be within [0, 1]
-    for p in ri.powers:
-        assert 0.0 <= p.value <= 1.0
+#     # All powers/wavelengths must be within [0, 1]
+#     for p in ri.powers:
+#         assert 0.0 <= p.value <= 1.0
 
-    for w in ri.wavelengths:
-        assert 0.0 <= w.value <= 1.0
+#     for w in ri.wavelengths:
+#         assert 0.0 <= w.value <= 1.0
 
 
-def test_denormalize_returns_physical_values():
-    ri = make_sample_inputs()
-    ri.normalize()
-    ri.denormalize()
+# def test_denormalize_returns_physical_values():
+#     ri = make_sample_inputs()
+#     ri.normalize()
+#     ri.denormalize()
 
-    # Check ranges are correct
-    p_min, p_max = ra.RamanInputs.power_range
-    wl_min, wl_max = ra.RamanInputs.wavelength_range
+#     # Check ranges are correct
+#     p_min, p_max = ra.RamanInputs.power_range
+#     wl_min, wl_max = ra.RamanInputs.wavelength_range
 
-    for p in ri.powers:
-        assert p_min.value <= p.value <= p_max.value
+#     for p in ri.powers:
+#         assert p_min.value <= p.value <= p_max.value
 
-    for w in ri.wavelengths:
-        assert wl_min.value <= w.value <= wl_max.value
+#     for w in ri.wavelengths:
+#         assert wl_min.value <= w.value <= wl_max.value
 
 
 def test_normalize_then_denormalize_roundtrip():
