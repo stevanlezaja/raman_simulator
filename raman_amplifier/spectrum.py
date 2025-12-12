@@ -251,7 +251,6 @@ class Spectrum(Generic[T]):
             self.spectrum[f] = self.value_cls(x, v.default_unit)
         return self
 
-
     def denormalize(self) -> "Spectrum[T]":
         """
         Denormalize spectrum values in-place using the provided limits.
