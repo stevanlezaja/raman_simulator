@@ -335,11 +335,11 @@ class BernoulliController(torch.nn.Module, Controller):
         self.logits += update
 
     def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
-        ax.plot(self.rewards, label='Reward')  # type: ignore
-        ax.plot(self.baseline, label='Baseline')  # type: ignore
+        ax.plot(self.rewards[1:], label='Reward')  # type: ignore
+        ax.plot(self.baseline[1:], label='Baseline')  # type: ignore
         # ax.plot(self.history['rewards']['mse_loss'], label='MSE Loss')  # type: ignore
-        ax.plot([-x for x in self.history['rewards']['integral_loss']], label='Integral Loss')  # type: ignore
-        ax.plot([-x for x in self.history['rewards']['shape_loss']], label='Shape Loss')  # type: ignore
+        ax.plot([-x for x in self.history['rewards']['integral_loss'][1:]], label='Integral Loss')  # type: ignore
+        ax.plot([-x for x in self.history['rewards']['shape_loss'][1:]], label='Shape Loss')  # type: ignore
         ax.set_xlabel("Iteration")  # type: ignore
         ax.set_ylabel("Reward")  # type: ignore
         ax.set_title("Reward over time")  # type: ignore

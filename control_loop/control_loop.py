@@ -178,7 +178,7 @@ class ControlLoop:
         if hasattr(self.controller, 'plot_loss') and callable(self.controller.plot_loss):  # type: ignore
             self.controller.plot_loss(ax)  # type: ignore
             return
-        ax.plot(self.history['errors'])  # type: ignore
+        ax.plot(self.history['errors'][1:])  # type: ignore
         ax.set_xlabel("Iteration")  # type: ignore
         ax.set_ylabel("MSE")  # type: ignore
         ax.set_title("MSE over time")  # type: ignore
