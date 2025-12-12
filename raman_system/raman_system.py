@@ -251,11 +251,11 @@ class RamanSystem:
             signal.wavelength = conv.frequency_to_wavelenth(freq)
             self.output_spectrum[freq] = ct.Power(0, 'W')
 
-            for pump_pair in self.raman_amplifier.pump_pairs:  # pylint: disable=not-an-iterable
+            assert len(self.raman_amplifier.pump_pairs) == 3
 
-                experiment = exp.Experiment(self.fiber, signal, pump_pair)
+            experiment = exp.Experiment(self.fiber, signal, self.raman_amplifier.pump_pairs)
 
-                self.output_spectrum[freq] += experiment.get_signal_power_at_distance(self.fiber.length)
+            self.output_spectrum[freq] = experiment.get_signal_power_at_distance(self.fiber.length)
 
     @property
     def is_valid(self) -> bool:
