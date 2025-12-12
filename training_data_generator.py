@@ -51,8 +51,8 @@ def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, file_p
     batch_size = 10
 
     if plot:
-        plt.ion()  # turn on interactive mode
-        fig, ax = plt.subplots()
+        plt.ion()  # type: ignore
+        fig, ax = plt.subplots()  # type: ignore
 
     for _ in tqdm(range(num_samples)):
         raman_inputs = sample_raman_inputs(num_pumps, power_range, wavelength_range)
@@ -71,7 +71,7 @@ def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, file_p
         # Write batch
         if len(data_batch) >= batch_size:
             write_data(data_batch, file_path)
-            if plot: visualize_data_batch(data_batch, ax)
+            if plot: visualize_data_batch(data_batch, ax)  # type: ignore
             data_batch = []
 
     # Write remaining
@@ -95,13 +95,13 @@ def visualize_data_batch(data_batch: list[dict[str, Any]], ax: Any) -> None:
 def visualize_data(file_path: str, update_every: int = 10):
     from utils.loading_data_from_file import load_raman_dataset
 
-    plt.ion()
-    fig, ax = plt.subplots()
+    plt.ion()  # type: ignore
+    fig, ax = plt.subplots()  # type: ignore
 
-    ax.set_xlabel("Pump Power (mW)")
-    ax.set_ylabel("Pump Wavelength (nm)")
-    ax.set_title("Streaming Raman Inputs")
-    ax.grid(True)
+    ax.set_xlabel("Pump Power (mW)")  # type: ignore
+    ax.set_ylabel("Pump Wavelength (nm)")  # type: ignore
+    ax.set_title("Streaming Raman Inputs")  # type: ignore
+    ax.grid(True)  # type: ignore
 
     for i, (raman_inputs, _) in enumerate(load_raman_dataset(file_path)):
         _plot_single_raman_input(raman_inputs, ax)
@@ -109,16 +109,16 @@ def visualize_data(file_path: str, update_every: int = 10):
         if i % update_every == 0:
             plt.pause(0.001)
 
-    plt.ioff()
-    plt.show()
+    plt.ioff()  # type: ignore
+    plt.show()  # type: ignore
 
 
 def main():
     num_pumps = 3
     pumping_ratio = 1.0
     file_path = f'controllers/gradient_descent_controller/data/raman_simulator_{num_pumps}_pumps_{pumping_ratio}_ratio.json'
-    generate_data(num_samples=10000, num_pumps=num_pumps, pumping_ratio=pumping_ratio, file_path=file_path)
+    generate_data(num_samples=1000, num_pumps=num_pumps, pumping_ratio=pumping_ratio, file_path=file_path)
 
 if __name__ == "__main__":
-    # main()
-    visualize_data(file_path=f'controllers/gradient_descent_controller/data/raman_simulator_3_pumps_1.0_ratio.json')
+    main()
+    # visualize_data(file_path=f'controllers/gradient_descent_controller/data/raman_simulator_3_pumps_1.0_ratio.json')
