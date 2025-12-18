@@ -7,6 +7,7 @@ spectrum. It maintains the current control inputs and the latest output
 spectrum at each step.
 """
 
+import copy
 import numpy as np
 import matplotlib.axes
 from typing import Optional, Any
@@ -73,6 +74,7 @@ class ControlLoop:
         self.curr_output: Optional[ra.Spectrum[ct.Power]] = None
         self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': [], 'errors': []}
         self.converged = False
+        self.off_power_spectrum = self._calculate_off_power()
 
     def set_target(self, target: ra.Spectrum[ct.Power]):
         """
@@ -174,6 +176,16 @@ class ControlLoop:
         valid = self.controller.is_valid ^ self.raman_system.is_valid
         return valid
 
+    def _calculate_off_power(self) -> ra.Spectrum[ct.Power]:
+        off_raman_system = rs.RamanSystem()
+        off_raman_system.raman_amplifier = ra.RamanAmplifier(3)
+        off_raman_system.raman_amplifier.pump_powers = [ct.Power(0, 'mW'), ct.Power(0, 'mW'), ct.Power(0, 'mW')]
+        off_raman_system.fiber = copy.deepcopy(self.raman_system.fiber)
+        off_raman_system.input_spectrum = copy.deepcopy(self.raman_system.input_spectrum)
+        off_raman_system.output_spectrum = copy.deepcopy(self.raman_system.input_spectrum)
+        off_raman_system.update()
+        return off_raman_system.output_spectrum
+
     def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
         if hasattr(self.controller, 'plot_loss') and callable(self.controller.plot_loss):  # type: ignore
             self.controller.plot_loss(ax)  # type: ignore
@@ -190,23 +202,23 @@ class ControlLoop:
         assert self.curr_output is not None
         ax.plot( # type: ignore
             [f.Hz for f in self.target.frequencies],
-            [val.mW for val in self.target.values],
+            [val.dB for val in (self.target/self.off_power_spectrum).values],
             label="Target",
         )
         ax.plot( # type: ignore
             [f.Hz for f in self.curr_output.frequencies],
-            [val.mW for val in self.curr_output.values],
+            [val.dB for val in (self.curr_output/self.off_power_spectrum).values],
             label="Current Output",
         )
         ax.set_xlabel("Frequency (Hz)")  # type: ignore
-        ax.set_ylabel("Power (mW)")  # type: ignore
-        ax.set_ylim(
-            0,
-            1.05 * max(
-                max(val.mW for val in self.target.values),
-                max(val.mW for val in self.curr_output.values),
-            ),
-        )
+        ax.set_ylabel("Gain (dB)")  # type: ignore
+        # ax.set_ylim(
+        #     0,
+        #     1.05 * max(
+        #         max(val.mW for val in self.target.values),
+        #         max(val.mW for val in self.curr_output.values),
+        #     ),
+        # )
         ax.set_title("Target vs Current Output Spectrum")  # type: ignore
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
