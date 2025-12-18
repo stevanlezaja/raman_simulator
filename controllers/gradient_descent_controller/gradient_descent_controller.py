@@ -7,7 +7,7 @@ import custom_types as ct
 
 from ..controller_base import Controller
 from .forward_nn import ForwardNN
-from .train_forward_model import train_model
+from .train_models import train_forward_model
 
 
 class GradientDescentController(Controller):
@@ -28,7 +28,7 @@ class GradientDescentController(Controller):
         if os.path.isdir(model_path):
             existing = [f for f in os.listdir(model_path) if f.endswith(".pt") and str(epochs) in f]
             if not existing:
-                train_model(lr_model, epochs, batch_size, training_data, save_path)
+                train_forward_model(lr_model, epochs, batch_size, training_data, save_path)
                 existing = [f for f in os.listdir(model_path) if f.endswith(".pt") and str(epochs) in f]
             latest = sorted(existing)[-1]   # or pick the best, or newest
             full_path = os.path.join(model_path, latest)
