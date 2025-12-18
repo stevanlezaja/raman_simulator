@@ -26,7 +26,7 @@ NUM_STEPS = 200
 def _make_flat_spectrum(input_spectrum: ra.Spectrum[ct.Power]) -> ra.Spectrum[ct.Power]:
     target_spectrum = ra.Spectrum(ct.Power)
     for freq in input_spectrum.frequencies:
-        target_spectrum.add_val(freq, ct.Power(100, 'uW'))
+        target_spectrum.add_val(freq, ct.Power(50, 'uW'))
     return target_spectrum
 
 # def _make_multipump_spectrum(

@@ -63,13 +63,15 @@ class RLController(Controller):
                 spread += abs(w1.nm - w2.nm) ** 0.5
             return spread
 
-        # sh_dif = 1 * shape_difference(curr_output, target_output)
+        # sh_dif = 100 * shape_difference(curr_output, target_output)
 
         # int_dif = integral_difference(curr_output, target_output)
 
         # wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
 
         # loss = sh_dif + int_dif - wl_spread
+
+        # return -loss
 
         return -ra.mse(curr_output, target_output)
 

@@ -133,25 +133,6 @@ def validation_experiment(fiber: Fiber, ax):
 
 
 def main():
-    # plot_Pp_Ps_over_distance(Experiment(DispersionCompensatingFiber(), Signal(), RamanAmplifier()))
-    # calculate_G_net()
-    # caluclate_G_on_off()
-    # plot_raman_efficiencies()
-    # net_gain_experiment()
-    fibers: list[fib.Fiber] = [StandardSingleModeFiber(), NonZeroDispersionFiber(), SuperLargeEffectiveArea()]
-    fig, axes = plt.subplots(2, 2)  # type: ignore
-    axes = axes.flatten()
-    for fiber, ax in zip(fibers, axes):
-        validation_experiment(fiber, ax)
-        ax.set_xlabel('Distance [km]')
-        ax.set_ylabel('Signal power [dBm]')
-        ax.legend()
-        ax.grid()
-        ax.set_title(fiber.__name__)
-    plt.show()  # type: ignore
-
-
-if __name__ == "__main__":
     import spectrum_control
     import raman_system as rs
     import controllers as ctrl
@@ -182,22 +163,23 @@ if __name__ == "__main__":
         raman_system.fiber.length.km = 80
         raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
-        # controller = ctrl.BernoulliController(
-        #     lr=1e-1,
-        #     power_step=ct.Power(20, 'mW'),
-        #     wavelength_step=ct.Length(2, 'nm'),
-        #     beta=1000,
-        #     gamma=0.99,
-        #     weight_decay=1e-1,
-        #     input_dim=6,
-        # )
+        controller = ctrl.BernoulliController(
+            lr=1e-1,
+            power_step=ct.Power(20, 'mW'),
+            wavelength_step=ct.Length(2, 'nm'),
+            beta=1000,
+            gamma=0.99,
+            weight_decay=1e-1,
+            input_dim=6,
+        )
 
-        # controller = ctrl.DifferentialEvolutionController()
+        # controller = ctrl.GradientDescentController(training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_1.0_ratio.json', epochs=500, lr_control=1000)
 
-        # controller = ctrl.GradientDescentController()
-        # controller.train_controller('data/raman_simulator_3_pumps_1.0_ratio.json')
+        # controller = ctrl.RLController()
+        # ra.Spectrum.set_normalization_limits(0.0, 0.1)
 
-        controller = ctrl.RLController()
-        ra.Spectrum.set_normalization_limits(0.0, 0.1)
+        spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=100)
 
-        spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=10000)
+
+if __name__ == "__main__":
+    main()
