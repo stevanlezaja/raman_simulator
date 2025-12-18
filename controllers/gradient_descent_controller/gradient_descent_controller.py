@@ -7,6 +7,7 @@ import custom_types as ct
 
 from ..controller_base import Controller
 from .forward_nn import ForwardNN
+from .train_forward_model import train_model
 
 
 class GradientDescentController(Controller):
@@ -22,34 +23,26 @@ class GradientDescentController(Controller):
         super().__init__()
         self.model = ForwardNN(lr=lr_model)
         self.control_lr = lr_control
+        save_path = self._make_model_filename(model_path, training_data, epochs)
 
-        # If the path is a directory, check if it contains any .pt model
         if os.path.isdir(model_path):
             existing = [f for f in os.listdir(model_path) if f.endswith(".pt") and str(epochs) in f]
-            if existing:
-                latest = sorted(existing)[-1]   # or pick the best, or newest
-                full_path = os.path.join(model_path, latest)
+            if not existing:
+                train_model(lr_model, epochs, batch_size, training_data, save_path)
+                existing = [f for f in os.listdir(model_path) if f.endswith(".pt") and str(epochs) in f]
+            latest = sorted(existing)[-1]   # or pick the best, or newest
+            full_path = os.path.join(model_path, latest)
 
-                print(f"[GDController] Found existing model — loading {latest}")
-                self.model.load(full_path)
-                return
+            print(f"[GDController] Found existing model — loading {latest}")
+            self.model.load(full_path)
+            return
 
-        # No existing model found → need to train
-        if training_data is None:
-            raise ValueError("No model found and no training data provided.")
-
-        print("[GDController] No model found — training a new one...")
-
-        final_loss = self.model.fit(training_data, epochs=epochs, batch_size=batch_size)
-        save_path = self._make_model_filename(model_path, training_data, epochs, final_loss)
-
-        self.model.save(save_path)
         print(f"[GDController] Model saved as: {save_path}")
 
-    def _make_model_filename(self, base_dir: str, dataset: str, epochs: int, loss: float):
+    def _make_model_filename(self, base_dir: str, dataset: str, epochs: int):
         os.makedirs(base_dir, exist_ok=True)
         dataset_name = os.path.splitext(os.path.basename(dataset))[0]
-        fname = f"forward_E{epochs}_L{loss:.4f}_dataset-{dataset_name}.pt"
+        fname = f"forward_E{epochs}_L_dataset-{dataset_name}"
         return os.path.join(base_dir, fname)
 
     def get_control(
