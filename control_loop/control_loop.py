@@ -75,6 +75,13 @@ class ControlLoop:
         self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': [], 'errors': []}
         self.converged = False
         self.off_power_spectrum = self._calculate_off_power()
+        self.backward_model = ctrl.gradient_descent_controller.BackwardNN()
+        ctrl.gradient_descent_controller.train_backward_model(
+            lr=1e-3, epochs=1000, batch_size=64,
+            training_data_path="controllers/gradient_descent_controller/data/raman_simulator_3_pumps_1.0_ratio.json",
+            save_model_path="controllers/gradient_descent_controller/models/backward_model"
+        )
+        self.backward_model.load("controllers/gradient_descent_controller/models/backward_model.pt")
 
     def set_target(self, target: ra.Spectrum[ct.Power]):
         """
