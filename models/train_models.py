@@ -16,8 +16,8 @@ def train_forward_model(lr: float, epochs: int, batch_size: int, training_data_p
     print(f"[GDController] Model saved as: {save_model_path}, with the loss of {final_loss}")
 
 
-def train_backward_model(lr: float, epochs: int, batch_size: int, training_data_path: str | None, save_model_path: str):
-    model = BackwardNN(lr=lr)
+def train_backward_model(fw_model: ForwardNN, lr: float, epochs: int, batch_size: int, training_data_path: str | None, save_model_path: str):
+    model = BackwardNN(forward_model=fw_model, lr=lr)
 
     if training_data_path is None:
         raise ValueError("No model found and no training data provided.")

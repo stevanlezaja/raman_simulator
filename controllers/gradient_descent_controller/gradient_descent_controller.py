@@ -4,16 +4,15 @@ import copy
 
 import raman_amplifier as ra
 import custom_types as ct
+from models import ForwardNN, train_forward_model
 
 from ..controller_base import Controller
-from .forward_nn import ForwardNN
-from .train_models import train_forward_model
 
 
 class GradientDescentController(Controller):
     def __init__(
         self,
-        model_path: str = "controllers/gradient_descent_controller/models/",
+        model_path: str = "models/models/",
         training_data: str | None = None,
         lr_model: float = 1e-3,
         lr_control: float = 100,
