@@ -35,3 +35,5 @@ packages = [
 # train-all = "setup.train_all:main"
 bernoulli-exe = "entry_points.bernoulli_main:main"
 gd-exe = "entry_points.gradient_descent_main:main"
+gen-data = "entry_points.training_data_generator:main"
+visualize-data = "entry_points.training_data_generator:visualize_data"
