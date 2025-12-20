@@ -9,6 +9,15 @@ from .backward_nn import BackwardNN
 MODULE_NAME = "Model Trainer"
 
 
+
+def _make_model_filename(base_dir: str, dataset: str, epochs: int):
+    os.makedirs(base_dir, exist_ok=True)
+    dataset_name = os.path.splitext(os.path.basename(dataset))[0]
+    fname = f"forward_E{epochs}_L_dataset-{dataset_name}"
+    return os.path.join(base_dir, fname)
+
+
+
 def find_latest_model(model_dir: str, prefix: str) -> Optional[str]:
     """
     Finds the latest model file matching prefix*.pt in model_dir
@@ -36,6 +45,8 @@ def get_or_train_forward_model(
     prefix: str = "forward"
 ) -> ForwardNN:
 
+    model_dir = _make_model_filename(model_dir, training_data_path, epochs)
+
     model_path = find_latest_model(model_dir, prefix)
 
     model = ForwardNN(lr=lr)
@@ -61,15 +72,35 @@ def get_or_train_forward_model(
     return model
 
 
-def train_backward_model(fw_model: ForwardNN, lr: float, epochs: int, batch_size: int, training_data_path: str | None, save_model_path: str):
-    model = BackwardNN(forward_model=fw_model, lr=lr)
+def get_or_train_backward_model(
+    forward_model: ForwardNN,
+    model_dir: str,
+    lr: float,
+    epochs: int,
+    batch_size: int,
+    training_data_path: str,
+    prefix: str = "backward"
+) -> BackwardNN:
 
-    if training_data_path is None:
-        raise ValueError("No model found and no training data provided.")
+    model_path = find_latest_model(model_dir, prefix)
 
-    print(f"[{MODULE_NAME}] No model found — training a new one...")
+    model = BackwardNN(forward_model=forward_model, lr=lr)
 
-    final_loss = model.fit(training_data_path, epochs=epochs, batch_size=batch_size)
+    if model_path is not None:
+        print(f"[{MODULE_NAME}] Found backward model: {model_path}")
+        model.load(model_path)
+        return model
 
-    model.save(f"{save_model_path}_loss{final_loss}.pt")
-    print(f"[{MODULE_NAME}] Model saved as: {save_model_path}, with the loss of {final_loss}")
+    print(f"[{MODULE_NAME}] No backward model found — training a new one...")
+
+    final_loss = model.fit(
+        training_data_path,
+        epochs=epochs,
+        batch_size=batch_size
+    )
+
+    save_path = os.path.join(model_dir, f"{prefix}_loss{final_loss:.6f}.pt")
+    model.save(save_path)
+
+    print(f"[{MODULE_NAME}] Backward model saved to {save_path}")
+    return model

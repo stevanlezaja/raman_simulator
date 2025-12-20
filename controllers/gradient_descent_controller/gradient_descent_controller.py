@@ -12,7 +12,7 @@ from ..controller_base import Controller
 class GradientDescentController(Controller):
     def __init__(
         self,
-        model_path: str = "models/models/",
+        model_dir_path: str = "models/models/",
         training_data: str | None = None,
         lr_model: float = 1e-3,
         lr_control: float = 100,
@@ -22,15 +22,8 @@ class GradientDescentController(Controller):
         super().__init__()
         self.control_lr = lr_control
         assert isinstance(training_data, str)
-        save_path = self._make_model_filename(model_path, training_data, epochs)
 
-        self.model = m.get_or_train_forward_model(save_path, lr_model, epochs, batch_size, training_data)
-
-    def _make_model_filename(self, base_dir: str, dataset: str, epochs: int):
-        os.makedirs(base_dir, exist_ok=True)
-        dataset_name = os.path.splitext(os.path.basename(dataset))[0]
-        fname = f"forward_E{epochs}_L_dataset-{dataset_name}"
-        return os.path.join(base_dir, fname)
+        self.model = m.get_or_train_forward_model(model_dir_path, lr_model, epochs, batch_size, training_data)
 
     def get_control(
         self,
