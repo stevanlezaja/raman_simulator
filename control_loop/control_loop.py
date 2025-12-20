@@ -79,7 +79,7 @@ class ControlLoop:
         if isinstance(self.controller, ctrl.GradientDescentController):
             self.backward_model = m.get_or_train_backward_model(
                 forward_model=controller.model,
-                model_dir='models/models/'
+                model_dir='models/models/',
                 lr=1e-3, epochs=1000, batch_size=64,
                 training_data_path="controllers/gradient_descent_controller/data/raman_simulator_3_pumps_1.0_ratio.json",
                 save_model_path="controllers/gradient_descent_controller/models/backward_model"
