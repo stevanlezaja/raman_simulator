@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "raman-amplifier"
+version = "0.1.0"
+dependencies = [
+    "torch",
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "tqdm",
+]
+
+[tool.setuptools]
+packages = [
+    "control_loop",
+    "controllers",
+    "custom_logging",
+    "custom_types",
+    "experiment",
+    "fibers",
+    "models",
+    "raman_amplifier",
+    "raman_system",
+    "signals",
+    "utils",
+    "entry_points",
+]
+
+[project.scripts]
+# train-forward = "models.:main"
+# train-backward = "setup.train_backward:main"
+# train-all = "setup.train_all:main"
+bernoulli-exe = "entry_points.bernoulli_main:main"
+gd-exe = "entry_points.gradient_descent_main:main"
+gen-data = "entry_points.training_data_generator:main"
+visualize-data = "entry_points.training_data_generator:visualize_data"
