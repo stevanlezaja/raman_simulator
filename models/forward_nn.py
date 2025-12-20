@@ -110,7 +110,7 @@ class ForwardNN(torch.nn.Module):
 
         best_val_loss = float("inf")
 
-        for epoch in range(epochs):
+        for _ in tqdm(range(epochs)):
             # ===== TRAIN =====
             self.train()
             train_loss = 0.0
@@ -138,12 +138,6 @@ class ForwardNN(torch.nn.Module):
 
             val_loss /= len(val_loader)
             val_losses.append(val_loss)
-
-            print(
-                f"[ForwardNN] "
-                f"epoch {epoch+1:03d}/{epochs} | "
-                f"train={train_loss:.6f} | val={val_loss:.6f}"
-            )
 
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
