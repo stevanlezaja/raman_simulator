@@ -54,7 +54,7 @@ def data_generator_parser():
     )
 
     parser.add_argument(
-        "-p", "--pumps",
+        "-p", "--num_pumps",
         type=int,
         action="store",
         help="Sets number of pumps",
@@ -62,7 +62,7 @@ def data_generator_parser():
     )
 
     parser.add_argument(
-        "-r", "--ratio",
+        "-r", "--pumping_ratio",
         type=float,
         action="store",
         help="Sets pumping ratio (must be in [0.0, 1.0])",

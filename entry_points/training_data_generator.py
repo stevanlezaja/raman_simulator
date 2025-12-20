@@ -35,7 +35,7 @@ def write_data(data: list[dict[str, Any]], file_path: str) -> None:
             json.dump(sample, f)
             f.write("\n")
 
-def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, fib_len: ct.Length, file_path: str, plot: bool = False) -> None:
+def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, fib_len: ct.Length, file_path: str, plot: bool = False, *args, **kwds) -> None:
     raman_system = rs.RamanSystem()
     raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps, [pumping_ratio for _ in range(num_pumps)])
     raman_system.fiber = fib.StandardSingleModeFiber(fib_len)
@@ -122,7 +122,7 @@ def main():
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
 
     num_pumps = kwargs['num_pumps']
-    pumping_ratio = kwargs['ratio']
+    pumping_ratio = kwargs['pumping_ratio']
     fib_len = ct.Length(kwargs['fiber_length'], 'km')
     file_path = f'data/raman_simulator/{num_pumps}_pumps/{fib_len.km:.0f}_fiber_{pumping_ratio}_ratio.json'
-    generate_data(**kwargs, num_pumps=num_pumps, pumping_ratio=pumping_ratio, fib_len=fib_len, file_path=file_path)
+    generate_data(**kwargs, fib_len=fib_len, file_path=file_path)
