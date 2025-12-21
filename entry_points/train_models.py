@@ -9,9 +9,9 @@ MODULE_NAME = "Model Trainer"
 
 
 
-def _make_model_filename(models_path: str, dataset: str, epochs: int, learning_rate: float, *args, **kwargs):
+def _make_model_filename(models_path: str, training_data_path: str, epochs: int, learning_rate: float, *args, **kwargs):
     os.makedirs(models_path, exist_ok=True)
-    dataset_name = os.path.splitext(os.path.basename(dataset))[0]
+    dataset_name = os.path.splitext(os.path.basename(training_data_path))[0]
     fname = f"forward_E{epochs}_lr{learning_rate}_dataset-{dataset_name}"
     return os.path.join(models_path, fname)
 
@@ -36,10 +36,6 @@ def find_latest_model(models_path: str, prefix: str, *args, **kwargs) -> Optiona
 
 
 def get_or_train_forward_model(
-    epochs: int = 200,
-    batch_size: int = 32,
-    model_dir: str = 'models/models',
-    training_data_path: str = 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json',
     prefix: str = "forward"
 ) -> m.ForwardNN:
 
@@ -48,7 +44,7 @@ def get_or_train_forward_model(
 
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
 
-    model_dir = _make_model_filename(**kwargs, dataset=training_data_path)
+    model_dir = _make_model_filename(**kwargs)
 
     model_path = find_latest_model(prefix=prefix, **kwargs)
 
@@ -61,11 +57,7 @@ def get_or_train_forward_model(
 
     print(f"[{MODULE_NAME}] No forward model found — training a new one...")
 
-    final_loss = model.fit(
-        training_data_path,
-        epochs=epochs,
-        batch_size=batch_size
-    )
+    final_loss = model.fit(**kwargs)
 
     save_path = model_dir + f"_loss{final_loss:.6f}.pt"
     model.save(save_path)

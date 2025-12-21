@@ -83,13 +83,14 @@ class ForwardNN(torch.nn.Module):
 
     def fit(
         self,
-        file_path: str,
+        training_data_path: str,
         epochs: int = 200,
         batch_size: int = 32,
         val_ratio: float = 0.2,
         plot_losses: bool = True,
+        *args, **kwargs
     ):
-        X, Y = self._prepare_dataset(file_path)
+        X, Y = self._prepare_dataset(training_data_path)
         dataset = TensorDataset(X, Y)
 
         n_total = len(dataset)
