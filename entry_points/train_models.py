@@ -67,18 +67,21 @@ def get_or_train_forward_model(
 
 
 def get_or_train_backward_model(
-    forward_model: m.ForwardNN,
-    model_dir: str,
-    lr: float,
-    epochs: int,
-    batch_size: int,
-    training_data_path: str,
     prefix: str = "backward"
 ) -> m.BackwardNN:
 
-    model_path = find_latest_model(model_dir, prefix)
+    forward_model = get_or_train_forward_model()
 
-    model = m.BackwardNN(forward_model=forward_model, lr=lr)
+    training_parser = parser.get_model_training_parser()
+    args = training_parser.parse_args()
+
+    kwargs = {k: v for k, v in vars(args).items() if v is not None}
+
+    model_dir = _make_model_filename(**kwargs)
+
+    model_path = find_latest_model(prefix=prefix, **kwargs)
+
+    model = m.BackwardNN(forward_model=forward_model, **kwargs)
 
     if model_path is not None:
         print(f"[{MODULE_NAME}] Found backward model: {model_path}")
@@ -87,11 +90,7 @@ def get_or_train_backward_model(
 
     print(f"[{MODULE_NAME}] No backward model found — training a new one...")
 
-    final_loss = model.fit(
-        training_data_path,
-        epochs=epochs,
-        batch_size=batch_size
-    )
+    final_loss = model.fit(**kwargs)
 
     save_path = os.path.join(model_dir, f"{prefix}_loss{final_loss:.6f}.pt")
     model.save(save_path)

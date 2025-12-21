@@ -3,6 +3,7 @@ import torch
 import numpy as np
 from torch.utils.data import DataLoader, TensorDataset, random_split
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 import raman_amplifier as ra
 from utils.loading_data_from_file import load_raman_dataset
@@ -19,6 +20,7 @@ class BackwardNN(torch.nn.Module):
         forward_model: torch.nn.Module,
         lr: float = 1e-3,
         lambda_param: float = 1e-3,
+        *args, **kwargs,
     ):
         super().__init__()
 
@@ -44,10 +46,6 @@ class BackwardNN(torch.nn.Module):
 
         self.mse = torch.nn.MSELoss()
 
-    # ------------------------------------------------------------------
-    # IO
-    # ------------------------------------------------------------------
-
     def save(self, path: str):
         torch.save(self.state_dict(), path)
 
@@ -58,10 +56,6 @@ class BackwardNN(torch.nn.Module):
         self.load_state_dict(torch.load(path, map_location="cpu"))
         self.eval()
         print(f"[BackwardNN] loaded model from {path}")
-
-    # ------------------------------------------------------------------
-    # Dataset
-    # ------------------------------------------------------------------
 
     def _prepare_dataset(self, file_path: str):
         samples = list(load_raman_dataset(file_path))
@@ -95,10 +89,6 @@ class BackwardNN(torch.nn.Module):
 
         return torch.stack(X), torch.stack(Y)
 
-    # ------------------------------------------------------------------
-    # Physical constraints
-    # ------------------------------------------------------------------
-
     def _constrain_outputs(self, y_hat):
         """
         Enforce physical bounds:
@@ -107,19 +97,16 @@ class BackwardNN(torch.nn.Module):
         """
         return torch.sigmoid(y_hat)
 
-    # ------------------------------------------------------------------
-    # Training
-    # ------------------------------------------------------------------
-
     def fit(
         self,
-        file_path: str,
+        training_data_path: str,
         epochs: int = 500,
         batch_size: int = 32,
         val_ratio: float = 0.2,
         plot_losses: bool = True,
+        *args, **kwargs
     ):
-        X, Y = self._prepare_dataset(file_path)
+        X, Y = self._prepare_dataset(training_data_path)
         dataset = TensorDataset(X, Y)
 
         n_val = int(len(dataset) * val_ratio)
@@ -138,8 +125,7 @@ class BackwardNN(torch.nn.Module):
 
         best_val = float("inf")
 
-        for epoch in range(epochs):
-            # ---------------- TRAIN ----------------
+        for _ in tqdm(range(epochs)):
             self.train()
             train_loss = 0.0
 
@@ -148,7 +134,6 @@ class BackwardNN(torch.nn.Module):
 
                 y_hat = self._constrain_outputs(self.net(x))
 
-                # ---- forward consistency
                 spec_hat = self.forward_model(y_hat)
 
                 loss_spec = self.mse(spec_hat, x)
@@ -164,7 +149,6 @@ class BackwardNN(torch.nn.Module):
             train_loss /= len(train_loader)
             train_losses.append(train_loss)
 
-            # ---------------- VALID ----------------
             self.eval()
             val_loss = 0.0
 
@@ -179,12 +163,6 @@ class BackwardNN(torch.nn.Module):
             val_loss /= len(val_loader)
             val_losses.append(val_loss)
 
-            print(
-                f"[BackwardNN] "
-                f"epoch {epoch+1:04d}/{epochs} | "
-                f"train={train_loss:.6f} | val={val_loss:.6f}"
-            )
-
             if val_loss < best_val:
                 best_val = val_loss
 
@@ -193,16 +171,8 @@ class BackwardNN(torch.nn.Module):
 
         return best_val
 
-    # ------------------------------------------------------------------
-    # Inference
-    # ------------------------------------------------------------------
-
     def forward(self, x):
         return self._constrain_outputs(self.net(x))
-
-    # ------------------------------------------------------------------
-    # Plot
-    # ------------------------------------------------------------------
 
     def _plot_losses(self, train_losses, val_losses):
         plt.figure(figsize=(8, 5))
