@@ -78,3 +78,50 @@ def data_generator_parser():
     )
 
     return parser
+
+def get_model_training_parser():
+    parser = argparse.ArgumentParser(
+        description="Raman Amplifier Control CLI"
+    )
+
+    parser.add_argument(
+        "-i", "--epochs",
+        type=int,
+        action="store",
+        help="Sets number of epochs for training",
+        default=500,
+    )
+
+    parser.add_argument(
+        "-lr", "--learning_rate",
+        type=float,
+        action="store",
+        help="Sets learning rate for model training",
+        default=1e-3,
+    )
+
+    parser.add_argument(
+        "-bs", "--batch_size",
+        type=int,
+        action="store",
+        help="Sets batch size for training",
+        default=32,
+    )
+
+    parser.add_argument(
+        "--training_data_path",
+        type=str,
+        action="store",
+        help="Sets the path for training data",
+        default='data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json',
+    )
+
+    parser.add_argument(
+        "--models_path",
+        type=str,
+        action="store",
+        help="Sets the path where model will be saved",
+        default='models/models',
+    )
+
+    return parser

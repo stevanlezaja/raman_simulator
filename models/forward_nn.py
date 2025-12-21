@@ -11,7 +11,7 @@ from utils.loading_data_from_file import load_raman_dataset
 
 
 class ForwardNN(torch.nn.Module):
-    def __init__(self, lr: float = 1e-3):
+    def __init__(self, lr: float = 1e-3, *args, **kwargs):
         super().__init__()
         self.net = torch.nn.Sequential(
             torch.nn.Linear(6, 10),
