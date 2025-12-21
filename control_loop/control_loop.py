@@ -17,6 +17,7 @@ import raman_amplifier as ra
 import raman_system as rs
 import controllers as ctrl
 import custom_types as ct
+import models as m
 
 
 log = logging.Logger("[Control Loop]", level=logging.INFO)
@@ -75,6 +76,15 @@ class ControlLoop:
         self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': [], 'errors': []}
         self.converged = False
         self.off_power_spectrum = self._calculate_off_power()
+        if isinstance(self.controller, ctrl.GradientDescentController):
+            self.backward_model = m.get_or_train_backward_model(
+                forward_model=controller.model,
+                model_dir='models/models/',
+                lr=1e-3, epochs=1000, batch_size=64,
+                training_data_path="controllers/gradient_descent_controller/data/raman_simulator_3_pumps_1.0_ratio.json",
+                save_model_path="controllers/gradient_descent_controller/models/backward_model"
+            )
+            self.backward_model.load("controllers/gradient_descent_controller/models/backward_model.pt")
 
     def set_target(self, target: ra.Spectrum[ct.Power]):
         """

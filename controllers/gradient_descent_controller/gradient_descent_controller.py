@@ -4,16 +4,15 @@ import copy
 
 import raman_amplifier as ra
 import custom_types as ct
+import models as m
 
 from ..controller_base import Controller
-from .forward_nn import ForwardNN
-from .train_forward_model import train_model
 
 
 class GradientDescentController(Controller):
     def __init__(
         self,
-        model_path: str = "controllers/gradient_descent_controller/models/",
+        model_dir_path: str = "models/models/",
         training_data: str | None = None,
         lr_model: float = 1e-3,
         lr_control: float = 100,
@@ -21,29 +20,10 @@ class GradientDescentController(Controller):
         batch_size: int = 32,
     ):
         super().__init__()
-        self.model = ForwardNN(lr=lr_model)
         self.control_lr = lr_control
-        save_path = self._make_model_filename(model_path, training_data, epochs)
+        assert isinstance(training_data, str)
 
-        if os.path.isdir(model_path):
-            existing = [f for f in os.listdir(model_path) if f.endswith(".pt") and str(epochs) in f]
-            if not existing:
-                train_model(lr_model, epochs, batch_size, training_data, save_path)
-                existing = [f for f in os.listdir(model_path) if f.endswith(".pt") and str(epochs) in f]
-            latest = sorted(existing)[-1]   # or pick the best, or newest
-            full_path = os.path.join(model_path, latest)
-
-            print(f"[GDController] Found existing model — loading {latest}")
-            self.model.load(full_path)
-            return
-
-        print(f"[GDController] Model saved as: {save_path}")
-
-    def _make_model_filename(self, base_dir: str, dataset: str, epochs: int):
-        os.makedirs(base_dir, exist_ok=True)
-        dataset_name = os.path.splitext(os.path.basename(dataset))[0]
-        fname = f"forward_E{epochs}_L_dataset-{dataset_name}"
-        return os.path.join(base_dir, fname)
+        self.model = m.get_or_train_forward_model(model_dir_path, lr_model, epochs, batch_size, training_data)
 
     def get_control(
         self,
