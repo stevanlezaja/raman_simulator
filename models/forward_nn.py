@@ -11,8 +11,8 @@ from utils.loading_data_from_file import load_raman_dataset
 
 
 class ForwardNN(torch.nn.Module):
-    def __init__(self, lr: float = 1e-3, *args, **kwargs):
-        super().__init__()
+    def __init__(self, lr: float = 1e-3, *args, **kwargs):  # type: ignore
+        super().__init__()  # type: ignore
         self.net = torch.nn.Sequential(
             torch.nn.Linear(6, 10),
             torch.nn.Tanh(),
@@ -41,19 +41,19 @@ class ForwardNN(torch.nn.Module):
 
         samples = list(load_raman_dataset(file_path))
 
-        all_spec_vals = []
+        all_spec_vals: list[np.ndarray] = []
         for _, spec in samples:
             arr = spec.as_array()
             all_spec_vals.append(arr[len(arr) // 2:])
 
-        all_spec_vals = np.vstack(all_spec_vals)
+        all_spec_vals = np.vstack(all_spec_vals)  # type: ignore
         ra.Spectrum.set_normalization_limits(
-            min_val=float(all_spec_vals.min()),
-            max_val=float(all_spec_vals.max())
+            min_val=float(all_spec_vals.min()),  # type: ignore
+            max_val=float(all_spec_vals.max())  # type: ignore
         )
 
-        X_list = []
-        Y_list = []
+        X_list: list[torch.Tensor] = []
+        Y_list: list[torch.Tensor] = []
 
         for raman_inputs, spectrum in samples:
             x = torch.tensor(raman_inputs.normalize().as_array(), dtype=torch.float32)
@@ -69,17 +69,17 @@ class ForwardNN(torch.nn.Module):
         Y = torch.stack(Y_list)
         return X, Y
 
-    def _plot_losses(self, train_losses, val_losses):
-        plt.figure(figsize=(8, 5))
-        plt.plot(train_losses, label="Training loss")
-        plt.plot(val_losses, label="Validation loss")
-        plt.xlabel("Epoch")
-        plt.ylabel("MSE loss")
-        plt.title("ForwardNN Training")
-        plt.legend()
-        plt.grid(True)
-        plt.tight_layout()
-        plt.show()
+    def _plot_losses(self, train_losses: list[float], val_losses: list[float]):
+        plt.figure(figsize=(8, 5))  # type: ignore
+        plt.plot(train_losses, label="Training loss")  # type: ignore
+        plt.plot(val_losses, label="Validation loss")  # type: ignore
+        plt.xlabel("Epoch")  # type: ignore
+        plt.ylabel("MSE loss")  # type: ignore
+        plt.title("ForwardNN Training")  # type: ignore
+        plt.legend()  # type: ignore
+        plt.grid(True)  # type: ignore
+        plt.tight_layout()  # type: ignore
+        plt.show()  # type: ignore
 
     def fit(
         self,
@@ -88,7 +88,7 @@ class ForwardNN(torch.nn.Module):
         batch_size: int = 32,
         val_ratio: float = 0.2,
         plot_losses: bool = True,
-        *args, **kwargs
+        *args, **kwargs  # type: ignore
     ):
         X, Y = self._prepare_dataset(training_data_path)
         dataset = TensorDataset(X, Y)
@@ -121,11 +121,11 @@ class ForwardNN(torch.nn.Module):
                 pred = self.net(xb)
                 loss = self.loss_fn(pred, yb)
                 loss.backward()
-                self.optimizer.step()
+                self.optimizer.step()  # type: ignore
                 train_loss += loss.item()
 
             train_loss /= len(train_loader)
-            train_losses.append(train_loss)
+            train_losses.append(train_loss)  # type: ignore
 
             # ===== VALIDATE =====
             self.eval()
@@ -138,17 +138,17 @@ class ForwardNN(torch.nn.Module):
                     val_loss += loss.item()
 
             val_loss /= len(val_loader)
-            val_losses.append(val_loss)
+            val_losses.append(val_loss)  # type: ignore
 
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 # self.save("forward_nn_best.pt")
 
         if plot_losses:
-            self._plot_losses(train_losses, val_losses)
+            self._plot_losses(train_losses, val_losses)  # type: ignore
 
         return best_val_loss
 
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         return self.net(x)
