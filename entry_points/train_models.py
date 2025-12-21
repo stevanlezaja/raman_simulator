@@ -17,7 +17,7 @@ def _make_model_filename(prefix: str, models_path: str, training_data_path: str,
 
 
 
-def find_latest_model(models_path: str, prefix: str, *args, **kwargs) -> Optional[str]:
+def find_latest_model(models_path: str, prefix: str, epochs: int, *args, **kwargs) -> Optional[str]:
     """
     Finds the latest model file matching prefix*.pt in models_path
     """
@@ -26,7 +26,7 @@ def find_latest_model(models_path: str, prefix: str, *args, **kwargs) -> Optiona
     if not models_path.exists():
         return None
 
-    candidates = list(models_path.glob(f"{prefix}*.pt"))
+    candidates = list(models_path.glob(f"{prefix}*{epochs}*.pt"))
     if not candidates:
         return None
 
