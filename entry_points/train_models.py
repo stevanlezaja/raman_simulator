@@ -9,10 +9,10 @@ MODULE_NAME = "Model Trainer"
 
 
 
-def _make_model_filename(models_path: str, training_data_path: str, epochs: int, learning_rate: float, *args, **kwargs):
+def _make_model_filename(prefix: str, models_path: str, training_data_path: str, epochs: int, learning_rate: float, *args, **kwargs):
     os.makedirs(models_path, exist_ok=True)
     dataset_name = os.path.splitext(os.path.basename(training_data_path))[0]
-    fname = f"forward_E{epochs}_lr{learning_rate}_dataset-{dataset_name}"
+    fname = f"{prefix}_E{epochs}_lr{learning_rate}_dataset-{dataset_name}"
     return os.path.join(models_path, fname)
 
 
@@ -44,7 +44,7 @@ def get_or_train_forward_model(
 
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
 
-    model_dir = _make_model_filename(**kwargs)
+    model_dir = _make_model_filename(prefix, **kwargs)
 
     model_path = find_latest_model(prefix=prefix, **kwargs)
 
@@ -77,7 +77,7 @@ def get_or_train_backward_model(
 
     kwargs = {k: v for k, v in vars(args).items() if v is not None}
 
-    model_dir = _make_model_filename(**kwargs)
+    model_dir = _make_model_filename(prefix, **kwargs)
 
     model_path = find_latest_model(prefix=prefix, **kwargs)
 
@@ -92,7 +92,8 @@ def get_or_train_backward_model(
 
     final_loss = model.fit(**kwargs)
 
-    save_path = os.path.join(model_dir, f"{prefix}_loss{final_loss:.6f}.pt")
+    save_path = model_dir + f"_loss{final_loss:.6f}.pt"
+    print(save_path)
     model.save(save_path)
 
     print(f"[{MODULE_NAME}] Backward model saved to {save_path}")
