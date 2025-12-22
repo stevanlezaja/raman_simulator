@@ -14,14 +14,16 @@ class ForwardNN(torch.nn.Module):
     def __init__(self, lr: float = 1e-3, *args, **kwargs):  # type: ignore
         super().__init__()  # type: ignore
         self.net = torch.nn.Sequential(
-            torch.nn.Linear(6, 10),
-            torch.nn.Tanh(),
-            torch.nn.Linear(10, 10),
-            torch.nn.Tanh(),
-            torch.nn.Linear(10, 10),
-            torch.nn.Tanh(),
-            torch.nn.Linear(10, 40),
+            torch.nn.Linear(6, 64),
+            torch.nn.ReLU(),
+            torch.nn.Linear(64, 64),
+            torch.nn.ReLU(),
+            torch.nn.Linear(64, 64),
+            torch.nn.ReLU(),
+            torch.nn.Linear(64, 40),
+            torch.nn.Sigmoid()  # because target is normalized [0,1]
         )
+
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr)
         self.loss_fn = torch.nn.MSELoss()
 
@@ -87,7 +89,7 @@ class ForwardNN(torch.nn.Module):
         epochs: int = 200,
         batch_size: int = 32,
         val_ratio: float = 0.2,
-        plot_losses: bool = False,
+        plot_losses: bool = True,
         *args, **kwargs  # type: ignore
     ):
         X, Y = self._prepare_dataset(training_data_path)

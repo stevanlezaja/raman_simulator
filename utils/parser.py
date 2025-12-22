@@ -89,7 +89,7 @@ def get_model_training_parser():
         type=int,
         action="store",
         help="Sets number of epochs for training",
-        default=50,
+        default=500,
     )
 
     parser.add_argument(
