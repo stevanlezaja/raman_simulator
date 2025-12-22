@@ -32,6 +32,7 @@ packages = [
 [project.scripts]
 train-forward = "entry_points.train_models:get_or_train_forward_model"
 train-backward = "entry_points.train_models:get_or_train_backward_model"
+train-back-ens = "entry_points.train_models:get_or_train_backward_ensemble"
 bernoulli-exe = "entry_points.bernoulli_main:main"
 gd-exe = "entry_points.gradient_descent_main:main"
 gen-data = "entry_points.training_data_generator:main"

@@ -241,7 +241,7 @@ class Spectrum(Generic[T]):
         """
         Normalize spectrum values in-place to [0, 1] using the provided limits.
         """
-        assert isinstance(Spectrum.norm_max, float) and isinstance(Spectrum.norm_min, float)
+        assert isinstance(Spectrum.norm_max, float) and isinstance(Spectrum.norm_min, float), f"Norm max is {type(Spectrum.norm_max)}, Norm min is {type(Spectrum.norm_min)}"
         denom = Spectrum.norm_max - Spectrum.norm_min
         if denom == 0:
             raise ValueError("Cannot normalize when min_val == max_val")

@@ -1,6 +1,9 @@
 import os
 from pathlib import Path
 from typing import Optional
+import random
+import numpy as np
+import torch
 
 import models as m
 from utils import parser
@@ -98,3 +101,66 @@ def get_or_train_backward_model(
 
     print(f"[{MODULE_NAME}] Backward model saved to {save_path}")
     return model
+
+
+def set_seed(seed: int):
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+
+
+def get_or_train_backward_ensemble(
+    ensemble_size: int = 10,
+    prefix: str = "backward",
+    base_seed: int = 42,
+) -> list[m.BackwardNN]:
+    """
+    Trains or loads an ensemble of backward models.
+    """
+
+    forward_model = get_or_train_forward_model()
+
+    training_parser = parser.get_model_training_parser()
+    args = training_parser.parse_args()
+    kwargs = {k: v for k, v in vars(args).items() if v is not None}
+
+    models = []
+
+    for i in range(ensemble_size):
+        seed = base_seed + i
+        set_seed(seed)
+
+        ens_prefix = f"{prefix}_ens{i}"
+
+        model_dir = _make_model_filename(ens_prefix, **kwargs)
+        model_path = find_latest_model(prefix=ens_prefix, **kwargs)
+
+        model = m.BackwardNN(
+            forward_model=forward_model,
+            **kwargs
+        )
+
+        # if model_path is not None:
+        #     print(f"[{MODULE_NAME}] Found backward model {i}: {model_path}")
+        #     model.load(model_path)
+        #     models.append(model)
+        #     continue
+
+        if model_path is not None:
+            print(f"[{MODULE_NAME}] Found backward model: {model_path}")
+
+
+        print(f"[{MODULE_NAME}] Training backward model {i} (seed={seed})...")
+
+        final_loss = model.fit(**kwargs)
+
+        save_path = model_dir + f"_loss{final_loss:.6f}.pt"
+        model.save(save_path)
+
+        print(f"[{MODULE_NAME}] Backward model {i} saved to {save_path}")
+
+        models.append(model)
+
+    print(models)
+    return models

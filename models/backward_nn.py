@@ -100,10 +100,10 @@ class BackwardNN(torch.nn.Module):
     def fit(
         self,
         training_data_path: str,
-        epochs: int = 500,
+        epochs: int = 100,
         batch_size: int = 32,
         val_ratio: float = 0.2,
-        plot_losses: bool = True,
+        plot_losses: bool = False,
         *args, **kwargs
     ):
         X, Y = self._prepare_dataset(training_data_path)

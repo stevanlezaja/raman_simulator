@@ -87,7 +87,7 @@ class ForwardNN(torch.nn.Module):
         epochs: int = 200,
         batch_size: int = 32,
         val_ratio: float = 0.2,
-        plot_losses: bool = True,
+        plot_losses: bool = False,
         *args, **kwargs  # type: ignore
     ):
         X, Y = self._prepare_dataset(training_data_path)

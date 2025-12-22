@@ -130,3 +130,22 @@ def validation_experiment(fiber: Fiber, ax):
         for dist in distances:
             signal_powers.append(to_dB(exp.get_signal_power_at_distance(Length(dist, 'km')).W, Power(1, 'mW').W))
         ax.plot(distances, signal_powers, label=f"r = {ratio}")
+
+
+if __name__ == '__main__':
+    import controllers as ctrl
+    import fibers as fib
+    import raman_amplifier as ra
+    import entry_points.spectrum_control as spectrum_control
+    import raman_system as rs
+
+
+    raman_system = rs.RamanSystem()
+    raman_system.fiber = fib.StandardSingleModeFiber()
+    raman_system.fiber.length.km = 100
+    raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
+
+    controller = ctrl.GradientDescentController(training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json', epochs=500, lr_control=1000)
+
+    spectrum_control.main(live_plot=True, iterations=100, raman_system=raman_system, controller=controller)
+

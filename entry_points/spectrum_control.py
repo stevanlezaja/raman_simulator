@@ -8,11 +8,12 @@ import matplotlib.pyplot as plt
 import custom_logging as clog
 import custom_types as ct
 import custom_types.conversions as conv
-
 import control_loop as loop
 import raman_system as rs
 import raman_amplifier as ra
 import controllers as ctrl
+import models as m
+from entry_points.train_models import get_or_train_backward_ensemble
 
 
 log = clog.get_logger("Spectrum Control Test Script")
@@ -29,22 +30,6 @@ def _make_flat_spectrum(input_spectrum: ra.Spectrum[ct.Power]) -> ra.Spectrum[ct
         target_spectrum.add_val(freq, ct.Power(50, 'uW'))
     return target_spectrum
 
-# def _make_multipump_spectrum(
-#         raman_system: rs.RamanSystem,
-#         target_powers: list[ct.Power],
-#         target_wavelengths: list[ct.Length]
-#     ) -> ra.Spectrum[ct.Power]:
-
-#     dummy_sytem = rs.RamanSystem()
-#     dummy_sytem.raman_amplifier = ra.RamanAmplifier()
-#     dummy_sytem.fiber = copy.deepcopy(raman_system.fiber)
-#     dummy_sytem.input_spectrum = copy.deepcopy(raman_system.input_spectrum)
-#     dummy_sytem.output_spectrum = copy.deepcopy(raman_system.input_spectrum)
-#     dummy_sytem.raman_amplifier.pump_powers = target_powers
-#     dummy_sytem.raman_amplifier.pump_wavelengths = target_wavelengths
-#     dummy_sytem.update()
-
-#     return dummy_sytem.output_spectrum
 
 def main(
         save_plots: bool = True,
@@ -87,7 +72,12 @@ def main(
         wl_high = ra.RamanInputs.MIN_WAVELENGTH_NM + (i + 1) * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM) / len(raman_system.raman_amplifier.pump_pairs)
         initial_wavelengths.append(ct.Length(np.random.uniform(low=wl_low, high=wl_high), 'nm'))
 
-    control_loop.curr_control = ra.RamanInputs(powers=initial_powers, wavelengths=initial_wavelengths)
+    backward_model = m.BackwardEnsemble(get_or_train_backward_ensemble())
+    import torch
+    initial_input = ra.RamanInputs.from_array(backward_model.forward(torch.Tensor(target_spectrum.as_array())).detach().numpy())
+    print(initial_input)
+
+    control_loop.curr_control = initial_input
 
     if live_plot:
         plt.ion()  # type: ignore

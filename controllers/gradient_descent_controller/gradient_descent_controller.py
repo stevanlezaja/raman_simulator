@@ -5,6 +5,7 @@ import copy
 import raman_amplifier as ra
 import custom_types as ct
 import models as m
+from entry_points.train_models import get_or_train_forward_model
 
 from ..controller_base import Controller
 
@@ -23,7 +24,7 @@ class GradientDescentController(Controller):
         self.control_lr = lr_control
         assert isinstance(training_data, str)
 
-        self.model = m.get_or_train_forward_model(model_dir_path, lr_model, epochs, batch_size, training_data)
+        self.model = get_or_train_forward_model()
 
     def get_control(
         self,
