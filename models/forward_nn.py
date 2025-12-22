@@ -150,5 +150,5 @@ class ForwardNN(torch.nn.Module):
         return best_val_loss
 
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.net(x)
