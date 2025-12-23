@@ -203,25 +203,27 @@ class ControlLoop:
     def plot_spectrums(self, ax: matplotlib.axes.Axes):
         assert self.target is not None
         assert self.curr_output is not None
+        target_gain = self.target/self.off_power_spectrum
+        current_gain = self.curr_output/self.off_power_spectrum
         ax.plot( # type: ignore
             [f.Hz for f in self.target.frequencies],
-            [val.dB for val in (self.target/self.off_power_spectrum).values],
+            [val.dB for val in target_gain.values],
             label="Target",
         )
         ax.plot( # type: ignore
             [f.Hz for f in self.curr_output.frequencies],
-            [val.dB for val in (self.curr_output/self.off_power_spectrum).values],
+            [val.dB for val in current_gain.values],
             label="Current Output",
         )
         ax.set_xlabel("Frequency (Hz)")  # type: ignore
         ax.set_ylabel("Gain (dB)")  # type: ignore
-        # ax.set_ylim(
-        #     0,
-        #     1.05 * max(
-        #         max(val.mW for val in self.target.values),
-        #         max(val.mW for val in self.curr_output.values),
-        #     ),
-        # )
+        ax.set_ylim(
+            0,
+            1.05 * max(
+                max(val.dB for val in target_gain.values),
+                max(val.dB for val in current_gain.values),
+            ),
+        )
         ax.set_title("Target vs Current Output Spectrum")  # type: ignore
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
