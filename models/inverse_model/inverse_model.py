@@ -20,9 +20,9 @@ class InverseModel:
         batch_size = 8
         self.loss_history = []
 
-        for model in self.models:
+        for model in tqdm(self.models):
             epoch_losses = []
-            for epoch in tqdm(range(4)):
+            for epoch in range(3):
                 batch_losses = []
 
                 for i in range(0, len(X), batch_size):
