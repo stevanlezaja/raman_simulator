@@ -42,10 +42,17 @@ def get_or_train_forward_model(
     prefix: str = "forward"
 ) -> m.ForwardNN:
 
-    training_parser = parser.get_model_training_parser()
-    args = training_parser.parse_args()
+    # training_parser = parser.get_model_training_parser()
+    # args = training_parser.parse_args()
 
-    kwargs = {k: v for k, v in vars(args).items() if v is not None}
+    # kwargs = {k: v for k, v in vars(args).items() if v is not None}
+    kwargs = {
+        'epochs': 500,
+        'learning_rate': 1e-3,
+        'batch_size': 32,
+        'training_data_path': 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json',
+        'models_path': 'models/models',
+    }
 
     model_dir = _make_model_filename(prefix, **kwargs)
 
