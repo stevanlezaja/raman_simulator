@@ -16,6 +16,7 @@ import raman_system as rs
 import fibers as fib
 from utils import parser
 
+from data.data_cleanup import write_sorted_dataset_copy
 
 def sample_raman_inputs(num_pumps: int, power_range: tuple[ct.Power, ct.Power], wavelength_range: tuple[ct.Length, ct.Length]) -> ra.RamanInputs:
     powers: list[ct.Power] = []
@@ -45,8 +46,8 @@ def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, fib_le
         raman_system.input_spectrum.add_val(freq, ct.Power(25, 'uW'))
     raman_system.output_spectrum = copy.deepcopy(raman_system.input_spectrum)
 
-    power_range = (ct.Power(0, 'mW'), ct.Power(750, 'mW'))
-    wavelength_range = (ct.Length(1420, 'nm'), ct.Length(1480, 'nm'))
+    power_range = (ct.Power(ra.RamanInputs.MIN_POWER_W, 'W'), ct.Power(ra.RamanInputs.MAX_POWER_W, 'W'))
+    wavelength_range = (ct.Length(ra.RamanInputs.MIN_WAVELENGTH_NM, 'nm'), ct.Length(ra.RamanInputs.MAX_WAVELENGTH_NM, 'nm'))
 
     data_batch: list[dict[str, Any]] = []
     batch_size = 10
@@ -126,3 +127,9 @@ def main():
     fib_len = ct.Length(kwargs['fiber_length'], 'km')
     file_path = f'data/raman_simulator/{num_pumps}_pumps/{fib_len.km:.0f}_fiber_{pumping_ratio}_ratio.json'
     generate_data(**kwargs, fib_len=fib_len, file_path=file_path)
+
+
+    INPUT = "data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json"
+    OUTPUT = "data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json"
+
+    write_sorted_dataset_copy(INPUT, OUTPUT)
