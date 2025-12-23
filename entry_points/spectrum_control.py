@@ -87,7 +87,7 @@ def main(
 
     if live_plot or save_plots:
         fig, axes = plt.subplots(2, 3, figsize=(12, 8))  # type: ignore
-        ax_err, ax_spec, ax_pow, ax_custom, ax_wl, ax_2d = axes.flatten()
+        ax_err, ax_spec, ax_custom, ax_pow, ax_wl, ax_2d = axes.flatten()
 
     errors: list[float] = []
     powers: list[float] = []
