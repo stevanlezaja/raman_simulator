@@ -68,7 +68,7 @@ def write_sorted_dataset_copy(input_path: str, output_path: str):
 
 
 if __name__ == '__main__':
-    INPUT = "data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json"
+    INPUT = "data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json"
     OUTPUT = "data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json"
 
     write_sorted_dataset_copy(INPUT, OUTPUT)
