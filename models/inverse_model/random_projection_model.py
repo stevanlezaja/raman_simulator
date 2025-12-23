@@ -26,13 +26,17 @@ class RandomProjectionInverseModel(nn.Module):
     def fit(self, epochs: int, X_train: torch.Tensor, Y_train: torch.Tensor):
         optimizer = torch.optim.Adam(self.output_layer.parameters(), lr=1e-3)
         criterion = nn.MSELoss()
+        losses = []
 
-        for epoch in range(epochs):
+        for _ in range(epochs):
             optimizer.zero_grad()
             pred = self.forward(X_train)
             loss = criterion(pred, Y_train)
             loss.backward()
             optimizer.step()
+            losses.append(loss.item())
+
+        return sum(losses) / len(losses)
 
 
     def forward(self, x: torch.Tensor | np.ndarray) -> torch.Tensor:

@@ -1,6 +1,7 @@
 from copy import deepcopy
 import torch
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 import custom_types as ct
 import raman_amplifier as ra
@@ -13,10 +14,38 @@ class InverseModel:
         self.model: RandomProjectionInverseModel = RandomProjectionInverseModel()
         X, Y = self._prepare_training_tensors('data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
         batch_size = 8
-        for i in tqdm(range(0, len(X), batch_size)):
-            X_batch = X[i:i+batch_size]
-            Y_batch = Y[i:i+batch_size]
-            self.model.fit(epochs=1, X_train=X_batch, Y_train=Y_batch)
+        self.loss_history = []
+        epoch_losses = []
+
+        for epoch in tqdm(range(3)):
+            batch_losses = []
+
+            for i in range(0, len(X), batch_size):
+                X_batch = X[i:i + batch_size]
+                Y_batch = Y[i:i + batch_size]
+
+                loss = self.model.fit(
+                    epochs=1,
+                    X_train=X_batch,
+                    Y_train=Y_batch
+                )
+
+                batch_losses.append(loss)
+
+            epoch_loss = sum(batch_losses) / len(batch_losses)
+            epoch_losses.append(epoch_loss)
+        self.loss_history = epoch_losses
+        self.plot_loss()
+
+    def plot_loss(self):
+        plt.figure()
+        plt.plot(self.loss_history)
+        plt.xlabel("Training step (batch)")
+        plt.ylabel("Loss")
+        plt.title("Inverse Model Training Loss")
+        plt.grid(True)
+        plt.tight_layout()
+        plt.show()
 
     def get_raman_inputs(self, spectrum: ra.Spectrum[ct.Power]) -> ra.RamanInputs:
         assert isinstance(spectrum, ra.Spectrum)
@@ -54,7 +83,3 @@ class InverseModel:
         Y_train = torch.tensor(Y_list, dtype=torch.float32)
 
         return X_train, Y_train
-
-
-
-# Example
