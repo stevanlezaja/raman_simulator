@@ -246,10 +246,10 @@ class ControlLoop:
     def plot_power_evolution(self, ax: matplotlib.axes.Axes):
         power_arr = np.array(self.history['powers'])
         for i in range(power_arr.shape[1]):
-            ax.plot(power_arr[::-1, i], range(len(power_arr[:, i])), label=f"Power {i}")  # type: ignore
-        ax.set_ylabel("Iteration")  # type: ignore
-        ax.set_xlabel("Power (W)")  # type: ignore
-        ax.set_xlim(left=ra.RamanInputs.MIN_POWER_W, right=ra.RamanInputs.MAX_POWER_W)
+            ax.plot(range(len(power_arr[:, i])), power_arr[:, i], label=f"Power {i}")  # type: ignore
+        ax.set_xlabel("Iteration")  # type: ignore
+        ax.set_ylabel("Power (W)")  # type: ignore
+        ax.set_ylim(top=ra.RamanInputs.MAX_POWER_W, bottom=ra.RamanInputs.MIN_POWER_W)
         ax.set_title("Power evolution")  # type: ignore
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
