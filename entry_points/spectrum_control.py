@@ -23,10 +23,21 @@ SAMPLES = 40
 
 NUM_STEPS = 200
 
-def _make_flat_spectrum(input_spectrum: ra.Spectrum[ct.Power]) -> ra.Spectrum[ct.Power]:
+def _make_flat_spectrum(off_spectrum: ra.Spectrum[ct.Power], target_val: ct.Power | ct.PowerGain) -> ra.Spectrum[ct.Power]:
+    def _get_power(input_power: ct.Power, power_gain: ct.PowerGain) -> ct.Power:
+        pout = input_power.value * power_gain.linear
+        return ct.Power(pout, input_power.default_unit)
+
+    if isinstance(target_val, ct.PowerGain):
+        target_power = _get_power(off_spectrum.values[0], target_val)
+    elif isinstance(target_val, ct.Power):
+        target_power = target_val
+    else:
+        raise ValueError(f"Target can be either Power or PowerGain, and not {type(target_val)}")
+
     target_spectrum = ra.Spectrum(ct.Power)
-    for freq in input_spectrum.frequencies:
-        target_spectrum.add_val(freq, ct.Power(5, 'uW'))
+    for freq in off_spectrum.frequencies:
+        target_spectrum.add_val(freq, target_power)
     return target_spectrum
 
 
@@ -55,12 +66,12 @@ def main(
         freq = conv.wavelength_to_frequency(ct.Length(num, 'nm'))
         input_spectrum.add_val(freq, ct.Power(25, 'uW'))
 
-    target_spectrum = _make_flat_spectrum(input_spectrum)
 
     raman_system.input_spectrum = input_spectrum
     raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
     control_loop = loop.ControlLoop(raman_system, controller)
+    target_spectrum = _make_flat_spectrum(control_loop.off_power_spectrum, ct.PowerGain(10, 'dB'))
     control_loop.set_target(target_spectrum)
 
     initial_powers: list[ct.Power] = []
@@ -70,13 +81,6 @@ def main(
         wl_low = ra.RamanInputs.MIN_WAVELENGTH_NM + i * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM) / len(raman_system.raman_amplifier.pump_pairs)
         wl_high = ra.RamanInputs.MIN_WAVELENGTH_NM + (i + 1) * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM) / len(raman_system.raman_amplifier.pump_pairs)
         initial_wavelengths.append(ct.Length(np.random.uniform(low=wl_low, high=wl_high), 'nm'))
-
-    # backward_model = m.BackwardEnsemble(get_or_train_backward_ensemble())
-    # import torch
-    # initial_input = ra.RamanInputs.from_array(backward_model.forward(torch.Tensor(target_spectrum.as_array())).detach().numpy())
-    # print(initial_input)
-
-    # control_loop.curr_control = initial_input
 
     if live_plot:
         plt.ion()  # type: ignore
@@ -91,10 +95,6 @@ def main(
 
     for curr_step in tqdm.tqdm(range(iterations)):
         final_step = curr_step == iterations - 1
-        # if isinstance(control_loop.controller, ctrl.BernoulliController):
-        #     if control_loop.controller.converged((0.48, 0.52), 50, 60):
-        #         print("Converged")
-        #         final_step = True
 
         control_loop.step()
 
@@ -103,11 +103,9 @@ def main(
         error = control_loop.curr_output - control_loop.target
         errors.append(abs(error.mean))
 
-        # Log powers and wavelengths for plotting
         powers.append([p.W for p in control_loop.curr_control.powers])  # type: ignore
         wavelengths.append([w.nm for w in control_loop.curr_control.wavelengths])  # type: ignore
 
-        # clear all axes
         if live_plot:
             for ax in axes.flatten():  # type: ignore
                 ax.clear()
@@ -119,8 +117,6 @@ def main(
             control_loop.plot_power_evolution(ax_pow)  # type: ignore
             control_loop.plot_wavelength_evolution(ax_wl)  # type: ignore
             controller.plot_custom_data(ax_custom)  # type: ignore
-
-            # update figure
             fig.tight_layout()  # type: ignore
 
         if live_plot:
