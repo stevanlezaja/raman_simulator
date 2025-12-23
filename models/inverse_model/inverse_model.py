@@ -2,6 +2,7 @@ from copy import deepcopy
 import torch
 from tqdm import tqdm
 import matplotlib.pyplot as plt
+import numpy as np
 
 import custom_types as ct
 import raman_amplifier as ra
@@ -11,31 +12,35 @@ from .random_projection_model import RandomProjectionInverseModel
 
 class InverseModel:
     def __init__(self) -> None:
-        self.model: RandomProjectionInverseModel = RandomProjectionInverseModel()
+        self.models = [RandomProjectionInverseModel(), RandomProjectionInverseModel(), RandomProjectionInverseModel(), 
+                        RandomProjectionInverseModel(), RandomProjectionInverseModel(), RandomProjectionInverseModel(), 
+                        RandomProjectionInverseModel(), RandomProjectionInverseModel(), RandomProjectionInverseModel(), 
+                        RandomProjectionInverseModel()]
         X, Y = self._prepare_training_tensors('data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
         batch_size = 8
         self.loss_history = []
-        epoch_losses = []
 
-        for epoch in tqdm(range(3)):
-            batch_losses = []
+        for model in self.models:
+            epoch_losses = []
+            for epoch in tqdm(range(4)):
+                batch_losses = []
 
-            for i in range(0, len(X), batch_size):
-                X_batch = X[i:i + batch_size]
-                Y_batch = Y[i:i + batch_size]
+                for i in range(0, len(X), batch_size):
+                    X_batch = X[i:i + batch_size]
+                    Y_batch = Y[i:i + batch_size]
 
-                loss = self.model.fit(
-                    epochs=1,
-                    X_train=X_batch,
-                    Y_train=Y_batch
-                )
+                    loss = model.fit(
+                        epochs=1,
+                        X_train=X_batch,
+                        Y_train=Y_batch
+                    )
 
-                batch_losses.append(loss)
+                    batch_losses.append(loss)
 
-            epoch_loss = sum(batch_losses) / len(batch_losses)
-            epoch_losses.append(epoch_loss)
-        self.loss_history = epoch_losses
-        self.plot_loss()
+                epoch_loss = sum(batch_losses) / len(batch_losses)
+                epoch_losses.append(epoch_loss)
+            self.loss_history = epoch_losses
+            # self.plot_loss()
 
     def plot_loss(self):
         plt.figure()
@@ -52,7 +57,8 @@ class InverseModel:
         spectrum_copy = deepcopy(spectrum)
         spectrum_arr = spectrum_copy.normalize().as_array()
 
-        raman_inputs_arr = self.model.forward(spectrum_arr[len(spectrum_arr)//2:]).detach().numpy()
+        raman_inputs_arr_list = [model.forward(spectrum_arr[len(spectrum_arr)//2:]).detach().numpy() for model in self.models]
+        raman_inputs_arr = np.mean(np.stack(raman_inputs_arr_list, axis=0), axis=0)
         raman_inputs = ra.RamanInputs.from_array(raman_inputs_arr).denormalize()
         return raman_inputs
     
