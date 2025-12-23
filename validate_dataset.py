@@ -3,7 +3,7 @@ from copy import deepcopy
 import custom_types as ct
 from utils.loading_data_from_file import load_raman_dataset
 
-dataset = load_raman_dataset('data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json')
+dataset = load_raman_dataset('data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
 
 min_power = ct.Power(1000, 'W')
 max_power = ct.Power(-100, 'W')

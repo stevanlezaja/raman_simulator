@@ -11,8 +11,8 @@ from utils.loading_data_from_file import load_raman_dataset
 
 forward_model = get_or_train_forward_model()
 
-data_generator = load_raman_dataset('data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json')
-m.ForwardNN._prepare_dataset(forward_model, 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json')
+data_generator = load_raman_dataset('data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
+m.ForwardNN._prepare_dataset(forward_model, 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
 
 for raman_inputs, target_spectrum in data_generator:
     ra_norm = raman_inputs.normalize()

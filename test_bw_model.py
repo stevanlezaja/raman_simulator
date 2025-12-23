@@ -11,8 +11,8 @@ from utils.loading_data_from_file import load_raman_dataset
 backward_model = get_or_train_backward_model()
 backward_ensemble = m.BackwardEnsemble(get_or_train_backward_rpm_ensemble())
 
-data_generator = load_raman_dataset('data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json')
-m.BackwardNN._prepare_dataset(backward_model, 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json')
+data_generator = load_raman_dataset('data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
+m.BackwardNN._prepare_dataset(backward_model, 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
 
 plt.ion()  # interactive mode
 

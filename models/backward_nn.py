@@ -103,7 +103,7 @@ class BackwardNN(torch.nn.Module):
         epochs: int = 100,
         batch_size: int = 32,
         val_ratio: float = 0.2,
-        plot_losses: bool = False,
+        plot_losses: bool = True,
         *args, **kwargs
     ):
         X, Y = self._prepare_dataset(training_data_path)

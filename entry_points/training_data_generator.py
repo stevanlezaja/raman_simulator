@@ -93,7 +93,7 @@ def visualize_data_batch(data_batch: list[dict[str, Any]], ax: Any) -> None:
     plt.pause(0.001)
 
 
-def visualize_data(file_path: str = 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json', update_every: int = 10):
+def visualize_data(file_path: str = 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json', update_every: int = 10):
     from utils.loading_data_from_file import load_raman_dataset
 
     plt.ion()  # type: ignore

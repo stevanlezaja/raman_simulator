@@ -74,9 +74,9 @@ class BackwardRPMEnsemble:
 # -----------------------------
 # Prepare dataset
 # -----------------------------
-def prepare_dataset(json_path='data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json'):
+def prepare_dataset(json_path='data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json'):
     data_generator = load_raman_dataset(json_path)
-    ForwardNN._prepare_dataset(ForwardNN(), 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json')
+    ForwardNN._prepare_dataset(ForwardNN(), 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
 
     X_list, Y_list = [], []
     for raman_inputs, spectrum in data_generator:

@@ -113,7 +113,7 @@ def get_model_training_parser():
         type=str,
         action="store",
         help="Sets the path for training data",
-        default='data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json',
+        default='data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json',
     )
 
     parser.add_argument(
