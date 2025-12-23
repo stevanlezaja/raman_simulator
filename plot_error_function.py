@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 
 import custom_types as ct
 import custom_types.conversions as conv
+import custom_types.constants as const
 
 import controllers as ctrl
 import raman_system as rs
@@ -12,14 +13,12 @@ import raman_amplifier as ra
 import fibers as fib
 
 
-LOWER = 1500
-UPPER = 1600
 SAMPLES = 40
 
 
 def main(
         num_samples: int = SAMPLES,
-        wavelength_range: tuple[float, float] = (LOWER, UPPER),
+        wavelength_range: tuple[float, float] = const.C_BAND,
         raman_system: rs.RamanSystem = rs.RamanSystem(),
 ) -> None:
 

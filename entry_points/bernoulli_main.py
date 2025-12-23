@@ -28,7 +28,7 @@ def main():
 
     raman_system = rs.RamanSystem()
     raman_system.fiber = fib.StandardSingleModeFiber()
-    raman_system.fiber.length.km = 80
+    raman_system.fiber.length.km = 100
     raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
-    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=100)
+    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller)

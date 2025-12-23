@@ -76,15 +76,7 @@ class ControlLoop:
         self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': [], 'errors': []}
         self.converged = False
         self.off_power_spectrum = self._calculate_off_power()
-        # if isinstance(self.controller, ctrl.GradientDescentController):
-        #     self.backward_model = m.get_or_train_backward_model(
-        #         forward_model=controller.model,
-        #         model_dir='models/models/',
-        #         lr=1e-3, epochs=1000, batch_size=64,
-        #         training_data_path="controllers/gradient_descent_controller/data/raman_simulator_3_pumps_1.0_ratio.json",
-        #         save_model_path="controllers/gradient_descent_controller/models/backward_model"
-        #     )
-        #     self.backward_model.load("controllers/gradient_descent_controller/models/backward_model.pt")
+        self.inverse_model = m.InverseModel()
 
     def set_target(self, target: ra.Spectrum[ct.Power]):
         """
@@ -97,6 +89,7 @@ class ControlLoop:
         """
 
         self.target = target
+        self.curr_control = self.inverse_model.get_raman_inputs(target)
 
     def get_raman_output(self) -> ra.Spectrum[ct.Power]:
         """
@@ -210,25 +203,27 @@ class ControlLoop:
     def plot_spectrums(self, ax: matplotlib.axes.Axes):
         assert self.target is not None
         assert self.curr_output is not None
+        target_gain = self.target/self.off_power_spectrum
+        current_gain = self.curr_output/self.off_power_spectrum
         ax.plot( # type: ignore
             [f.Hz for f in self.target.frequencies],
-            [val.dB for val in (self.target/self.off_power_spectrum).values],
+            [val.dB for val in target_gain.values],
             label="Target",
         )
         ax.plot( # type: ignore
             [f.Hz for f in self.curr_output.frequencies],
-            [val.dB for val in (self.curr_output/self.off_power_spectrum).values],
+            [val.dB for val in current_gain.values],
             label="Current Output",
         )
         ax.set_xlabel("Frequency (Hz)")  # type: ignore
         ax.set_ylabel("Gain (dB)")  # type: ignore
-        # ax.set_ylim(
-        #     0,
-        #     1.05 * max(
-        #         max(val.mW for val in self.target.values),
-        #         max(val.mW for val in self.curr_output.values),
-        #     ),
-        # )
+        ax.set_ylim(
+            0,
+            1.05 * max(
+                max(val.dB for val in target_gain.values),
+                max(val.dB for val in current_gain.values),
+            ),
+        )
         ax.set_title("Target vs Current Output Spectrum")  # type: ignore
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore

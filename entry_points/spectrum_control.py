@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import custom_logging as clog
 import custom_types as ct
 import custom_types.conversions as conv
+import custom_types.constants as const
 import control_loop as loop
 import raman_system as rs
 import raman_amplifier as ra
@@ -18,8 +19,6 @@ from entry_points.train_models import get_or_train_backward_ensemble
 
 log = clog.get_logger("Spectrum Control Test Script")
 
-LOWER = 1500
-UPPER = 1600
 SAMPLES = 40
 
 NUM_STEPS = 200
@@ -27,7 +26,7 @@ NUM_STEPS = 200
 def _make_flat_spectrum(input_spectrum: ra.Spectrum[ct.Power]) -> ra.Spectrum[ct.Power]:
     target_spectrum = ra.Spectrum(ct.Power)
     for freq in input_spectrum.frequencies:
-        target_spectrum.add_val(freq, ct.Power(50, 'uW'))
+        target_spectrum.add_val(freq, ct.Power(5, 'uW'))
     return target_spectrum
 
 
@@ -36,7 +35,7 @@ def main(
         live_plot: bool = False,
         iterations: int = NUM_STEPS,
         num_samples: int = SAMPLES,
-        wavelength_range: tuple[float, float] = (LOWER, UPPER),
+        wavelength_range: tuple[float, float] = const.C_BAND,
         raman_system: rs.RamanSystem = rs.RamanSystem(),
         controller: ctrl.Controller = ctrl.BernoulliController(),
         number: int | None = None
@@ -72,12 +71,12 @@ def main(
         wl_high = ra.RamanInputs.MIN_WAVELENGTH_NM + (i + 1) * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM) / len(raman_system.raman_amplifier.pump_pairs)
         initial_wavelengths.append(ct.Length(np.random.uniform(low=wl_low, high=wl_high), 'nm'))
 
-    backward_model = m.BackwardEnsemble(get_or_train_backward_ensemble())
-    import torch
-    initial_input = ra.RamanInputs.from_array(backward_model.forward(torch.Tensor(target_spectrum.as_array())).detach().numpy())
-    print(initial_input)
+    # backward_model = m.BackwardEnsemble(get_or_train_backward_ensemble())
+    # import torch
+    # initial_input = ra.RamanInputs.from_array(backward_model.forward(torch.Tensor(target_spectrum.as_array())).detach().numpy())
+    # print(initial_input)
 
-    control_loop.curr_control = initial_input
+    # control_loop.curr_control = initial_input
 
     if live_plot:
         plt.ion()  # type: ignore
