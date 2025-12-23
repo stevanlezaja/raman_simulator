@@ -207,17 +207,18 @@ class BernoulliController(torch.nn.Module, Controller):
                 spread += abs(w1.nm - w2.nm) **0.5
             return spread
 
-        sh_dif = 1 * shape_difference(curr_output, target_output)
+        # sh_dif = 1 * shape_difference(curr_output, target_output)
 
-        int_dif = integral_difference(curr_output, target_output)
+        # int_dif = integral_difference(curr_output, target_output)
 
-        wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
+        # wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
 
-        self.history['rewards']['shape_loss'].append(sh_dif)
-        self.history['rewards']['integral_loss'].append(int_dif)
-        self.history['rewards']['wavelength_spread'].append(wl_spread)
+        # self.history['rewards']['shape_loss'].append(sh_dif)
+        # self.history['rewards']['integral_loss'].append(int_dif)
+        # self.history['rewards']['wavelength_spread'].append(wl_spread)
 
-        loss = sh_dif + int_dif - wl_spread
+        # loss = sh_dif + int_dif - wl_spread
+        loss = ra.spectrum.mse(curr_output, target_output)
 
         # print(f"Reward is: {-loss}\n  Shape difference is {sh_dif/loss*100:.2f}%\n  Integral difference is {int_dif/loss*100:.2f}%\n")
 
@@ -319,6 +320,10 @@ class BernoulliController(torch.nn.Module, Controller):
         self._baseline = self.gamma * self._baseline + (1 - self.gamma) * reward
         self.history['baseline'].append(self._baseline)
 
+        if not np.isfinite(reward):
+            print("INFINITE REWARD")
+            reward = -1e3   # or some strong penalty
+
         advantage = self.beta * (reward - self._baseline)
 
         self.prev_error = error
@@ -334,17 +339,17 @@ class BernoulliController(torch.nn.Module, Controller):
 
         self.logits += torch.clamp(update, -0.2 * torch.ones_like(update), 0.2 * torch.ones_like(update))
 
-    def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
-        ax.plot(self.rewards[1:], label='Reward')  # type: ignore
-        ax.plot(self.baseline[1:], label='Baseline')  # type: ignore
-        # ax.plot(self.history['rewards']['mse_loss'], label='MSE Loss')  # type: ignore
-        ax.plot([-x for x in self.history['rewards']['integral_loss'][1:]], label='Integral Loss')  # type: ignore
-        ax.plot([-x for x in self.history['rewards']['shape_loss'][1:]], label='Shape Loss')  # type: ignore
-        ax.set_xlabel("Iteration")  # type: ignore
-        ax.set_ylabel("Reward")  # type: ignore
-        ax.set_title("Reward over time")  # type: ignore
-        ax.grid()  # type: ignore
-        ax.legend()  # type: ignore
+    # def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
+    #     ax.plot(self.rewards[1:], label='Reward')  # type: ignore
+    #     ax.plot(self.baseline[1:], label='Baseline')  # type: ignore
+    #     # ax.plot(self.history['rewards']['mse_loss'], label='MSE Loss')  # type: ignore
+    #     ax.plot([-x for x in self.history['rewards']['integral_loss'][1:]], label='Integral Loss')  # type: ignore
+    #     ax.plot([-x for x in self.history['rewards']['shape_loss'][1:]], label='Shape Loss')  # type: ignore
+    #     ax.set_xlabel("Iteration")  # type: ignore
+    #     ax.set_ylabel("Reward")  # type: ignore
+    #     ax.set_title("Reward over time")  # type: ignore
+    #     ax.grid()  # type: ignore
+    #     ax.legend()  # type: ignore
 
     def plot_custom_data(self, ax: matplotlib.axes.Axes):
         probs = np.array(self.history['probs'])  # shape: (steps, n_actions)
