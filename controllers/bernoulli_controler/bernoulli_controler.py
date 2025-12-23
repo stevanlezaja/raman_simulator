@@ -76,7 +76,7 @@ class BernoulliController(torch.nn.Module, Controller):
                  lr: float = 1e-1,
                  weight_decay: float = 0.0,
                  beta: float = 1,
-                 gamma: float = 1,
+                 gamma: float = 0.99,
                  input_dim: int = 2,
                  ):
         super(torch.nn.Module, self).__init__()
@@ -332,7 +332,7 @@ class BernoulliController(torch.nn.Module, Controller):
 
         update = self.learning_rate * advantage * eligibility - self.weight_decay * self.logits
 
-        self.logits += update
+        self.logits += torch.clamp(update, -0.2 * torch.ones_like(update), 0.2 * torch.ones_like(update))
 
     def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
         ax.plot(self.rewards[1:], label='Reward')  # type: ignore
