@@ -12,9 +12,7 @@ class InverseModel:
     def __init__(self) -> None:
         self.model: RandomProjectionInverseModel = RandomProjectionInverseModel()
         X, Y = self._prepare_training_tensors('data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
-        print(X.shape)
-        print(Y.shape)
-        batch_size = 128
+        batch_size = 8
         for i in tqdm(range(0, len(X), batch_size)):
             X_batch = X[i:i+batch_size]
             Y_batch = Y[i:i+batch_size]
