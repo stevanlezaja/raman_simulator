@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Iterable
 
 import custom_types as ct
 import raman_amplifier as ra
@@ -22,7 +22,7 @@ def _load_jsonl(path: str) -> Iterator[dict]:
                 yield json.loads(line)
 
 
-def load_raman_dataset(path: str):
+def load_raman_dataset(path: str) -> Iterable[tuple[ra.RamanInputs, ra.Spectrum[ct.Power]]]:
     """
     Loads the dataset and reconstructs RamanInputs and Spectrum objects.
     """
