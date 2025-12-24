@@ -22,29 +22,6 @@ def sort_raman_inputs_inplace(raman_inputs: ra.RamanInputs):
     return raman_inputs
 
 
-def sort_dataset_to_new_file(
-    input_path: str,
-    output_path: str,
-):
-    dataset = load_raman_dataset(input_path)
-
-    sorted_entries = []
-
-    for raman_inputs, outputs in dataset:
-        raman_inputs = sort_raman_inputs_inplace(raman_inputs)
-
-        sorted_entries.append(raman_inputs.to_dict())
-
-    output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with output_path.open("w") as f:
-        json.dump(sorted_entries, f, indent=2)
-
-    print(f"Sorted dataset written to:\n  {output_path}")
-    print(f"Original dataset left untouched:\n  {input_path}")
-
-
 def write_sorted_dataset_copy(input_path: str, output_path: str):
     output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
