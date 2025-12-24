@@ -173,11 +173,11 @@ class BernoulliController(torch.nn.Module, Controller):
 
     @property
     def rewards(self) -> list[float]:
-        return self.history['rewards']['total']
+        return self.history['rewards']['total']  # type: ignore
 
     @property
     def baseline(self) -> list[float]:
-        return self.history['baseline']
+        return self.history['baseline']  # type: ignore
 
     def reward(
         self,
@@ -207,17 +207,17 @@ class BernoulliController(torch.nn.Module, Controller):
                 spread += abs(w1.nm - w2.nm) **0.5
             return spread
 
-        # sh_dif = 1 * shape_difference(curr_output, target_output)
+        sh_dif = 1 * shape_difference(curr_output, target_output)
 
-        # int_dif = integral_difference(curr_output, target_output)
+        int_dif = integral_difference(curr_output, target_output)
 
-        # wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
+        wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
 
-        # self.history['rewards']['shape_loss'].append(sh_dif)
-        # self.history['rewards']['integral_loss'].append(int_dif)
-        # self.history['rewards']['wavelength_spread'].append(wl_spread)
+        self.history['rewards']['shape_loss'].append(sh_dif)  # type: ignore
+        self.history['rewards']['integral_loss'].append(int_dif)  # type: ignore
+        self.history['rewards']['wavelength_spread'].append(wl_spread)  # type: ignore
 
-        # loss = sh_dif + int_dif - wl_spread
+        loss = sh_dif + int_dif - wl_spread
         loss = ra.spectrum.mse(curr_output, target_output)
 
         # print(f"Reward is: {-loss}\n  Shape difference is {sh_dif/loss*100:.2f}%\n  Integral difference is {int_dif/loss*100:.2f}%\n")
@@ -312,13 +312,13 @@ class BernoulliController(torch.nn.Module, Controller):
         """
 
         reward = self.reward(self.curr_input, self.curr_output, self.target_output)
-        self.history['rewards']['total'].append(reward)
+        self.history['rewards']['total'].append(reward)  # type: ignore
 
         mse = ra.spectrum.mse(self.curr_output, self.target_output)
-        self.history['rewards']['mse_loss'].append(mse)
+        self.history['rewards']['mse_loss'].append(mse)  # type: ignore
 
         self._baseline = self.gamma * self._baseline + (1 - self.gamma) * reward
-        self.history['baseline'].append(self._baseline)
+        self.history['baseline'].append(self._baseline)  # type: ignore
 
         if not np.isfinite(reward):
             print("INFINITE REWARD")
@@ -336,8 +336,7 @@ class BernoulliController(torch.nn.Module, Controller):
         eligibility = sample - probs
 
         update = self.learning_rate * advantage * eligibility - self.weight_decay * self.logits
-
-        self.logits += torch.clamp(update, -0.2 * torch.ones_like(update), 0.2 * torch.ones_like(update))
+        self.logits += update
 
     # def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
     #     ax.plot(self.rewards[1:], label='Reward')  # type: ignore
@@ -366,12 +365,12 @@ class BernoulliController(torch.nn.Module, Controller):
         assert min_steps > num_steps
         if len(self.history['probs']) > min_steps:
             converged = True
-            for x in self.history['probs'][::-num_steps]:
+            for x in self.history['probs'][::-num_steps]:  # type: ignore
                 for y in x:
                     if not (thresholds[0] < y < thresholds[1]):
                         converged = False
                         break
         if converged:
-            print(self.history['probs'][:num_steps])
+            print(self.history['probs'][:num_steps])  # type: ignore
             print(self.history['probs'])
         return converged
