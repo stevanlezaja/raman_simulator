@@ -19,10 +19,11 @@ class Spectrum(Generic[T]):
     norm_min: float | None = None
     norm_max: float | None = None
 
-    def __init__(self, value_cls: Type[T],* , frequencies: list[ct.Frequency] = [], values: list[ct.Power|ct.PowerGain] = []):
+    def __init__(self, value_cls: Type[T],* , frequencies: list[ct.Frequency] = [], values: list[ct.Power|ct.PowerGain] = [], normalized: bool = False):
         self.value_cls: Type[T] = value_cls
         assert len(frequencies) == len(values)
         self.spectrum: dict[ct.Frequency, T] = {}
+        self.normalized = normalized
         for freq, val in zip(frequencies, values):
             assert isinstance(val, self.value_cls)
             self.add_val(freq, val)
