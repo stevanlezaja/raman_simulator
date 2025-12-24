@@ -21,7 +21,7 @@ log = clog.get_logger("Spectrum Control Test Script")
 
 SAMPLES = 40
 
-NUM_STEPS = 200
+NUM_STEPS = 50
 
 def _make_flat_spectrum(off_spectrum: ra.Spectrum[ct.Power], target_val: ct.Power | ct.PowerGain) -> ra.Spectrum[ct.Power]:
     def _get_power(input_power: ct.Power, power_gain: ct.PowerGain) -> ct.Power:
