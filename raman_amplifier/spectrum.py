@@ -64,11 +64,11 @@ class Spectrum(Generic[T]):
     def __mul__(self, other: Any) -> "Spectrum[T]":
         if isinstance(other, float | int):
             for comp in self.values:
-                current_value, unit = comp.value, comp.default_unit
-                comp.value = (current_value * other, unit)
+                current_value, unit = comp.value, comp.default_unit  # type: ignore
+                comp.value = (current_value * other, unit)  # type: ignore
             return self
         elif isinstance(other, Spectrum):
-            return self._linear_op(other, '*')
+            return self._linear_op(other, '*')  # type: ignore
         else:
             raise NotImplementedError
 
@@ -76,7 +76,7 @@ class Spectrum(Generic[T]):
         if isinstance(other, float):
             return self * (1 / other)
         elif isinstance(other, Spectrum):
-            return self._spectrum_div(other)
+            return self._spectrum_div(other)  # type: ignore
         else:
             raise NotImplementedError
 
@@ -152,7 +152,7 @@ class Spectrum(Generic[T]):
         """
         return list(self.spectrum.values())
 
-    def as_array(self) -> np.ndarray:
+    def as_array(self, include_freq: bool = True) -> np.ndarray:
         """
         Convert Spectrum into a flat array:
             [frequencies_Hz..., values...]
@@ -163,9 +163,9 @@ class Spectrum(Generic[T]):
         freqs = [f.Hz for f in self.frequencies]
 
         if self.value_cls == ct.Power:
-            vals = [v.W for v in self.values]
+            vals = [v.W for v in self.values]  # type: ignore
         elif self.value_cls == ct.PowerGain:
-            vals = [v.dB for v in self.values]
+            vals = [v.dB for v in self.values]  # type: ignore
         else:
             raise TypeError(f"Unsupported Spectrum value type: {self.value_cls}")
 
@@ -200,7 +200,7 @@ class Spectrum(Generic[T]):
         else:
             raise TypeError(f"Unsupported Spectrum value type: {value_cls}")
 
-        return cls(value_cls, frequencies=frequencies, values=values)
+        return cls(value_cls, frequencies=frequencies, values=values)  # type: ignore
 
 
     def peak_frequency(self) -> ct.Frequency:
@@ -212,25 +212,25 @@ class Spectrum(Generic[T]):
     def to_dict(self) -> dict[str, Any]:
         result = {"frequencies_Hz": [f.Hz for f in self.frequencies],}
         if self.value_cls == ct.Power:
-            result["values_mW"] = [v.mW for v in self.values]
+            result["values_mW"] = [v.mW for v in self.values]  # type: ignore
         elif self.value_cls == ct.PowerGain:
-            result['values_dB'] = [v.dB for v in self.values]
+            result['values_dB'] = [v.dB for v in self.values]  # type: ignore
         else:
             raise TypeError("Unsupported Spectrum value type")
         return result
 
     @classmethod
-    def from_dict(cls, data: dict):
-        freqs = [ct.Frequency(float(f), 'Hz') for f in data['frequencies_Hz']]
+    def from_dict(cls, data: dict):  # type: ignore
+        freqs = [ct.Frequency(float(f), 'Hz') for f in data['frequencies_Hz']]  # type: ignore
         if 'values_mW' in data.keys():
-            vals = [ct.Power(float(v), 'mW') for v in data["values_mW"]]
+            vals = [ct.Power(float(v), 'mW') for v in data["values_mW"]]  # type: ignore
             cls_type = ct.Power
         elif 'values_dB' in data.keys():
-            vals = [ct.PowerGain(float(v), 'dB') for v in data["values_dB"]]
+            vals = [ct.PowerGain(float(v), 'dB') for v in data["values_dB"]]  # type: ignore
             cls_type = ct.PowerGain
         else:
             raise TypeError("Unsupported Spectrum value type")
-        return cls(cls_type, frequencies=freqs, values=vals)
+        return cls(cls_type, frequencies=freqs, values=vals)  # type: ignore
 
     @classmethod
     def set_normalization_limits(cls, min_val: float, max_val: float):
@@ -248,7 +248,7 @@ class Spectrum(Generic[T]):
 
         for f, v in self.spectrum.items():
             x = (v.value - Spectrum.norm_min) / denom
-            self.spectrum[f] = self.value_cls(x, v.default_unit)
+            self.spectrum[f] = self.value_cls(x, v.default_unit)  # type: ignore
         return self
 
     def denormalize(self) -> "Spectrum[T]":
@@ -262,7 +262,7 @@ class Spectrum(Generic[T]):
 
         for f, v in self.spectrum.items():
             x = v.value * denom + Spectrum.norm_min
-            self.spectrum[f] = self.value_cls(x, v.default_unit)
+            self.spectrum[f] = self.value_cls(x, v.default_unit)  # type: ignore
         return self
 
 
