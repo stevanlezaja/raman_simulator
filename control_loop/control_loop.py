@@ -73,6 +73,7 @@ class ControlLoop:
         self.target: Optional[ra.Spectrum[ct.Power]] = None
         self.curr_control: ra.RamanInputs = ra.RamanInputs(n_pumps=1)
         self.curr_output: Optional[ra.Spectrum[ct.Power]] = None
+        self.initial_output: Optional[ra.Spectrum[ct.Power]] = None
         self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': [], 'errors': []}
         self.converged = False
         self.off_power_spectrum = self._calculate_off_power()
@@ -203,8 +204,11 @@ class ControlLoop:
     def plot_spectrums(self, ax: matplotlib.axes.Axes):
         assert self.target is not None
         assert self.curr_output is not None
+        initial_gain = None
         target_gain = self.target/self.off_power_spectrum
         current_gain = self.curr_output/self.off_power_spectrum
+        if self.initial_output is not None:
+            initial_gain = self.initial_output/self.off_power_spectrum
         ax.plot( # type: ignore
             [f.Hz for f in self.target.frequencies],
             [val.dB for val in target_gain.values],
@@ -215,15 +219,22 @@ class ControlLoop:
             [val.dB for val in current_gain.values],
             label="Current Output",
         )
+        if initial_gain:
+            ax.plot( # type: ignore
+                [f.Hz for f in initial_gain.frequencies],
+                [val.dB for val in initial_gain.values],
+                label="Initial Output",
+            )
+
+        ymax = max(val.dB for val in target_gain.values)
+        ymax = max(ymax, max(val.dB for val in current_gain.values))
+
+        if initial_gain is not None:
+            ymax = max(ymax, max(val.dB for val in initial_gain.values))
+
         ax.set_xlabel("Frequency (Hz)")  # type: ignore
         ax.set_ylabel("Gain (dB)")  # type: ignore
-        ax.set_ylim(
-            0,
-            1.05 * max(
-                max(val.dB for val in target_gain.values),
-                max(val.dB for val in current_gain.values),
-            ),
-        )
+        ax.set_ylim(0, 1.05 * ymax)
         ax.set_title("Target vs Current Output Spectrum")  # type: ignore
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
