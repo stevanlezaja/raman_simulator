@@ -55,9 +55,8 @@ class InverseModel:
     def get_raman_inputs(self, spectrum: ra.Spectrum[ct.Power]) -> ra.RamanInputs:
         assert isinstance(spectrum, ra.Spectrum)
         spectrum_copy = deepcopy(spectrum)
-        spectrum_arr = spectrum_copy.normalize().as_array()
-
-        raman_inputs_arr_list = [model.forward(spectrum_arr[len(spectrum_arr)//2:]).detach().numpy() for model in self.models]
+        spectrum_arr = spectrum_copy.normalize().as_array(include_freq=False)
+        raman_inputs_arr_list = [model.forward(spectrum_arr).detach().numpy() for model in self.models]
         raman_inputs_arr = np.mean(np.stack(raman_inputs_arr_list, axis=0), axis=0)
         raman_inputs = ra.RamanInputs.from_array(raman_inputs_arr).denormalize()
         return raman_inputs
