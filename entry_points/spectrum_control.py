@@ -96,6 +96,7 @@ def main(
         final_step = curr_step == iterations - 1
 
         control_loop.step()
+        if curr_step == 0: control_loop.initial_output = copy.deepcopy(control_loop.curr_output)
 
         assert control_loop.curr_output is not None and control_loop.target is not None
 
