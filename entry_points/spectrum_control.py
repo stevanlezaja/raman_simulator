@@ -1,6 +1,7 @@
 import os
 import copy
 import tqdm
+from typing import Any
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -13,8 +14,6 @@ import control_loop as loop
 import raman_system as rs
 import raman_amplifier as ra
 import controllers as ctrl
-import models as m
-from entry_points.train_models import get_or_train_backward_ensemble
 
 
 log = clog.get_logger("Spectrum Control Test Script")
@@ -23,7 +22,7 @@ SAMPLES = 40
 
 NUM_STEPS = 50
 
-def _make_flat_spectrum(off_spectrum: ra.Spectrum[ct.Power], target_val: ct.Power | ct.PowerGain) -> ra.Spectrum[ct.Power]:
+def _make_flat_spectrum(off_spectrum: ra.Spectrum[ct.Power], target_val: ct.Power | ct.PowerGain | Any) -> ra.Spectrum[ct.Power]:
     def _get_power(input_power: ct.Power, power_gain: ct.PowerGain) -> ct.Power:
         pout = input_power.value * power_gain.linear
         return ct.Power(pout, input_power.default_unit)
