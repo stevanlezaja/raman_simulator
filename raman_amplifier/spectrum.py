@@ -169,7 +169,9 @@ class Spectrum(Generic[T]):
         else:
             raise TypeError(f"Unsupported Spectrum value type: {self.value_cls}")
 
-        return np.array(freqs + vals, dtype=float)
+        arr = np.array(freqs + vals, dtype=float) if include_freq else np.array(vals, dtype=float)
+
+        return arr
 
     @classmethod
     def from_array(cls, value_cls: Type[T], arr: np.ndarray) -> "Spectrum[T]":
