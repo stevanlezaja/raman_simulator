@@ -15,8 +15,8 @@ import raman_amplifier as ra
 import raman_system as rs
 import fibers as fib
 from utils import parser
+from data import write_sorted_dataset_copy
 
-from data.data_cleanup import write_sorted_dataset_copy
 
 def sample_raman_inputs(num_pumps: int, power_range: tuple[ct.Power, ct.Power], wavelength_range: tuple[ct.Length, ct.Length]) -> ra.RamanInputs:
     powers: list[ct.Power] = []
