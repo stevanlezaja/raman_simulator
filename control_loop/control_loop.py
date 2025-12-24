@@ -124,8 +124,7 @@ class ControlLoop:
         """
 
         assert self.curr_output is not None
-        if self.target is None:
-            return ra.RamanInputs()
+        assert self.target is not None
         control = self.controller.get_control(curr_input=self.curr_control,
                                               curr_output=self.curr_output,
                                               target_output=self.target)
