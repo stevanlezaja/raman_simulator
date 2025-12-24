@@ -13,9 +13,9 @@ def main():
         lr=1e-1,
         power_step=ct.Power(20, 'mW'),
         wavelength_step=ct.Length(2, 'nm'),
-        beta=1000,
+        beta=1e6,
         gamma=0.99,
-        weight_decay=1e-1,
+        weight_decay=0.5,
         input_dim=6,
     )
 

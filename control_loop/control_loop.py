@@ -90,6 +90,7 @@ class ControlLoop:
 
         self.target = target
         self.curr_control = self.inverse_model.get_raman_inputs(target)
+        self.apply_control()
 
     def get_raman_output(self) -> ra.Spectrum[ct.Power]:
         """
@@ -124,8 +125,7 @@ class ControlLoop:
         """
 
         assert self.curr_output is not None
-        if self.target is None:
-            return ra.RamanInputs()
+        assert self.target is not None
         control = self.controller.get_control(curr_input=self.curr_control,
                                               curr_output=self.curr_output,
                                               target_output=self.target)
