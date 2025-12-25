@@ -1,3 +1,4 @@
+import os
 from tqdm import tqdm
 from typing import Any
 import copy
@@ -54,7 +55,7 @@ def plot_spectrums(
         freqs,
         [val.dB for val in target_gain.values],
         color=color,
-        linestyle="-",
+        linestyle=":",
         linewidth=2,
         label=label,
     )
@@ -71,7 +72,7 @@ def plot_spectrums(
         freqs,
         [val.dB for val in fine_tuned_gain.values],
         color=color,
-        linestyle="--",
+        linestyle="-",
         linewidth=2,
     )
 
@@ -100,9 +101,15 @@ def main():
     )
     bern_loop = cl.ControlLoop(bern_raman_system, bern_controller)
 
-    _, ax = plt.subplots(figsize=(8, 4))  # type: ignore
+    plt.ion()  # type: ignore
+    fig, ax = plt.subplots(figsize=(8, 4))  # type: ignore
 
-    for target_gain in tqdm(range(5, 14)):
+    ax.set_xlabel("Frequency (Hz)")  # type: ignore
+    ax.set_ylabel("Gain (dB)")  # type: ignore
+    ax.set_title("Flat Target vs Achieved Gain (Inverse Model)")  # type: ignore
+    ax.grid(True)  # type: ignore
+
+    for target_gain in tqdm(range(5, 12)):
         target_spectrum = _make_flat_spectrum(
             bern_loop.off_power_spectrum,
             ct.PowerGain(target_gain, 'dB')
@@ -112,7 +119,8 @@ def main():
 
         bern_loop.curr_control = predicted_inputs
         bern_loop.apply_control()
-        predicted_spectrum = copy.deepcopy(bern_loop.get_raman_output())
+        initial_spectrum = copy.deepcopy(bern_loop.get_raman_output())
+        bern_loop.set_target(target_spectrum)
 
         spectrum_control.main(
             save_plots=False,
@@ -132,15 +140,22 @@ def main():
             ax,
             bern_loop,
             target_spectrum,
-            predicted_spectrum,
+            initial_spectrum,
             fine_tuned_spectrum,
             color=color,
         )
 
-    ax.set_xlabel("Frequency (Hz)")  # type: ignore
-    ax.set_ylabel("Gain (dB)")  # type: ignore
-    ax.set_title("Flat Target vs Achieved Gain (Inverse Model)")  # type: ignore
-    ax.grid(True)  # type: ignore
+        ax.relim()
+        ax.autoscale_view()
+
+        fig.canvas.draw()  # type: ignore
+        fig.canvas.flush_events()
+        plt.pause(0.01)
+
+    plt.tight_layout()
+
+    os.makedirs("plots", exist_ok=True)
+    plt.savefig("plots/flat_gain_inverse_model.png", dpi=300)  # type: ignore
 
     plt.show()  # type: ignore
 
