@@ -17,12 +17,12 @@ class InverseModel:
                         RandomProjectionInverseModel(), RandomProjectionInverseModel(), RandomProjectionInverseModel(), 
                         RandomProjectionInverseModel()]
         X, Y = self._prepare_training_tensors('data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
-        batch_size = 8
+        batch_size = 64
         self.loss_history = []
 
         for model in tqdm(self.models):
             epoch_losses = []
-            for epoch in range(3):
+            for epoch in range(20):
                 batch_losses = []
 
                 for i in range(0, len(X), batch_size):
@@ -66,7 +66,7 @@ class InverseModel:
             min_val = float('inf')
             max_val = float('-inf')
             for _, spectrum in load_raman_dataset(dataset_path):
-                arr = deepcopy(spectrum).as_array()
+                arr = deepcopy(spectrum).as_array(include_freq=False)
                 min_val = min(min_val, arr.min())
                 max_val = max(max_val, arr.max())
             return min_val, max_val
