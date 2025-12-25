@@ -5,6 +5,7 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
 
 import custom_types as ct
 import custom_types.constants as const
@@ -109,7 +110,16 @@ def main():
     ax.set_title("Flat Target vs Achieved Gain (Inverse Model)")  # type: ignore
     ax.grid(True)  # type: ignore
 
-    for target_gain in tqdm(range(5, 12)):
+    legend_elements = [
+        Line2D([0], [0], color="black", linestyle=":", linewidth=2, label="Target"),
+        Line2D([0], [0], color="black", linestyle="--", linewidth=2, label="Initial"),
+        Line2D([0], [0], color="black", linestyle="-", linewidth=2, label="Fine-tuned"),
+    ]
+
+    ax.legend(handles=legend_elements, loc="best")  # type: ignore
+
+    for target_gain in [5, 7, 9, 11, 13]:
+        print(f"Optimizing for flat spectrum at {target_gain} dB")
         target_spectrum = _make_flat_spectrum(
             bern_loop.off_power_spectrum,
             ct.PowerGain(target_gain, 'dB')
