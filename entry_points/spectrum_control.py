@@ -46,10 +46,42 @@ def main(
         iterations: int = NUM_STEPS,
         num_samples: int = SAMPLES,
         wavelength_range: tuple[float, float] = const.C_BAND,
-        raman_system: rs.RamanSystem = rs.RamanSystem(),
-        controller: ctrl.Controller = ctrl.BernoulliController(),
+        control_loop: loop.ControlLoop | None = None,
+        raman_system: rs.RamanSystem | None = None,
+        controller: ctrl.Controller | None = None,
         number: int | None = None
 ) -> None:
+
+    if control_loop is None:
+        assert controller is not None
+        assert raman_system is not None
+
+        input_spectrum = ra.Spectrum(ct.Power)
+        for num in list(np.linspace(wavelength_range[0], wavelength_range[1], num_samples)):
+            freq = conv.wavelength_to_frequency(ct.Length(num, 'nm'))
+            input_spectrum.add_val(freq, ct.Power(25, 'uW'))
+
+        raman_system.input_spectrum = input_spectrum
+        raman_system.output_spectrum = copy.deepcopy(input_spectrum)
+
+        control_loop = loop.ControlLoop(raman_system, controller)
+        target_spectrum = _make_flat_spectrum(control_loop.off_power_spectrum, ct.PowerGain(10, 'dB'))
+        control_loop.set_target(target_spectrum)
+
+        initial_powers: list[ct.Power] = []
+        initial_wavelengths: list[ct.Length] = []
+        for i in range(len(raman_system.raman_amplifier.pump_pairs)):
+            initial_powers.append(ct.Power(np.random.uniform(low=ra.RamanInputs.MIN_POWER_W, high=ra.RamanInputs.MAX_POWER_W), 'W'))
+            wl_low = ra.RamanInputs.MIN_WAVELENGTH_NM + i * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM) / len(raman_system.raman_amplifier.pump_pairs)
+            wl_high = ra.RamanInputs.MIN_WAVELENGTH_NM + (i + 1) * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM) / len(raman_system.raman_amplifier.pump_pairs)
+            initial_wavelengths.append(ct.Length(np.random.uniform(low=wl_low, high=wl_high), 'nm'))
+
+    if live_plot:
+        plt.ion()  # type: ignore
+
+    if live_plot or save_plots:
+        fig, axes = plt.subplots(2, 3, figsize=(12, 8))  # type: ignore
+        ax_err, ax_spec, ax_custom, ax_pow, ax_wl, ax_2d = axes.flatten()
 
     if save_plots:
         save_dir = f'plots/experiments/{controller.__class__.__name__}'
@@ -59,34 +91,6 @@ def main(
         else:
             exp_name = 'experiment.png'
         exp_path = os.path.join(save_dir, exp_name)
-
-    input_spectrum = ra.Spectrum(ct.Power)
-    for num in list(np.linspace(wavelength_range[0], wavelength_range[1], num_samples)):
-        freq = conv.wavelength_to_frequency(ct.Length(num, 'nm'))
-        input_spectrum.add_val(freq, ct.Power(25, 'uW'))
-
-
-    raman_system.input_spectrum = input_spectrum
-    raman_system.output_spectrum = copy.deepcopy(input_spectrum)
-
-    control_loop = loop.ControlLoop(raman_system, controller)
-    target_spectrum = _make_flat_spectrum(control_loop.off_power_spectrum, ct.PowerGain(10, 'dB'))
-    control_loop.set_target(target_spectrum)
-
-    initial_powers: list[ct.Power] = []
-    initial_wavelengths: list[ct.Length] = []
-    for i in range(len(raman_system.raman_amplifier.pump_pairs)):
-        initial_powers.append(ct.Power(np.random.uniform(low=ra.RamanInputs.MIN_POWER_W, high=ra.RamanInputs.MAX_POWER_W), 'W'))
-        wl_low = ra.RamanInputs.MIN_WAVELENGTH_NM + i * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM) / len(raman_system.raman_amplifier.pump_pairs)
-        wl_high = ra.RamanInputs.MIN_WAVELENGTH_NM + (i + 1) * (ra.RamanInputs.MAX_WAVELENGTH_NM - ra.RamanInputs.MIN_WAVELENGTH_NM) / len(raman_system.raman_amplifier.pump_pairs)
-        initial_wavelengths.append(ct.Length(np.random.uniform(low=wl_low, high=wl_high), 'nm'))
-
-    if live_plot:
-        plt.ion()  # type: ignore
-
-    if live_plot or save_plots:
-        fig, axes = plt.subplots(2, 3, figsize=(12, 8))  # type: ignore
-        ax_err, ax_spec, ax_custom, ax_pow, ax_wl, ax_2d = axes.flatten()
 
     errors: list[float] = []
     powers: list[float] = []
