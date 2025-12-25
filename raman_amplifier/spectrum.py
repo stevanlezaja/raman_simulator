@@ -19,10 +19,11 @@ class Spectrum(Generic[T]):
     norm_min: float | None = None
     norm_max: float | None = None
 
-    def __init__(self, value_cls: Type[T],* , frequencies: list[ct.Frequency] = [], values: list[ct.Power|ct.PowerGain] = []):
+    def __init__(self, value_cls: Type[T],* , frequencies: list[ct.Frequency] = [], values: list[ct.Power|ct.PowerGain] = [], normalized: bool = False):
         self.value_cls: Type[T] = value_cls
         assert len(frequencies) == len(values)
         self.spectrum: dict[ct.Frequency, T] = {}
+        self.normalized = normalized
         for freq, val in zip(frequencies, values):
             assert isinstance(val, self.value_cls)
             self.add_val(freq, val)
@@ -243,6 +244,7 @@ class Spectrum(Generic[T]):
         """
         Normalize spectrum values in-place to [0, 1] using the provided limits.
         """
+        assert not self.normalized
         assert isinstance(Spectrum.norm_max, float) and isinstance(Spectrum.norm_min, float), f"Norm max is {type(Spectrum.norm_max)}, Norm min is {type(Spectrum.norm_min)}"
         denom = Spectrum.norm_max - Spectrum.norm_min
         if denom == 0:
@@ -251,12 +253,14 @@ class Spectrum(Generic[T]):
         for f, v in self.spectrum.items():
             x = (v.value - Spectrum.norm_min) / denom
             self.spectrum[f] = self.value_cls(x, v.default_unit)  # type: ignore
+        self.normalized = True
         return self
 
     def denormalize(self) -> "Spectrum[T]":
         """
         Denormalize spectrum values in-place using the provided limits.
         """
+        assert self.normalized
         assert isinstance(Spectrum.norm_max, float) and isinstance(Spectrum.norm_min, float)
         denom = Spectrum.norm_max - Spectrum.norm_min
         if denom == 0:
@@ -265,6 +269,7 @@ class Spectrum(Generic[T]):
         for f, v in self.spectrum.items():
             x = v.value * denom + Spectrum.norm_min
             self.spectrum[f] = self.value_cls(x, v.default_unit)  # type: ignore
+        self.normalized = False
         return self
 
 
