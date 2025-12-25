@@ -60,9 +60,8 @@ class ForwardNN(torch.nn.Module):
         for raman_inputs, spectrum in samples:
             x = torch.tensor(raman_inputs.normalize().as_array(), dtype=torch.float32)
 
-            arr = spectrum.normalize().as_array()
-            values = arr[len(arr) // 2:]
-            y = torch.tensor(values, dtype=torch.float32)
+            arr = spectrum.normalize().as_array(include_freq=False)
+            y = torch.tensor(arr, dtype=torch.float32)
 
             X_list.append(x)
             Y_list.append(y)
