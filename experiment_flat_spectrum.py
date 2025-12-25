@@ -41,14 +41,16 @@ def plot_spectrums(
     loop: cl.ControlLoop,
     target_spectrum: ra.Spectrum[ct.Power],
     initial_spectrum: ra.Spectrum[ct.Power],
-    fine_tuned_spectrum: ra.Spectrum[ct.Power],
+    bern_fine_tuned_spectrum: ra.Spectrum[ct.Power],
+    gd_fine_tuned_spectrum: ra.Spectrum[ct.Power],
     *,
     color: Any,
     label: str | None = None,
 ):
     target_gain = target_spectrum / loop.off_power_spectrum
     initial_gain = initial_spectrum / loop.off_power_spectrum
-    fine_tuned_gain = fine_tuned_spectrum / loop.off_power_spectrum
+    bern_fine_tuned_gain = bern_fine_tuned_spectrum / loop.off_power_spectrum
+    gd_fine_tuned_gain = gd_fine_tuned_spectrum / loop.off_power_spectrum
 
     freqs = [f.Hz for f in target_gain.frequencies]
 
@@ -71,9 +73,17 @@ def plot_spectrums(
 
     ax.plot(  # type: ignore
         freqs,
-        [val.dB for val in fine_tuned_gain.values],
+        [val.dB for val in bern_fine_tuned_gain.values],
         color=color,
         linestyle="-",
+        linewidth=2,
+    )
+
+    ax.plot(  # type: ignore
+        freqs,
+        [val.dB for val in gd_fine_tuned_gain.values],
+        color=color,
+        linestyle="-.",
         linewidth=2,
     )
 
@@ -102,6 +112,14 @@ def main():
     )
     bern_loop = cl.ControlLoop(bern_raman_system, bern_controller)
 
+    gd_raman_system = copy.deepcopy(bern_raman_system)
+    gd_controller = ctrl.GradientDescentController(
+        training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json',
+        epochs=500,
+        lr_control=10
+    )
+    gd_loop = cl.ControlLoop(gd_raman_system, gd_controller)
+
     plt.ion()  # type: ignore
     fig, ax = plt.subplots(figsize=(8, 4))  # type: ignore
 
@@ -112,8 +130,9 @@ def main():
 
     legend_elements = [
         Line2D([0], [0], color="black", linestyle=":", linewidth=2, label="Target"),
+        Line2D([0], [0], color="black", linestyle="-.", linewidth=2, label="GD"),
         Line2D([0], [0], color="black", linestyle="--", linewidth=2, label="Initial"),
-        Line2D([0], [0], color="black", linestyle="-", linewidth=2, label="Fine-tuned"),
+        Line2D([0], [0], color="black", linestyle="-", linewidth=2, label="Bernoulli"),
     ]
 
     ax.legend(handles=legend_elements, loc="best")  # type: ignore
@@ -129,18 +148,29 @@ def main():
 
         bern_loop.curr_control = predicted_inputs
         bern_loop.apply_control()
-        initial_spectrum = copy.deepcopy(bern_loop.get_raman_output())
         bern_loop.set_target(target_spectrum)
+
+        gd_loop.curr_control = predicted_inputs
+        gd_loop.apply_control()
+        gd_loop.set_target(target_spectrum)
+
+        initial_spectrum = copy.deepcopy(bern_loop.get_raman_output())
 
         spectrum_control.main(
             save_plots=False,
             iterations=50,
-            raman_system=bern_raman_system,
             control_loop=bern_loop,
         )
+        bern_fine_tuned_spectrum = copy.deepcopy(bern_loop.curr_output)
+        assert bern_fine_tuned_spectrum is not None
 
-        fine_tuned_spectrum = copy.deepcopy(bern_loop.curr_output)
-        assert fine_tuned_spectrum is not None
+        spectrum_control.main(
+            save_plots=False,
+            iterations=50,
+            control_loop=gd_loop,
+        )
+        gd_fine_tuned_spectrum = copy.deepcopy(gd_loop.curr_output)
+        assert gd_fine_tuned_spectrum is not None
 
         line = ax.plot([], [])[0]  # type: ignore
         color = line.get_color()
@@ -151,7 +181,8 @@ def main():
             bern_loop,
             target_spectrum,
             initial_spectrum,
-            fine_tuned_spectrum,
+            bern_fine_tuned_spectrum,
+            gd_fine_tuned_spectrum,
             color=color,
         )
 
