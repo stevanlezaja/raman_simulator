@@ -187,14 +187,15 @@ class BernoulliController(torch.nn.Module, Controller):
     ) -> float:
 
         def shape_difference(spec1: ra.Spectrum[ct.Power], spec2: ra.Spectrum[ct.Power]):
-            int1 = ra.spectrum.integral(spec1).W
-            scaled_spec1 = copy.deepcopy(spec1)
+            scaled_spec1 = ra.Spectrum(value_cls=ct.Power)
+            max1 = max(spec1.values)
+            min1 = min(spec1.values)
+            [scaled_spec1.add_val(f, copy.deepcopy(v) / (max1 - min1).value- min1)  for f, v in spec1]
 
-            int2 = ra.spectrum.integral(spec2).W
-            scaled_spec2 = copy.deepcopy(spec2)
+            scaled_spec2 = ra.Spectrum(value_cls=ct.Power)
+            [scaled_spec2.add_val(f, copy.deepcopy(v) / (max1 - min1).value- min1)  for f, v in spec2]
 
-            difference_spec = scaled_spec1 / int1 - scaled_spec2 / int2
-
+            difference_spec = scaled_spec1 - scaled_spec2
             return difference_spec.mean
 
         def integral_difference(spec1: ra.Spectrum[ct.Power], spec2: ra.Spectrum[ct.Power]):
@@ -218,7 +219,7 @@ class BernoulliController(torch.nn.Module, Controller):
         self.history['rewards']['wavelength_spread'].append(wl_spread)  # type: ignore
 
         loss = sh_dif + int_dif - wl_spread
-        loss = ra.spectrum.mse(curr_output, target_output)
+        # loss = ra.spectrum.mse(curr_output, target_output)
 
         # print(f"Reward is: {-loss}\n  Shape difference is {sh_dif/loss*100:.2f}%\n  Integral difference is {int_dif/loss*100:.2f}%\n")
 
