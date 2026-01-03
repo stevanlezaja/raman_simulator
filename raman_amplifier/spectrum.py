@@ -276,7 +276,7 @@ class Spectrum(Generic[T]):
 def mse(current: Spectrum[T], target: Spectrum[T]) -> float:
     return abs((current - target).mean)
 
-def integral(spec: Spectrum[T]) -> Any:
+def integral(spec: Spectrum[T]) -> ct.Power:
     if spec.value_cls == ct.Power:
         sum_value = ct.Power(0, 'W')
         for comp in spec.values:

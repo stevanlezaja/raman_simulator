@@ -262,7 +262,7 @@ class BernoulliController(torch.nn.Module, Controller):
         dist = torch.distributions.Bernoulli(probs)
 
         sample = torch.zeros_like(dist.sample())
-        num_samples = 50
+        num_samples = 1
         for _ in range(num_samples):
             sample += dist.sample()
         sample /= num_samples
@@ -313,6 +313,14 @@ class BernoulliController(torch.nn.Module, Controller):
         """
 
         reward = self.reward(self.curr_input, self.curr_output, self.target_output)
+        if self.best_reward is None:
+            self.best_reward = reward
+            self.best_input = copy.deepcopy(self.curr_input)
+            self.best_output = copy.deepcopy(self.curr_output)
+        if reward > self.best_reward:
+            self.best_reward = reward
+            self.best_input = copy.deepcopy(self.curr_input)
+            self.best_output = copy.deepcopy(self.curr_output)
         self.history['rewards']['total'].append(reward)  # type: ignore
 
         mse = ra.spectrum.mse(self.curr_output, self.target_output)
@@ -371,7 +379,4 @@ class BernoulliController(torch.nn.Module, Controller):
                     if not (thresholds[0] < y < thresholds[1]):
                         converged = False
                         break
-        if converged:
-            print(self.history['probs'][:num_steps])  # type: ignore
-            print(self.history['probs'])
         return converged
