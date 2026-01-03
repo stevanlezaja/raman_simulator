@@ -21,8 +21,8 @@ class RamanInputs:
     MAX_POWER_W = 0.3
     MIN_POWER_W = 0.0
 
-    MAX_WAVELENGTH_NM = 1470
-    MIN_WAVELENGTH_NM = 1420
+    MAX_WAVELENGTH_NM = 1484
+    MIN_WAVELENGTH_NM = 1414
 
     power_range = (ct.Power(MIN_POWER_W, 'W'), ct.Power(MAX_POWER_W, 'W'))
     wavelength_range = (ct.Length(MIN_WAVELENGTH_NM, 'nm'), ct.Length(MAX_WAVELENGTH_NM, 'nm'))

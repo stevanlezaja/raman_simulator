@@ -262,7 +262,7 @@ class BernoulliController(torch.nn.Module, Controller):
         dist = torch.distributions.Bernoulli(probs)
 
         sample = torch.zeros_like(dist.sample())
-        num_samples = 50
+        num_samples = 1
         for _ in range(num_samples):
             sample += dist.sample()
         sample /= num_samples

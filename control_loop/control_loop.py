@@ -190,6 +190,14 @@ class ControlLoop:
         off_raman_system.update()
         return off_raman_system.output_spectrum
 
+    def stopping_criterion(self, error_db: ct.PowerGain) -> bool:
+        if self.curr_output is None or self.target is None:
+            return False
+        curr_gain: ra.Spectrum[ct.PowerGain] = self.curr_output/self.off_power_spectrum
+        target_gain: ra.Spectrum[ct.PowerGain] = self.target/self.off_power_spectrum
+        error_spectrum = curr_gain - target_gain
+        return all([abs(x.dB) < error_db.dB for x in error_spectrum.values])
+
     def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
         if hasattr(self.controller, 'plot_loss') and callable(self.controller.plot_loss):  # type: ignore
             self.controller.plot_loss(ax)  # type: ignore
