@@ -4,6 +4,7 @@ import torch.nn as nn
 from typing import Union
 import matplotlib.pyplot as plt
 
+
 class RandomProjectionInverseModel(nn.Module):
     def __init__(
         self,
