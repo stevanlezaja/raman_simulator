@@ -215,6 +215,7 @@ class ControlLoop:
         initial_gain = None
         target_gain = self.target/self.off_power_spectrum
         current_gain = self.curr_output/self.off_power_spectrum
+        best_gain = self.controller.best_output/self.off_power_spectrum
         if self.initial_output is not None:
             initial_gain = self.initial_output/self.off_power_spectrum
         ax.plot( # type: ignore
@@ -226,6 +227,11 @@ class ControlLoop:
             [f.Hz for f in self.curr_output.frequencies],
             [val.dB for val in current_gain.values],
             label="Current Output",
+        )
+        ax.plot( # type: ignore
+            [f.Hz for f in best_gain.frequencies],
+            [val.dB for val in best_gain.values],
+            label="Best Output",
         )
         if initial_gain:
             ax.plot( # type: ignore

@@ -100,7 +100,8 @@ def main(
     for curr_step in tqdm.tqdm(range(iterations)):
         final_step = curr_step == iterations - 1
         if hasattr(control_loop.controller, 'converged'):
-            if control_loop.controller.converged(thresholds=(0.4, 0.6), num_steps=10, min_steps=20):
+            if control_loop.controller.converged(thresholds=(0.48, 0.52), num_steps=10, min_steps=20):
+                print("Stopping due to controller convergence")
                 final_step = True
             if control_loop.stopping_criterion(ct.PowerGain(1, 'dB')):
                 print("Stopping due to loop stopping criterion")

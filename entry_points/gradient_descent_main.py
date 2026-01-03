@@ -19,7 +19,10 @@ def main():
     raman_system.fiber.length.km = 100
     raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
-    controller = ctrl.GradientDescentController(training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json', epochs=500, lr_control=10)
+    controller = ctrl.GradientDescentController(
+        training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json',
+        epochs=500,
+        lr_control=1
+    )
 
-    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=100)
-
+    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=100, target_gain_value=7)
