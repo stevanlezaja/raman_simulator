@@ -1,3 +1,4 @@
+from pathlib import Path
 from copy import deepcopy
 import torch
 import torch.nn as nn
@@ -26,8 +27,6 @@ class InverseModel:
         self.train_loss_history = [[] for _ in range(n_models)]  # type: ignore
         self.val_loss_history = [[] for _ in range(n_models)]  # type: ignore
 
-
-        # Prepare training tensors
         X, Y = self._prepare_training_tensors('data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
         X_train, X_val, Y_train, Y_val = train_test_split(X, Y, test_size=0.2, random_state=42)  # type: ignore
 
@@ -36,13 +35,53 @@ class InverseModel:
         self.X_val: torch.Tensor = X_val
         self.Y_val: torch.Tensor = Y_val
 
-        # Train each model
         batch_size = 64
-        for idx, model in enumerate(tqdm(self.models, desc="Training RPM ensemble")):
-            self._train_model(model, batch_size=batch_size, model_idx=idx, epochs=100)
+        for idx, model in enumerate(self.models):
+            loaded = self._load_model(model, idx)
+            if loaded:
+                print(f"Loaded model {idx}")
+                continue
+            print(f"Training model {idx}")
+            self._train_model(
+                model,
+                batch_size=batch_size,
+                model_idx=idx,
+                epochs=100,
+            )
+            self._save_model(model, idx)
+            self.plot_loss()
+            self.plot_ensemble_mean_loss()
 
-        self.plot_loss()
-        self.plot_ensemble_mean_loss()
+    def _save_model(self, model: nn.Module, model_idx: int):
+        path = self._model_path(model_idx)
+        torch.save(model.state_dict(), path)
+
+    def _load_model(self, model: nn.Module, model_idx: int) -> bool:
+        path = self._model_path(model_idx)
+        if path.exists():
+            model.load_state_dict(torch.load(path, map_location="cpu"))
+            model.eval()
+            return True
+        return False
+
+    def _model_path(self, model_idx: int) -> Path:
+        base_dir = Path("models/models/rpm_inverse")
+        base_dir.mkdir(parents=True, exist_ok=True)
+
+        activation_name = type(self.models[model_idx].activation).__name__
+
+        filename = (
+            f"rpm_inv_"
+            f"ensemble{len(self.models)}_"
+            f"idx{model_idx}_"
+            f"in40_out6_"
+            f"h{self.models[model_idx].output_layer.in_features}_"
+            f"layers{len(self.models[model_idx].random_layers)}_"
+            f"act{activation_name}_"
+            f"dataset3pumps.pt"
+        )
+        return base_dir / filename
+
 
     def _train_model(
         self,
