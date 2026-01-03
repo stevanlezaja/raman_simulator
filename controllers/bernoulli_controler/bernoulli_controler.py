@@ -339,17 +339,17 @@ class BernoulliController(torch.nn.Module, Controller):
         update = self.learning_rate * advantage * eligibility - self.weight_decay * self.logits
         self.logits += update
 
-    # def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
-    #     ax.plot(self.rewards[1:], label='Reward')  # type: ignore
-    #     ax.plot(self.baseline[1:], label='Baseline')  # type: ignore
-    #     # ax.plot(self.history['rewards']['mse_loss'], label='MSE Loss')  # type: ignore
-    #     ax.plot([-x for x in self.history['rewards']['integral_loss'][1:]], label='Integral Loss')  # type: ignore
-    #     ax.plot([-x for x in self.history['rewards']['shape_loss'][1:]], label='Shape Loss')  # type: ignore
-    #     ax.set_xlabel("Iteration")  # type: ignore
-    #     ax.set_ylabel("Reward")  # type: ignore
-    #     ax.set_title("Reward over time")  # type: ignore
-    #     ax.grid()  # type: ignore
-    #     ax.legend()  # type: ignore
+    def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
+        ax.plot(self.rewards[1:], label='Reward')  # type: ignore
+        ax.plot(self.baseline[1:], label='Baseline')  # type: ignore
+        # ax.plot(self.history['rewards']['mse_loss'], label='MSE Loss')  # type: ignore
+        ax.plot([-x for x in self.history['rewards']['integral_loss'][1:]], label='Integral Loss')  # type: ignore
+        ax.plot([-x for x in self.history['rewards']['shape_loss'][1:]], label='Shape Loss')  # type: ignore
+        ax.set_xlabel("Iteration")  # type: ignore
+        ax.set_ylabel("Reward")  # type: ignore
+        ax.set_title("Reward over time")  # type: ignore
+        ax.grid()  # type: ignore
+        ax.legend()  # type: ignore
 
     def plot_custom_data(self, ax: matplotlib.axes.Axes):
         probs = np.array(self.history['probs'])  # shape: (steps, n_actions)

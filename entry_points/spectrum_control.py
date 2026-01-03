@@ -49,7 +49,8 @@ def main(
         control_loop: loop.ControlLoop | None = None,
         raman_system: rs.RamanSystem | None = None,
         controller: ctrl.Controller | None = None,
-        number: int | None = None
+        number: int | None = None,
+        target_gain_value: float = 10.0
 ) -> None:
 
     if control_loop is None:
@@ -65,7 +66,7 @@ def main(
         raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
         control_loop = loop.ControlLoop(raman_system, controller)
-        target_spectrum = _make_flat_spectrum(control_loop.off_power_spectrum, ct.PowerGain(10, 'dB'))
+        target_spectrum = _make_flat_spectrum(control_loop.off_power_spectrum, ct.PowerGain(target_gain_value, 'dB'))
         control_loop.set_target(target_spectrum)
 
         initial_powers: list[ct.Power] = []
