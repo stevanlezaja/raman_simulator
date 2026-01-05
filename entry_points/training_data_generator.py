@@ -15,7 +15,6 @@ import raman_amplifier as ra
 import raman_system as rs
 import fibers as fib
 from utils import parser
-from data import write_sorted_dataset_copy
 
 
 def sample_raman_inputs(num_pumps: int, power_range: tuple[ct.Power, ct.Power], wavelength_range: tuple[ct.Length, ct.Length]) -> ra.RamanInputs:
@@ -36,7 +35,7 @@ def write_data(data: list[dict[str, Any]], file_path: str) -> None:
             json.dump(sample, f)
             f.write("\n")
 
-def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, fib_len: ct.Length, file_path: str, plot: bool = False, *args, **kwds) -> None:
+def generate_data(num_samples: int, num_pumps: int, pumping_ratio: float, fib_len: ct.Length, file_path: str, plot: bool = False, *args, **kwds) -> None:  # type: ignore
     raman_system = rs.RamanSystem()
     raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps, [pumping_ratio for _ in range(num_pumps)])
     raman_system.fiber = fib.StandardSingleModeFiber(fib_len)
@@ -127,9 +126,3 @@ def main():
     fib_len = ct.Length(kwargs['fiber_length'], 'km')
     file_path = f'data/raman_simulator/{num_pumps}_pumps/{fib_len.km:.0f}_fiber_{pumping_ratio}_ratio.json'
     generate_data(**kwargs, fib_len=fib_len, file_path=file_path)
-
-
-    INPUT = "data/raman_simulator/3_pumps/100_fiber_0.0_ratio.json"
-    OUTPUT = "data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json"
-
-    write_sorted_dataset_copy(INPUT, OUTPUT)
