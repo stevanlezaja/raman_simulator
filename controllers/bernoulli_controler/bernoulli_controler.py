@@ -78,6 +78,7 @@ class BernoulliController(torch.nn.Module, Controller):
                  beta: float = 1,
                  gamma: float = 0.99,
                  input_dim: int = 2,
+                 num_samples: int = 1,
                  ):
         super(torch.nn.Module, self).__init__()
         Controller.__init__(self)
@@ -87,6 +88,7 @@ class BernoulliController(torch.nn.Module, Controller):
         self._params['weight_decay'] = (float, weight_decay)
         self._params['beta'] = (float, beta)
         self._params['gamma'] = (float, gamma)
+        self.num_samples = num_samples
 
         self.input_dim = input_dim
         self.logits = 0.01 * torch.randn(input_dim)
@@ -210,7 +212,7 @@ class BernoulliController(torch.nn.Module, Controller):
 
         sh_dif = 1 * shape_difference(curr_output, target_output)
 
-        int_dif = integral_difference(curr_output, target_output)
+        int_dif = 2000 * integral_difference(curr_output, target_output)
 
         wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
 
@@ -219,7 +221,7 @@ class BernoulliController(torch.nn.Module, Controller):
         self.history['rewards']['wavelength_spread'].append(wl_spread)  # type: ignore
 
         loss = sh_dif + int_dif - wl_spread
-        # loss = ra.spectrum.mse(curr_output, target_output)
+        # loss = 1e6 * ra.spectrum.mse(curr_output, target_output)
 
         # print(f"Reward is: {-loss}\n  Shape difference is {sh_dif/loss*100:.2f}%\n  Integral difference is {int_dif/loss*100:.2f}%\n")
 
@@ -262,7 +264,7 @@ class BernoulliController(torch.nn.Module, Controller):
         dist = torch.distributions.Bernoulli(probs)
 
         sample = torch.zeros_like(dist.sample())
-        num_samples = 1
+        num_samples = self.num_samples
         for _ in range(num_samples):
             sample += dist.sample()
         sample /= num_samples
@@ -331,7 +333,7 @@ class BernoulliController(torch.nn.Module, Controller):
 
         if not np.isfinite(reward):
             print("INFINITE REWARD")
-            reward = -1e3   # or some strong penalty
+            reward = -1e3
 
         advantage = self.beta * (reward - self._baseline)
 
@@ -347,17 +349,17 @@ class BernoulliController(torch.nn.Module, Controller):
         update = self.learning_rate * advantage * eligibility - self.weight_decay * self.logits
         self.logits += update
 
-    def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
-        ax.plot(self.rewards[1:], label='Reward')  # type: ignore
-        ax.plot(self.baseline[1:], label='Baseline')  # type: ignore
-        # ax.plot(self.history['rewards']['mse_loss'], label='MSE Loss')  # type: ignore
-        ax.plot([-x for x in self.history['rewards']['integral_loss'][1:]], label='Integral Loss')  # type: ignore
-        ax.plot([-x for x in self.history['rewards']['shape_loss'][1:]], label='Shape Loss')  # type: ignore
-        ax.set_xlabel("Iteration")  # type: ignore
-        ax.set_ylabel("Reward")  # type: ignore
-        ax.set_title("Reward over time")  # type: ignore
-        ax.grid()  # type: ignore
-        ax.legend()  # type: ignore
+    # def plot_loss(self, ax: matplotlib.axes.Axes) -> None:
+    #     ax.plot(self.rewards[1:], label='Reward')  # type: ignore
+    #     ax.plot(self.baseline[1:], label='Baseline')  # type: ignore
+    #     # ax.plot(self.history['rewards']['mse_loss'], label='MSE Loss')  # type: ignore
+    #     ax.plot([-x for x in self.history['rewards']['integral_loss'][1:]], label='Integral Loss')  # type: ignore
+    #     ax.plot([-x for x in self.history['rewards']['shape_loss'][1:]], label='Shape Loss')  # type: ignore
+    #     ax.set_xlabel("Iteration")  # type: ignore
+    #     ax.set_ylabel("Reward")  # type: ignore
+    #     ax.set_title("Reward over time")  # type: ignore
+    #     ax.grid()  # type: ignore
+    #     ax.legend()  # type: ignore
 
     def plot_custom_data(self, ax: matplotlib.axes.Axes):
         probs = np.array(self.history['probs'])  # shape: (steps, n_actions)
