@@ -48,13 +48,13 @@ class Experiment:
         dPsdz = -self.fiber.alpha_s.m * Ps + C_R_m1 * Ps * (Ppf1 + Ppb1) + C_R_m2 * Ps * (Ppf2 + Ppb2) + C_R_m3 * Ps * (Ppf3 + Ppb3)
 
         dPpfdz1 = -self.fiber.alpha_p.m * Ppf1 - self.signal.wavelength.m / self.pumps[0][0].wavelength.m * C_R_m1 * Ps * Ppf1
-        dPpbdz1 = self.fiber.alpha_p.m * Ppb1 + self.signal.wavelength.m / self.pumps[0][0].wavelength.m * C_R_m1 * Ps * Ppb1
+        dPpbdz1 = self.fiber.alpha_p.m * Ppb1 + self.signal.wavelength.m / self.pumps[0][1].wavelength.m * C_R_m1 * Ps * Ppb1
 
-        dPpfdz2 = -self.fiber.alpha_p.m * Ppf2 - self.signal.wavelength.m / self.pumps[0][0].wavelength.m * C_R_m2 * Ps * Ppf2
-        dPpbdz2 = self.fiber.alpha_p.m * Ppb2 + self.signal.wavelength.m / self.pumps[0][0].wavelength.m * C_R_m2 * Ps * Ppb2
+        dPpfdz2 = -self.fiber.alpha_p.m * Ppf2 - self.signal.wavelength.m / self.pumps[1][0].wavelength.m * C_R_m2 * Ps * Ppf2
+        dPpbdz2 = self.fiber.alpha_p.m * Ppb2 + self.signal.wavelength.m / self.pumps[1][1].wavelength.m * C_R_m2 * Ps * Ppb2
 
-        dPpfdz3 = -self.fiber.alpha_p.m * Ppf3 - self.signal.wavelength.m / self.pumps[0][0].wavelength.m * C_R_m3 * Ps * Ppf3
-        dPpbdz3 = self.fiber.alpha_p.m * Ppb3 + self.signal.wavelength.m / self.pumps[0][0].wavelength.m * C_R_m3 * Ps * Ppb3
+        dPpfdz3 = -self.fiber.alpha_p.m * Ppf3 - self.signal.wavelength.m / self.pumps[2][0].wavelength.m * C_R_m3 * Ps * Ppf3
+        dPpbdz3 = self.fiber.alpha_p.m * Ppb3 + self.signal.wavelength.m / self.pumps[2][1].wavelength.m * C_R_m3 * Ps * Ppb3
 
         return np.vstack([dPsdz, dPpfdz1, dPpbdz1, dPpfdz2, dPpbdz2, dPpfdz3, dPpbdz3])
 
