@@ -2,7 +2,6 @@ from pathlib import Path
 from copy import deepcopy
 import torch
 import torch.nn as nn
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split  # type: ignore
@@ -49,8 +48,6 @@ class InverseModel:
                 epochs=100,
             )
             self._save_model(model, idx)
-            self.plot_loss()
-            self.plot_ensemble_mean_loss()
 
     def _save_model(self, model: nn.Module, model_idx: int):
         path = self._model_path(model_idx)
