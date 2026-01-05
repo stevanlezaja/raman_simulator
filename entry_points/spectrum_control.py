@@ -51,7 +51,7 @@ def main(
         controller: ctrl.Controller | None = None,
         number: int | None = None,
         target_gain_value: float = 10.0
-) -> None:
+) -> loop.ControlLoop | None:
 
     if control_loop is None:
         assert controller is not None
@@ -136,7 +136,7 @@ def main(
             fig.canvas.flush_events()  # type: ignore
 
         if final_step:
-            break
+            return control_loop
 
     if live_plot:
         plt.ioff()  # type: ignore
