@@ -1,5 +1,4 @@
 import os
-from tqdm import tqdm
 from typing import Any
 import copy
 import numpy as np
@@ -104,11 +103,11 @@ def main():
 
     bern_controller = ctrl.BernoulliController(
         lr=1e-1,
-        power_step=ct.Power(20, 'mW'),
-        wavelength_step=ct.Length(2, 'nm'),
-        beta=1e8,
+        power_step=ct.Power(1, 'mW'),
+        wavelength_step=ct.Length(1, 'nm'),
+        beta=10,
         gamma=0.99,
-        weight_decay=0.2,
+        weight_decay=1e-3,
         input_dim=6,
     )
     bern_loop = cl.ControlLoop(bern_raman_system, bern_controller)
@@ -116,7 +115,7 @@ def main():
     gd_raman_system = copy.deepcopy(bern_raman_system)
     gd_controller = ctrl.GradientDescentController(
         training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json',
-        epochs=500,
+        epochs=100,
         lr_control=10
     )
     gd_loop = cl.ControlLoop(gd_raman_system, gd_controller)
