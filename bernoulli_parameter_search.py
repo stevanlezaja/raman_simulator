@@ -59,6 +59,7 @@ if __name__ == '__main__':
         if path.exists():
             data = np.load(path, allow_pickle=True)
             runs = list(data["runs"])
+            print(f"Loaded {len(runs)} runs with parameters {key}")
         else:
             runs = []
 
@@ -87,6 +88,10 @@ if __name__ == '__main__':
             )
 
             errors = np.asarray(control_loop.history["errors"])
+            if errors.shape[0] < simulation_length:
+                last = errors[-1]
+                pad_len = simulation_length - errors.shape[0]
+                errors = np.concatenate([errors, np.full(pad_len, last)])
             assert errors.shape == (simulation_length,)
 
             runs.append(errors)
@@ -144,6 +149,7 @@ if __name__ == '__main__':
 
         # mean + std
         plt.plot(it, mean, linewidth=2, label="Mean")
+        plt.grid()
         plt.fill_between(
             it,
             mean - std,
