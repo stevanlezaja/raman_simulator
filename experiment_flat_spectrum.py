@@ -53,6 +53,7 @@ def plot_spectrums(
     gd_fine_tuned_gain = gd_fine_tuned_spectrum / loop.off_power_spectrum
 
     freqs = [f.Hz for f in target_gain.frequencies]
+    ax.set_ylim(bottom=0, top=15)
 
     ax.plot(  # type: ignore
         freqs,

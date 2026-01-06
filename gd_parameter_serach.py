@@ -25,10 +25,10 @@ def key_to_path(key):
 if __name__ == '__main__':
     results = defaultdict(list)
 
-    lr_controls = [1, 5, 10, 100]
+    lr_controls = [10]
     epochs_list = [500]
-    repetitions = 10
-    simulation_length = 100
+    repetitions = 5
+    simulation_length = 50
 
     parameters = [len(lr_controls), len(epochs_list)]
     time_per_iteration = 1.55
@@ -73,6 +73,7 @@ if __name__ == '__main__':
                 iterations=simulation_length,
                 controller=controller,
                 raman_system=raman_system,
+                target_gain_value=np.random.randint(low=5, high=13)
             )
 
             errors = np.asarray(control_loop.history["errors"])
@@ -110,15 +111,42 @@ if __name__ == '__main__':
         std  = item["std"]
         key  = item["key"]
 
-        it = np.arange(simulation_length)
+        data = np.load(RESULTS_DIR / f"{name}.npz", allow_pickle=True)
+        runs = data["runs"]  # (n_runs, n_iter)
+
+        it = np.arange(len(mean))
 
         plt.figure(figsize=(7, 4))
-        plt.plot(it, mean)
-        plt.fill_between(it, mean - std, mean + std, alpha=0.3)
+
+        for r in runs:
+            # plot run
+            plt.plot(it, r, color="gray", alpha=0.25, linewidth=1)
+
+            # mark minimum
+            idx_min = np.argmin(r)
+            plt.scatter(
+                it[idx_min],
+                r[idx_min],
+                color="black",
+                s=20,
+                zorder=5
+            )
+
+        # mean + std
+        plt.plot(it, mean, linewidth=2, label="Mean")
+        plt.grid()
+        plt.fill_between(
+            it,
+            mean - std,
+            mean + std,
+            alpha=0.3,
+            label="±1 std"
+        )
+
         plt.xlabel("Iteration")
         plt.ylabel("Error")
         plt.title(key)
+        plt.legend()
         plt.tight_layout()
         plt.savefig(PLOTS_DIR / f"{name}.png", dpi=200)
         plt.close()
-

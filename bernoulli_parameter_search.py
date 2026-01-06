@@ -85,6 +85,7 @@ if __name__ == '__main__':
                 iterations=simulation_length,
                 controller=controller,
                 raman_system=raman_system,
+                target_gain_value=np.random.randint(low=5, high=13)
             )
 
             errors = np.asarray(control_loop.history["errors"])
