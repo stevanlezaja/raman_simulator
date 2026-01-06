@@ -93,7 +93,7 @@ class BernoulliController(torch.nn.Module, Controller):
         self.input_dim = input_dim
         self.logits = 0.01 * torch.randn(input_dim)
         self.best_reward = None
-        self._baseline = 0.0
+        self._baseline = None
         self.history: dict[str, list[float]|dict[str, list[float]]] = {'probs': [], 'rewards': {'total': [], 'shape_loss': [], 'integral_loss': [], 'mse_loss': [], 'wavelength_spread': []}, 'baseline': []}
         self.avg_sample = torch.zeros_like(self.logits)
         self.prev_error: ra.Spectrum[ct.Power] | None = None
@@ -328,7 +328,10 @@ class BernoulliController(torch.nn.Module, Controller):
         mse = ra.spectrum.mse(self.curr_output, self.target_output)
         self.history['rewards']['mse_loss'].append(mse)  # type: ignore
 
-        self._baseline = self.gamma * self._baseline + (1 - self.gamma) * reward
+        if self._baseline is None:
+            self._baseline = reward
+        else:
+            self._baseline = self.gamma * self._baseline + (1 - self.gamma) * reward
         self.history['baseline'].append(self._baseline)  # type: ignore
 
         if not np.isfinite(reward):

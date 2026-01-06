@@ -38,7 +38,6 @@ class InverseModel:
         for idx, model in enumerate(self.models):
             loaded = self._load_model(model, idx)
             if loaded:
-                print(f"Loaded model {idx}")
                 continue
             print(f"Training model {idx}")
             self._train_model(

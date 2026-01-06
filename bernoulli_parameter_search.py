@@ -25,13 +25,13 @@ def key_to_path(key):
 if __name__ == '__main__':
     results = defaultdict(list)
 
-    power_steps = [ct.Power(0.5, 'mW')]
-    wl_steps = [ct.Length(0.5, 'nm')]
-    betas: list[int|float] = [10]
-    gammas: list[float] = [0.99, 1]
-    weight_decays: list[float] = [1e-2]
+    power_steps = [ct.Power(1, 'mW')]
+    wl_steps = [ct.Length(1, 'nm')]
+    betas: list[int|float] = [10, 20, 50]
+    gammas: list[float] = [0.7, 0.9, 0.99]
+    weight_decays: list[float] = [1e-3, 1e-1]
     num_samples_list: list[int] = [1]
-    repetitions = 5
+    repetitions = 10
     simulation_length = 50
 
     parameters = [len(power_steps), len(betas), len(gammas), len(weight_decays), len(num_samples_list)]
