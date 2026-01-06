@@ -11,9 +11,9 @@ def main():
 
     controller = ctrl.BernoulliController(
         lr=1e-1,
-        power_step=ct.Power(5, 'mW'),
+        power_step=ct.Power(1, 'mW'),
         wavelength_step=ct.Length(1, 'nm'),
-        beta=1e2,
+        beta=10,
         gamma=0.99,
         weight_decay=0.01,
         input_dim=6,
