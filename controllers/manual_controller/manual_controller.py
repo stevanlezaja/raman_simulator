@@ -15,6 +15,7 @@ class ManualController(Controller):
         power_step: ct.Power | None = None,
         wavelength_step: ct.Length | None = None,
     ):
+        super().__init__()
         self.n_pumps = n_pumps
         self.active_pump_idx = 0
 

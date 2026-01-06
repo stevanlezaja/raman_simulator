@@ -18,6 +18,7 @@ class Controller(ABC):
     """
     def __init__(self):
         self._params: dict[str, tuple[type, Any]] = {}
+        self.best_output = None
 
     @abstractmethod
     def get_control(
