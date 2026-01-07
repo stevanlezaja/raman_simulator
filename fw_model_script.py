@@ -9,7 +9,9 @@ from entry_points.train_models import get_or_train_forward_model
 from utils.loading_data_from_file import load_raman_dataset
 
 
-forward_model = get_or_train_forward_model()
+forward_model = get_or_train_forward_model(
+    epochs=500,
+)
 
 data_generator = load_raman_dataset(
     'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json'
