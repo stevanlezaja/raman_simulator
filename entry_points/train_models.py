@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 import random
 import numpy as np
 import torch
@@ -39,19 +39,19 @@ def find_latest_model(models_path: str, prefix: str, epochs: int, *args, **kwarg
 
 
 def get_or_train_forward_model(
-    prefix: str = "forward"
+    prefix: str = "forward",
+    epochs: int = 500,
+    batch_size: int = 32,
+    lr: float = 1e-3,
+    dir_path: str = "models/models/",
 ) -> m.ForwardNN:
 
-    # training_parser = parser.get_model_training_parser()
-    # args = training_parser.parse_args()
-
-    # kwargs = {k: v for k, v in vars(args).items() if v is not None}
-    kwargs = {
-        'epochs': 500,
-        'learning_rate': 1e-3,
-        'batch_size': 32,
+    kwargs: dict[str, Any] = {
+        'epochs': epochs,
+        'learning_rate': lr,
+        'batch_size': batch_size,
         'training_data_path': 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json',
-        'models_path': 'models/models',
+        'models_path': dir_path,
     }
 
     model_dir = _make_model_filename(prefix, **kwargs)

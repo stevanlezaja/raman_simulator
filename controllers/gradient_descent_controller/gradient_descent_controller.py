@@ -24,7 +24,12 @@ class GradientDescentController(Controller):
         self.control_lr = lr_control
         assert isinstance(training_data, str)
 
-        self.model = get_or_train_forward_model()
+        self.model = get_or_train_forward_model(
+            epochs=epochs,
+            batch_size=batch_size,
+            lr=lr_model,
+            dir_path=model_dir_path
+        )
 
     def get_control(
         self,
