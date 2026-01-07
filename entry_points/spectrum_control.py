@@ -103,6 +103,9 @@ def main(
             # if control_loop.controller.converged(thresholds=(0.495, 0.505), num_steps=10, min_steps=20):
             #     print("Stopping due to controller convergence")
             #     final_step = True
+        if isinstance(control_loop.controller, ctrl.GradientDescentController) and len(errors) >= 2:
+            if errors[-1] > errors[-2]:
+                final_step = True
         if control_loop.stopping_criterion(ct.PowerGain(1, 'dB')):
             print("Stopping due to loop stopping criterion")
             final_step = True

@@ -8,11 +8,13 @@ from sklearn.model_selection import train_test_split  # type: ignore
 
 import custom_types as ct
 import raman_amplifier as ra
+import models as m
 from utils.loading_data_from_file import load_raman_dataset
 from .random_projection_model import RandomProjectionInverseModel
 
+
 class InverseModel:
-    def __init__(self, n_models=10, hidden_dim=800, n_layers=7) -> None:  # type: ignore
+    def __init__(self, forward_model: m.ForwardNN, n_models=10, hidden_dim=800, n_layers=7) -> None:  # type: ignore
         self.models = [
             RandomProjectionInverseModel(
                 input_dim=40,
@@ -23,6 +25,7 @@ class InverseModel:
             )
             for _ in range(n_models)
         ]
+        self.forward_model = forward_model
         self.train_loss_history = [[] for _ in range(n_models)]  # type: ignore
         self.val_loss_history = [[] for _ in range(n_models)]  # type: ignore
 
@@ -170,22 +173,28 @@ class InverseModel:
         plt.tight_layout()
         plt.show()  # type: ignore
 
+    def _calculate_loss(self, raman_inputs, spectrum) -> float:
+        predicted = self.forward_model.forward(torch.Tensor(raman_inputs)).detach().numpy()
+        return float(np.mean((predicted - spectrum) ** 2))
 
     def get_raman_inputs(self, spectrum: ra.Spectrum[ct.Power]) -> ra.RamanInputs:
         assert isinstance(spectrum, ra.Spectrum)
         spectrum_copy = deepcopy(spectrum)
         spectrum_arr = spectrum_copy.normalize().as_array(include_freq=False)
 
-        # Ensemble predictions
         raman_inputs_arr_list = [
             model.forward(spectrum_arr).detach().numpy() for model in self.models
         ]
-        raman_inputs_arr = np.mean(np.stack(raman_inputs_arr_list, axis=0), axis=0)
 
-        return ra.RamanInputs.from_array(raman_inputs_arr).denormalize()
+        best_inputs = raman_inputs_arr_list[0]
+        best_loss = self._calculate_loss(best_inputs, spectrum_arr)
+        for raman_input in raman_inputs_arr_list[1:]:
+            if self._calculate_loss(raman_input, spectrum_arr) < best_loss:
+                best_inputs = raman_input
+
+        return ra.RamanInputs.from_array(best_inputs).denormalize()
 
     def _prepare_training_tensors(self, dataset_path: str):
-        # Compute normalization constants
         def _compute_spectrum_norm(dataset_path):  # type: ignore
             min_val = float('inf')
             max_val = float('-inf')

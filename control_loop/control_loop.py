@@ -18,6 +18,7 @@ import raman_system as rs
 import controllers as ctrl
 import custom_types as ct
 import models as m
+from entry_points.train_models import get_or_train_forward_model
 
 
 log = logging.Logger("[Control Loop]", level=logging.INFO)
@@ -77,7 +78,8 @@ class ControlLoop:
         self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': [], 'errors': []}
         self.converged = False
         self.off_power_spectrum = self._calculate_off_power()
-        self.inverse_model = m.InverseModel()
+        forward_model = get_or_train_forward_model(epochs=500)
+        self.inverse_model = m.InverseModel(forward_model=forward_model)
 
     def set_target(self, target: ra.Spectrum[ct.Power]):
         """
