@@ -11,8 +11,13 @@ from utils.loading_data_from_file import load_raman_dataset
 
 forward_model = get_or_train_forward_model()
 
-data_generator = load_raman_dataset('data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
-m.ForwardNN._prepare_dataset(forward_model, 'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
+data_generator = load_raman_dataset(
+    'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json'
+)
+m.ForwardNN._prepare_dataset(  # type: ignore
+    forward_model,
+    'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json'
+)
 
 for raman_inputs, target_spectrum in data_generator:
     ra_norm = raman_inputs.normalize()
@@ -21,9 +26,14 @@ for raman_inputs, target_spectrum in data_generator:
 
     fw_model_output = list(forward_model.forward(ra_tens).detach().numpy())
     power_pred = [ct.Power(p, 'W') for p in fw_model_output]
-    spec_pred = ra.Spectrum(value_cls=ct.Power, frequencies=target_spectrum.frequencies, values=power_pred).denormalize()
+    spec_pred = ra.Spectrum(
+        value_cls=ct.Power,
+        frequencies=target_spectrum.frequencies,
+        values=power_pred,  # type: ignore
+        normalized=True
+    ).denormalize()
 
-    fig = plt.figure()
+    fig = plt.figure()  # type: ignore
 
     plt.plot( # type: ignore
         [f.Hz for f in target_spectrum.frequencies],
@@ -37,4 +47,4 @@ for raman_inputs, target_spectrum in data_generator:
     )
     plt.grid()  # type: ignore
     plt.legend()  # type: ignore
-    plt.show()
+    plt.show()  # type: ignore
