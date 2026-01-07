@@ -1,10 +1,8 @@
-import os
 import torch
 import copy
 
 import raman_amplifier as ra
 import custom_types as ct
-import models as m
 from entry_points.train_models import get_or_train_forward_model
 
 from ..controller_base import Controller
@@ -41,16 +39,17 @@ class GradientDescentController(Controller):
         x_leaf = torch.tensor(x0, dtype=torch.float32, requires_grad=True)
         x = x_leaf.unsqueeze(0)
 
-        target_arr = target_output.as_array()[-40:]       # SAFETY: ensure this matches model output dim
+        target_arr = target_output.as_array()[-40:]
         target = torch.tensor(target_arr, dtype=torch.float32).unsqueeze(0)
 
         y_pred = self.model(x)
         loss = torch.nn.functional.mse_loss(y_pred, target)
-        loss.backward()
+        loss.backward()  # type: ignore
 
         grad = x_leaf.grad
 
         with torch.no_grad():
+            assert grad is not None
             x_delta = - self.control_lr * grad
 
         x_new_np = x_leaf.detach() + x_delta.detach()
