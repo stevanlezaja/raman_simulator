@@ -61,6 +61,7 @@ if __name__ == '__main__':
             runs = list(data["runs"])
             print(f"Loaded {len(runs)} runs with parameters {key}")
         else:
+            print(f"\n\nStarting {repetitions} runs with parameters {key}\n")
             runs = []
 
         while len(runs) < repetitions:
