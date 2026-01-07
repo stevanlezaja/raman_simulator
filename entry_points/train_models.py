@@ -22,18 +22,25 @@ def _make_model_filename(prefix: str, models_path: str, training_data_path: str,
 
 def find_latest_model(models_path: str, prefix: str, epochs: int, *args, **kwargs) -> Optional[str]:
     """
-    Finds the latest model file matching prefix*.pt in models_path
+    Finds the latest model file matching prefix and exact epochs.
     """
     models_path = Path(models_path)
 
     if not models_path.exists():
         return None
 
-    candidates = list(models_path.glob(f"{prefix}*{epochs}*.pt"))
+    candidates = list(models_path.glob(f"{prefix}*.pt"))
     if not candidates:
         return None
 
-    # newest by modified time
+    def matches_epochs(p: Path) -> bool:
+        return f"_E{epochs}_" in p.name
+
+    candidates = [p for p in candidates if matches_epochs(p)]
+
+    if not candidates:
+        return None
+
     candidates.sort(key=lambda p: p.stat().st_mtime, reverse=True)
     return str(candidates[0])
 
