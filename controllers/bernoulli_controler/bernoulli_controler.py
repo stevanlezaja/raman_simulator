@@ -93,6 +93,7 @@ class BernoulliController(torch.nn.Module, Controller):
         self.input_dim = input_dim
         self.logits = 0.01 * torch.randn(input_dim)
         self.best_reward = None
+        self.prev_loss = None
         self._baseline = None
         self.history: dict[str, list[float]|dict[str, list[float]]] = {'probs': [], 'rewards': {'total': [], 'shape_loss': [], 'integral_loss': [], 'mse_loss': [], 'wavelength_spread': []}, 'baseline': []}
         self.avg_sample = torch.zeros_like(self.logits)
@@ -210,22 +211,28 @@ class BernoulliController(torch.nn.Module, Controller):
                 spread += abs(w1.nm - w2.nm) **0.5
             return spread
 
-        sh_dif = 1 * shape_difference(curr_output, target_output)
+        # sh_dif = 1 * shape_difference(curr_output, target_output)
 
-        int_dif = 2000 * integral_difference(curr_output, target_output)
+        # int_dif = 2000 * integral_difference(curr_output, target_output)
 
-        wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
+        # wl_spread = 0 * wavelength_spread(curr_input.wavelengths)
 
-        self.history['rewards']['shape_loss'].append(sh_dif)  # type: ignore
-        self.history['rewards']['integral_loss'].append(int_dif)  # type: ignore
-        self.history['rewards']['wavelength_spread'].append(wl_spread)  # type: ignore
+        # self.history['rewards']['shape_loss'].append(sh_dif)  # type: ignore
+        # self.history['rewards']['integral_loss'].append(int_dif)  # type: ignore
+        # self.history['rewards']['wavelength_spread'].append(wl_spread)  # type: ignore
 
-        loss = sh_dif + int_dif - wl_spread
-        # loss = 1e6 * ra.spectrum.mse(curr_output, target_output)
+        # loss = sh_dif + int_dif - wl_spread
+        loss = 1e6 * ra.spectrum.mse(curr_output, target_output)
+
+        if self.prev_loss is None:
+            self.prev_loss = loss
+
+        reward = self.prev_loss - loss
+        self.prev_loss = loss
 
         # print(f"Reward is: {-loss}\n  Shape difference is {sh_dif/loss*100:.2f}%\n  Integral difference is {int_dif/loss*100:.2f}%\n")
 
-        return -loss
+        return reward
 
     def get_control(
         self,
