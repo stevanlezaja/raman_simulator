@@ -99,13 +99,13 @@ def main(
 
     for curr_step in tqdm.tqdm(range(iterations)):
         final_step = curr_step == iterations - 1
-        if hasattr(control_loop.controller, 'converged'):
-            if control_loop.controller.converged(thresholds=(0.49, 0.51), num_steps=10, min_steps=20):
-                print("Stopping due to controller convergence")
-                final_step = True
-            if control_loop.stopping_criterion(ct.PowerGain(1, 'dB')):
-                print("Stopping due to loop stopping criterion")
-                final_step = True
+        # if hasattr(control_loop.controller, 'converged'):
+            # if control_loop.controller.converged(thresholds=(0.495, 0.505), num_steps=10, min_steps=20):
+            #     print("Stopping due to controller convergence")
+            #     final_step = True
+        if control_loop.stopping_criterion(ct.PowerGain(1, 'dB')):
+            print("Stopping due to loop stopping criterion")
+            final_step = True
 
         control_loop.step()
         if curr_step == 0: control_loop.initial_output = copy.deepcopy(control_loop.curr_output)
