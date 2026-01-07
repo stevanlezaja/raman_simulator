@@ -21,27 +21,17 @@ class RandomProjectionInverseModel(nn.Module):
             torch.manual_seed(random_seed)
 
         self.activation = activation
-
-        # Fixed random projection layers (Linear but frozen)
         self.random_layers = nn.ModuleList()
-
-        # Input → first hidden
         self.random_layers.append(
             nn.Linear(input_dim, hidden_dim, bias=True)
         )
-
-        # Hidden → hidden
         for _ in range(n_layers - 1):
             self.random_layers.append(
                 nn.Linear(hidden_dim, hidden_dim, bias=True)
             )
-
-        # Freeze all random layers
         for layer in self.random_layers:
             layer.weight.requires_grad = False
             layer.bias.requires_grad = False
-
-        # Trainable output layer
         self.output_layer = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x: Union[torch.Tensor, np.ndarray]) -> torch.Tensor:
@@ -62,7 +52,6 @@ class RandomProjectionInverseModel(nn.Module):
         lr: float = 1e-3,
         plot: bool = True,
     ) -> float:
-        # Only optimize the last layer
         optimizer = torch.optim.Adam(self.output_layer.parameters(), lr=lr)
         criterion = nn.MSELoss()
         losses = []
