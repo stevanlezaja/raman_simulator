@@ -113,7 +113,6 @@ class ForwardNN(torch.nn.Module):
         best_val_loss = float("inf")
 
         for _ in tqdm(range(epochs)):
-            # ===== TRAIN =====
             self.train()
             train_loss = 0.0
 
@@ -128,7 +127,6 @@ class ForwardNN(torch.nn.Module):
             train_loss /= len(train_loader)
             train_losses.append(train_loss)  # type: ignore
 
-            # ===== VALIDATE =====
             self.eval()
             val_loss = 0.0
 
@@ -141,15 +139,10 @@ class ForwardNN(torch.nn.Module):
             val_loss /= len(val_loader)
             val_losses.append(val_loss)  # type: ignore
 
-            if val_loss < best_val_loss:
-                best_val_loss = val_loss
-                # self.save("forward_nn_best.pt")
-
         if plot_losses:
             self._plot_losses(train_losses, val_losses)  # type: ignore
 
         return best_val_loss
-
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.net(x)
