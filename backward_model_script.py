@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from tqdm import tqdm
+from pathlib import Path
 
 import custom_types as ct
 import custom_types.constants as const
@@ -12,8 +13,8 @@ import raman_system as rs
 import raman_amplifier as ra
 import fibers as fib
 import controllers as ctrl
+import models as m
 from utils.loading_data_from_file import load_raman_dataset
-from pathlib import Path
 
 
 CHECKPOINT_PATH = Path("results/inverse_model_eval_checkpoint.npz")
@@ -105,7 +106,6 @@ def plot_error_distribution(errors: np.ndarray):
     plt.show()  # type: ignore
 
 
-
 def main():
     raman_system = rs.RamanSystem()
     raman_system.fiber = fib.StandardSingleModeFiber(ct.Length(100, 'km'))
@@ -122,37 +122,41 @@ def main():
     controller = ctrl.PidController(0, 0, 0)
     loop = cl.ControlLoop(raman_system, controller)
 
-    # 🔹 Load checkpoint
-    errors: list[float] = load_checkpoint(CHECKPOINT_PATH)
-    start_idx = len(errors)
+    for sigma_rpm in [0.2]:
+        print(f"\n=== Evaluating sigma_rpm = {sigma_rpm} ===")
 
-    dataset = list(load_raman_dataset(
-        'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json'
-    ))
+        loop.inverse_model = m.InverseModel(sigma_rpm=sigma_rpm)
 
-    for i in tqdm(range(start_idx, len(dataset))):
-        raman_inputs, spectrum = dataset[i]
+        checkpoint_path = Path(
+            f"results/inverse_eval_sigma_{sigma_rpm:.3f}.npz"
+        )
 
-        predicted_inputs = loop.inverse_model.get_raman_inputs(spectrum)
-        loop.curr_control = predicted_inputs
-        loop.apply_control()
-        predicted_spectrum = copy.deepcopy(loop.get_raman_output())
+        errors: list[float] = load_checkpoint(checkpoint_path)
+        start_idx = len(errors)
 
-        err = mean_gain_error_db(loop, predicted_spectrum, spectrum)
-        errors.append(err)
+        dataset = list(load_raman_dataset(
+            'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json'
+        ))
 
-        # 🔹 Save every N samples
-        if i % 10 == 0:
-            save_checkpoint(CHECKPOINT_PATH, errors)
+        for i in tqdm(range(start_idx, len(dataset[0:1000]))):
+            raman_inputs, spectrum = dataset[i]
 
-    # Final save
-    save_checkpoint(CHECKPOINT_PATH, errors)
+            predicted_inputs = loop.inverse_model.get_raman_inputs(spectrum)
+            loop.curr_control = predicted_inputs
+            loop.apply_control()
 
-    errors_np = np.array(errors)
-    print(f"\nMean error: {errors_np.mean():.3f} dB")
-    print(f"Std error : {errors_np.std():.3f} dB")
+            predicted_spectrum = copy.deepcopy(loop.get_raman_output())
+            err = mean_gain_error_db(loop, predicted_spectrum, spectrum)
+            errors.append(err)
 
-    plot_error_distribution(errors_np)
+            if i % 10 == 0:
+                save_checkpoint(checkpoint_path, errors)
+
+        save_checkpoint(checkpoint_path, errors)
+
+        errors_np = np.array(errors)
+        print(f"Mean error: {errors_np.mean():.3f} dB")
+        print(f"Std error : {errors_np.std():.3f} dB")
 
 
 if __name__ == '__main__':
