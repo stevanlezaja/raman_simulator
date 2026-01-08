@@ -13,19 +13,21 @@ from .random_projection_model import RandomProjectionInverseModel
 
 
 class InverseModel:
-    def __init__(self, n_models=200, hidden_dim=800, n_layers=7) -> None:  # type: ignore
+    def __init__(self, n_models=200, hidden_dim=800, n_layers=7, sigma_rpm=0.2) -> None:  # type: ignore
         self.models = [
             RandomProjectionInverseModel(
                 input_dim=40,
                 output_dim=6,
                 hidden_dim=hidden_dim,
                 n_layers=n_layers,
+                sigma_rpm=sigma_rpm,
                 activation=nn.Tanh()
             )
             for _ in range(n_models)
         ]
         self.train_loss_history = [[] for _ in range(n_models)]  # type: ignore
         self.val_loss_history = [[] for _ in range(n_models)]  # type: ignore
+        self.sigma_rpm = sigma_rpm
 
         X, Y = self._prepare_training_tensors('data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json')
         X_train, X_val, Y_train, Y_val = train_test_split(X, Y, test_size=0.2, random_state=42)  # type: ignore
@@ -39,20 +41,20 @@ class InverseModel:
             loaded = self._load_model(model, idx)
             if loaded:
                 val_loss = self._validate_model(model)
-                self.val_loss_history[idx].append(val_loss)
+                self.val_loss_history[idx].append(val_loss)  # type: ignore
                 continue
             model.fit_closed_form(
-                self.X_train,
-                self.Y_train,
+                self.X_train,  # type: ignore
+                self.Y_train,  # type: ignore
                 lambda_reg=1e-4,
             )
             val_loss = self._validate_model(model)
-            self.train_loss_history[idx].append(float("nan"))  # no training curve
-            self.val_loss_history[idx].append(val_loss)
+            self.train_loss_history[idx].append(float("nan"))  # type: ignore
+            self.val_loss_history[idx].append(val_loss)  # type: ignore
 
             self._save_model(model, idx)
 
-    @torch.no_grad()
+    @torch.no_grad()  # type: ignore
     def _validate_model(
         self,
         model: nn.Module,
@@ -74,13 +76,14 @@ class InverseModel:
         return False
 
     def _model_path(self, model_idx: int) -> Path:
-        base_dir = Path("models/models/rpm_inverse")
+        base_dir = Path("models/models/rpm_inverse") / f"sigma_{self.sigma_rpm:.3f}"
         base_dir.mkdir(parents=True, exist_ok=True)
 
         activation_name = type(self.models[model_idx].activation).__name__
 
         filename = (
             f"rpm_inv_"
+            f"sigma{self.sigma_rpm:.3f}_"
             f"ensemble{len(self.models)}_"
             f"idx{model_idx}_"
             f"in40_out6_"
@@ -97,7 +100,7 @@ class InverseModel:
         spectrum_arr = spectrum_copy.normalize().as_array(include_freq=False)
 
         raman_inputs_arr_list = [
-            model.forward(spectrum_arr).detach().numpy() for model in self.models
+            model.forward(spectrum_arr).detach().numpy() for model in self.models  # type: ignore
         ]
         mean_inputs = np.mean(raman_inputs_arr_list, axis=0)
         return ra.RamanInputs.from_array(mean_inputs).denormalize()
