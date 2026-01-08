@@ -78,8 +78,7 @@ class ControlLoop:
         self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': [], 'errors': []}
         self.converged = False
         self.off_power_spectrum = self._calculate_off_power()
-        forward_model = get_or_train_forward_model(epochs=500)
-        self.inverse_model = m.InverseModel(forward_model=forward_model)
+        self.inverse_model = m.InverseModel()
 
     def set_target(self, target: ra.Spectrum[ct.Power]):
         """
