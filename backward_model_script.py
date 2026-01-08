@@ -2,6 +2,7 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
+from tqdm import tqdm
 
 import custom_types as ct
 import custom_types.constants as const
@@ -12,6 +13,26 @@ import raman_amplifier as ra
 import fibers as fib
 import controllers as ctrl
 from utils.loading_data_from_file import load_raman_dataset
+from pathlib import Path
+
+
+CHECKPOINT_PATH = Path("results/inverse_model_eval_checkpoint.npz")
+CHECKPOINT_PATH.parent.mkdir(parents=True, exist_ok=True)
+
+
+def load_checkpoint(path: Path) -> list[float]:
+    if path.exists():
+        data = np.load(path, allow_pickle=True)
+        errors = data["errors"].tolist()
+        print(f"Resuming from checkpoint: {len(errors)} samples completed")
+        return errors
+    return []
+
+
+def save_checkpoint(path: Path, errors: list[float]):
+    tmp_path = path.with_suffix(".tmp.npz")
+    np.savez(tmp_path, errors=np.array(errors))
+    tmp_path.replace(path)
 
 
 def mean_gain_error_db(
@@ -101,13 +122,18 @@ def main():
     controller = ctrl.PidController(0, 0, 0)
     loop = cl.ControlLoop(raman_system, controller)
 
-    errors: list[float] = []
+    # 🔹 Load checkpoint
+    errors: list[float] = load_checkpoint(CHECKPOINT_PATH)
+    start_idx = len(errors)
 
-    for raman_inputs, spectrum in load_raman_dataset(
+    dataset = list(load_raman_dataset(
         'data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json'
-    ):
-        predicted_inputs = loop.inverse_model.get_raman_inputs(spectrum)
+    ))
 
+    for i in tqdm(range(start_idx, len(dataset))):
+        raman_inputs, spectrum = dataset[i]
+
+        predicted_inputs = loop.inverse_model.get_raman_inputs(spectrum)
         loop.curr_control = predicted_inputs
         loop.apply_control()
         predicted_spectrum = copy.deepcopy(loop.get_raman_output())
@@ -115,12 +141,19 @@ def main():
         err = mean_gain_error_db(loop, predicted_spectrum, spectrum)
         errors.append(err)
 
-    errors = np.array(errors)
-    print(f"Mean error: {errors.mean():.3f} dB")
-    print(f"Std error : {errors.std():.3f} dB")
+        # 🔹 Save every N samples
+        if i % 10 == 0:
+            save_checkpoint(CHECKPOINT_PATH, errors)
 
-    plot_error_distribution(errors)
-        
+    # Final save
+    save_checkpoint(CHECKPOINT_PATH, errors)
+
+    errors_np = np.array(errors)
+    print(f"\nMean error: {errors_np.mean():.3f} dB")
+    print(f"Std error : {errors_np.std():.3f} dB")
+
+    plot_error_distribution(errors_np)
+
 
 if __name__ == '__main__':
     main()
