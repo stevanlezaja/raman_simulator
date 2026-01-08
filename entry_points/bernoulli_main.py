@@ -32,3 +32,4 @@ def main():
     raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
     spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, target_gain_value=7)
+    _ = input("Press any key to finish")

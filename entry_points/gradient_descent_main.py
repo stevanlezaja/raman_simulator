@@ -25,4 +25,5 @@ def main():
         lr_control=1
     )
 
-    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=100, target_gain_value=7)
+    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=100, target_gain_value=5)
+    _ = input("\n\nPress any key to finish\n")
