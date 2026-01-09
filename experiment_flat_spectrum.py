@@ -115,8 +115,8 @@ def main():
     gd_raman_system = copy.deepcopy(bern_raman_system)
     gd_controller = ctrl.GradientDescentController(
         training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json',
-        epochs=100,
-        lr_control=10
+        epochs=1000,
+        lr_control=1
     )
     gd_loop = cl.ControlLoop(gd_raman_system, gd_controller)
 
