@@ -92,7 +92,7 @@ class BernoulliController(torch.nn.Module, Controller):
 
         self.input_dim = input_dim
         self.logits = 0.01 * torch.randn(input_dim)
-        self.best_reward = None
+        self.best_loss = None
         self.prev_loss = None
         self._baseline = None
         self.history: dict[str, list[float]|dict[str, list[float]]] = {'probs': [], 'rewards': {'total': [], 'shape_loss': [], 'integral_loss': [], 'mse_loss': [], 'wavelength_spread': []}, 'baseline': []}
@@ -224,6 +224,7 @@ class BernoulliController(torch.nn.Module, Controller):
         # loss = sh_dif + int_dif - wl_spread
         loss = 1e6 * ra.spectrum.mse(curr_output, target_output)
 
+        # reward = -loss
         if self.prev_loss is None:
             self.prev_loss = loss
 
@@ -322,12 +323,13 @@ class BernoulliController(torch.nn.Module, Controller):
         """
 
         reward = self.reward(self.curr_input, self.curr_output, self.target_output)
-        if self.best_reward is None:
-            self.best_reward = reward
+        loss = ra.spectrum.mse(self.curr_output, self.target_output)
+        if self.best_loss is None:
+            self.best_loss = loss
             self.best_input = copy.deepcopy(self.curr_input)
             self.best_output = copy.deepcopy(self.curr_output)
-        if reward > self.best_reward:
-            self.best_reward = reward
+        if loss < self.best_loss:
+            self.best_loss = loss
             self.best_input = copy.deepcopy(self.curr_input)
             self.best_output = copy.deepcopy(self.curr_output)
         self.history['rewards']['total'].append(reward)  # type: ignore
