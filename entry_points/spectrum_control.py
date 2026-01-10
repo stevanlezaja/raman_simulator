@@ -131,7 +131,7 @@ def main(
             control_loop.plot_parameter_2d(ax_2d)  # type: ignore
             control_loop.plot_power_evolution(ax_pow)  # type: ignore
             control_loop.plot_wavelength_evolution(ax_wl)  # type: ignore
-            controller.plot_custom_data(ax_custom)  # type: ignore
+            control_loop.controller.plot_custom_data(ax_custom)  # type: ignore
             fig.tight_layout()  # type: ignore
 
         if live_plot:
@@ -139,6 +139,11 @@ def main(
             fig.canvas.flush_events()  # type: ignore
 
         if final_step:
+            if hasattr(control_loop.controller, 'best_input'):
+                print("Loading best control")
+                control_loop.curr_control = copy.deepcopy(control_loop.controller.best_input)
+                control_loop.apply_control()
+                control_loop.curr_output = control_loop.get_raman_output()
             return control_loop
 
     if live_plot:
