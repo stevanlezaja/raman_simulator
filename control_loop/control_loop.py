@@ -271,24 +271,69 @@ class ControlLoop:
         ax.grid()  # type: ignore
         ax.legend()  # type: ignore
 
+    def _find_best_iteration(self, history_arr: np.ndarray, best_arr: np.ndarray, atol=1e-9):
+        matches = np.all(np.isclose(history_arr, best_arr, atol=atol), axis=1)
+        idx = np.where(matches)[0]
+        return idx[0] if len(idx) > 0 else None
+
     def plot_power_evolution(self, ax: matplotlib.axes.Axes):
-        power_arr = np.array(self.history['powers'])
+        power_arr = np.array(self.history['powers'])  # (iters, n_pumps)
+
         for i in range(power_arr.shape[1]):
-            ax.plot(range(len(power_arr[:, i])), power_arr[:, i], label=f"Power {i}")  # type: ignore
-        ax.set_xlabel("Iteration")  # type: ignore
-        ax.set_ylabel("Power (W)")  # type: ignore
-        ax.set_ylim(top=ra.RamanInputs.MAX_POWER_W, bottom=ra.RamanInputs.MIN_POWER_W)
-        ax.set_title("Power evolution")  # type: ignore
-        ax.grid()  # type: ignore
-        ax.legend()  # type: ignore
+            ax.plot(power_arr[:, i], label=f"Power {i}")
+
+        if hasattr(self.controller, 'best_input'):
+            best_powers = np.array([p.value for p in self.controller.best_input.powers])
+            best_idx = self._find_best_iteration(power_arr, best_powers)
+
+            if best_idx is not None:
+                ax.axvline(
+                    best_idx,
+                    linestyle="--",
+                    linewidth=2,
+                    alpha=0.8,
+                    label="Best power"
+                )
+
+        ax.set_xlabel("Iteration")
+        ax.set_ylabel("Power (W)")
+        ax.set_ylim(
+            bottom=ra.RamanInputs.MIN_POWER_W,
+            top=ra.RamanInputs.MAX_POWER_W
+        )
+        ax.set_title("Power evolution")
+        ax.grid()
+        ax.legend()
+
 
     def plot_wavelength_evolution(self, ax: matplotlib.axes.Axes):
-        wl_arr = np.array(self.history['wavelengths'])
+        wl_arr = np.array(self.history['wavelengths'])  # (iters, n_pumps)
+
         for i in range(wl_arr.shape[1]):
-            ax.plot(wl_arr[:, i], label=f"Wavelength {i}")  # type: ignore
-        ax.set_xlabel("Iteration")  # type: ignore
-        ax.set_ylabel("Wavelength (nm)")  # type: ignore
-        ax.set_ylim(bottom=ra.RamanInputs.MIN_WAVELENGTH_NM, top=ra.RamanInputs.MAX_WAVELENGTH_NM)
-        ax.set_title("Wavelength evolution")  # type: ignore
-        ax.grid()  # type: ignore
-        ax.legend()  # type: ignore
+            ax.plot(wl_arr[:, i], label=f"Wavelength {i}")
+
+        if hasattr(self.controller, 'best_input'):
+            best_wls = np.array([w.nm for w in self.controller.best_input.wavelengths])
+            print(wl_arr)
+            print(best_wls)
+            best_idx = self._find_best_iteration(wl_arr, best_wls)
+
+            if best_idx is not None:
+                ax.axvline(
+                    best_idx,
+                    linestyle="--",
+                    linewidth=2,
+                    alpha=0.8,
+                    label="Best wavelength"
+                )
+
+        ax.set_xlabel("Iteration")
+        ax.set_ylabel("Wavelength (nm)")
+        ax.set_ylim(
+            bottom=ra.RamanInputs.MIN_WAVELENGTH_NM,
+            top=ra.RamanInputs.MAX_WAVELENGTH_NM
+        )
+        ax.set_title("Wavelength evolution")
+        ax.grid()
+        ax.legend()
+
