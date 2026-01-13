@@ -62,38 +62,38 @@ def mean_gain_error_db(
 
 
 def main():
-    raman_system = rs.RamanSystem()
-    raman_system.fiber = fib.StandardSingleModeFiber(ct.Length(100, "km"))
-    raman_system.raman_amplifier = ra.RamanAmplifier(3, [0.0, 0.0, 0.0])
-
-    input_spectrum = ra.Spectrum(ct.Power)
-    for num in np.linspace(const.C_BAND[0], const.C_BAND[1], 40):
-        freq = conv.wavelength_to_frequency(ct.Length(num, "nm"))
-        input_spectrum.add_val(freq, ct.Power(25, "uW"))
-
-    raman_system.input_spectrum = input_spectrum
-    raman_system.output_spectrum = copy.deepcopy(input_spectrum)
-
-    gd_controller = ctrl.GradientDescentController(  # type: ignore
-        training_data="controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json",
-        epochs=1000,
-        lr_control=1.0,
-    )
-
-    bern_controller = ctrl.BernoulliController(  # type: ignore
-        lr=1e-1,
-        power_step=ct.Power(0.1, 'mW'),
-        wavelength_step=ct.Length(0.1, 'nm'),
-        beta=100,
-        gamma=0.99,
-        weight_decay=1e-5,
-        input_dim=6,
-    )
-    loop = cl.ControlLoop(raman_system, bern_controller)
-
-    dataset = list(load_raman_dataset(DATASET_PATH))
-
     for sigma_rpm in [0.2]:
+        raman_system = rs.RamanSystem()
+        raman_system.fiber = fib.StandardSingleModeFiber(ct.Length(100, "km"))
+        raman_system.raman_amplifier = ra.RamanAmplifier(3, [0.0, 0.0, 0.0])
+
+        input_spectrum = ra.Spectrum(ct.Power)
+        for num in np.linspace(const.C_BAND[0], const.C_BAND[1], 40):
+            freq = conv.wavelength_to_frequency(ct.Length(num, "nm"))
+            input_spectrum.add_val(freq, ct.Power(25, "uW"))
+
+        raman_system.input_spectrum = input_spectrum
+        raman_system.output_spectrum = copy.deepcopy(input_spectrum)
+
+        gd_controller = ctrl.GradientDescentController(  # type: ignore
+            training_data="controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json",
+            epochs=1000,
+            lr_control=1.0,
+        )
+
+        bern_controller = ctrl.BernoulliController(  # type: ignore
+            lr=1e-1,
+            power_step=ct.Power(1, 'mW'),
+            wavelength_step=ct.Length(1, 'nm'),
+            beta=10000,
+            gamma=0.99,
+            weight_decay=1e-1,
+            input_dim=6,
+        )
+        loop = cl.ControlLoop(raman_system, bern_controller)
+
+        dataset = list(load_raman_dataset(DATASET_PATH))
+
         print(f"\n=== Evaluating Inverse + Bernoulli (sigma={sigma_rpm}) ===")
 
         loop.inverse_model = m.InverseModel(sigma_rpm=sigma_rpm)
@@ -102,7 +102,8 @@ def main():
         errors = load_checkpoint(checkpoint_path)
         start_idx = len(errors)
 
-        for i in tqdm(range(start_idx, len(dataset))):
+        # for i in tqdm(range(start_idx, len(dataset))):
+        for i in tqdm(range(start_idx, 100)):
             raman_inputs, target_spectrum = dataset[i]  # type: ignore
 
             predicted_inputs = loop.inverse_model.get_raman_inputs(target_spectrum)
@@ -120,7 +121,7 @@ def main():
             final_spectrum = copy.deepcopy(loop.curr_output)
             assert final_spectrum is not None
 
-            err = mean_gain_error_db(loop, final_spectrum, target_spectrum)
+            err = mean_gain_error_db(loop, loop.controller.best_output, target_spectrum)
             print(err)
             errors.append(err)
 
