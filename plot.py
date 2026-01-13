@@ -16,6 +16,14 @@ for file in RESULTS_DIR.glob("*.npz"):
     mean = runs.mean(axis=0) # (100,)
     std  = runs.std(axis=0)  # (100,)
 
+    start_error = np.mean(runs[:, 0])
+    final_error = np.mean(runs[:, -1])
+    best_error = np.mean(runs.min(axis=1))
+    
+    print("Parameters:", key)
+    print("Final error", final_error - start_error)
+    print("Best error ", best_error - start_error, "\n")
+
     summary[file.stem] = {
         "key": key,
         "mean": mean,
