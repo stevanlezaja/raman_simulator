@@ -39,7 +39,7 @@ class GradientDescentController(Controller):
         x_leaf = torch.tensor(x0, dtype=torch.float32, requires_grad=True)
         x = x_leaf.unsqueeze(0)
 
-        target_arr = target_output.as_array()[-40:]
+        target_arr = target_output.as_array(include_freq=False)
         target = torch.tensor(target_arr, dtype=torch.float32).unsqueeze(0)
 
         y_pred = self.model(x)

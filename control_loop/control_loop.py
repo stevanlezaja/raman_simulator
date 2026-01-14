@@ -314,8 +314,6 @@ class ControlLoop:
 
         if hasattr(self.controller, 'best_input'):
             best_wls = np.array([w.nm for w in self.controller.best_input.wavelengths])
-            print(wl_arr)
-            print(best_wls)
             best_idx = self._find_best_iteration(wl_arr, best_wls)
 
             if best_idx is not None:

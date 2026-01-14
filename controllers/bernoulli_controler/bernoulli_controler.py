@@ -76,6 +76,7 @@ class BernoulliController(torch.nn.Module, Controller):
                  lr: float = 1e-1,
                  weight_decay: float = 0.0,
                  beta: float = 1,
+                 sigma: float = 0.01,
                  gamma: float = 0.99,
                  input_dim: int = 2,
                  num_samples: int = 1,
@@ -87,11 +88,12 @@ class BernoulliController(torch.nn.Module, Controller):
         self._params['lr'] = (float, lr)
         self._params['weight_decay'] = (float, weight_decay)
         self._params['beta'] = (float, beta)
+        self._params['sigma'] = (float, sigma)
         self._params['gamma'] = (float, gamma)
         self.num_samples = num_samples
 
         self.input_dim = input_dim
-        self.logits = 0.01 * torch.randn(input_dim)
+        self.logits = self.sigma * torch.randn(input_dim)
         self.best_loss = None
         self.prev_loss = None
         self._baseline = None
@@ -173,6 +175,18 @@ class BernoulliController(torch.nn.Module, Controller):
             The discount factor applied to the running baseline of rewards.
         """
         return self._params['gamma'][1]
+
+    @property
+    def sigma(self) -> float:
+        """
+        Get the sigma parameter for initializing logits.
+
+        Returns
+        -------
+        float
+            The standard deviation for initializing logits.
+        """
+        return self._params['sigma'][1]
 
     @property
     def rewards(self) -> list[float]:
