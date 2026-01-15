@@ -21,9 +21,10 @@ def main():
 
     controller = ctrl.GradientDescentController(
         training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json',
-        epochs=500,
-        lr_control=1
+        epochs=5000,
+        lr_control=1e-1,
+        iterations=100,
     )
 
-    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=100, target_gain_value=5)
+    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=50, target_gain_value=10)
     _ = input("\n\nPress any key to finish\n")

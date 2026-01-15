@@ -101,13 +101,14 @@ def main():
     bern_raman_system.input_spectrum = input_spectrum
     bern_raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
-    bern_controller = ctrl.BernoulliController(
+    bern_controller = ctrl.BernoulliController(  # type: ignore
         lr=1e-1,
-        power_step=ct.Power(1, 'mW'),
-        wavelength_step=ct.Length(1, 'nm'),
-        beta=10,
+        power_step=ct.Power(0.1, 'mW'),
+        wavelength_step=ct.Length(0.1, 'nm'),
+        beta=10000,
         gamma=0.99,
-        weight_decay=1e-3,
+        weight_decay=1e-1,
+        sigma=1,
         input_dim=6,
     )
     bern_loop = cl.ControlLoop(bern_raman_system, bern_controller)
@@ -115,8 +116,9 @@ def main():
     gd_raman_system = copy.deepcopy(bern_raman_system)
     gd_controller = ctrl.GradientDescentController(
         training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json',
-        epochs=1000,
-        lr_control=1
+        epochs=5000,
+        lr_control=1e-1,
+        iterations=100,
     )
     gd_loop = cl.ControlLoop(gd_raman_system, gd_controller)
 
@@ -149,6 +151,7 @@ def main():
         bern_loop.curr_control = predicted_inputs
         bern_loop.apply_control()
         bern_loop.set_target(target_spectrum)
+        bern_loop.controller.best_loss = None
 
         gd_loop.curr_control = predicted_inputs
         gd_loop.apply_control()

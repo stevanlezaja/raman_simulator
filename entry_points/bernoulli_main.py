@@ -11,11 +11,12 @@ def main():
 
     controller = ctrl.BernoulliController(
         lr=1e-1,
-        power_step=ct.Power(1, 'mW'),
-        wavelength_step=ct.Length(1, 'nm'),
-        beta=10,
+        power_step=ct.Power(0.1, 'mW'),
+        wavelength_step=ct.Length(0.1, 'nm'),
+        beta=5000,
+        sigma=1,
         gamma=0.99,
-        weight_decay=0.01,
+        weight_decay=0.1,
         input_dim=6,
     )
 
@@ -31,5 +32,5 @@ def main():
     raman_system.fiber.length.km = 100
     raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
-    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, target_gain_value=7)
+    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, target_gain_value=13, iterations=1000)
     _ = input("Press any key to finish")

@@ -25,7 +25,7 @@ RESULTS_DIR = Path("results")
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 GD_ITERATIONS = 50
-CHECKPOINT_EVERY = 10
+CHECKPOINT_EVERY = 1
 
 
 # =========================
@@ -63,10 +63,10 @@ def mean_gain_error_db(
 
 def main():
     for sigma_rpm in [0.2]:
-        checkpoint_path = RESULTS_DIR / f"inverse_plus_bern_sigma_{sigma_rpm:.3f}.npz"
+        checkpoint_path = RESULTS_DIR / f"inverse_plus_gd_sigma_{sigma_rpm:.3f}.npz"
         errors = load_checkpoint(checkpoint_path)
         start_idx = len(errors)
-        for i in tqdm(range(start_idx, 100)):
+        for i in tqdm(range(start_idx, 200)):
             raman_system = rs.RamanSystem()
             raman_system.fiber = fib.StandardSingleModeFiber(ct.Length(100, "km"))
             raman_system.raman_amplifier = ra.RamanAmplifier(3, [0.0, 0.0, 0.0])
@@ -79,10 +79,11 @@ def main():
             raman_system.input_spectrum = input_spectrum
             raman_system.output_spectrum = copy.deepcopy(input_spectrum)
 
-            gd_controller = ctrl.GradientDescentController(  # type: ignore
-                training_data="controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json",
-                epochs=1000,
-                lr_control=1.0,
+            gd_controller = ctrl.GradientDescentController(
+                training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json',
+                epochs=5000,
+                lr_control=1e-1,
+                iterations=100,
             )
 
             bern_controller = ctrl.BernoulliController(  # type: ignore
@@ -95,14 +96,13 @@ def main():
                 sigma=1,
                 input_dim=6,
             )
-            loop = cl.ControlLoop(raman_system, bern_controller)
+            loop = cl.ControlLoop(raman_system, gd_controller)
 
             dataset = list(load_raman_dataset(DATASET_PATH))
 
-            print(f"\n=== Evaluating Inverse + Bernoulli (sigma={sigma_rpm}) ===")
+            print(f"\n=== Evaluating Inverse + GD (sigma={sigma_rpm}) ===")
 
             loop.inverse_model = m.InverseModel(sigma_rpm=sigma_rpm)
-
 
             # for i in tqdm(range(start_idx, len(dataset))):
             raman_inputs, target_spectrum = dataset[i]  # type: ignore
@@ -122,7 +122,7 @@ def main():
             final_spectrum = copy.deepcopy(loop.curr_output)
             assert final_spectrum is not None
 
-            err = mean_gain_error_db(loop, loop.controller.best_output, target_spectrum)
+            err = mean_gain_error_db(loop, loop.curr_output, target_spectrum)
             print(err)
             errors.append(err)
 

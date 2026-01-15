@@ -1,5 +1,6 @@
 import torch
 import copy
+import matplotlib
 
 import raman_amplifier as ra
 import custom_types as ct
@@ -17,9 +18,11 @@ class GradientDescentController(Controller):
         lr_control: float = 100,
         epochs: int = 200,
         batch_size: int = 32,
+        iterations: int = 1000,
     ):
         super().__init__()
         self.control_lr = lr_control
+        self.iterations = iterations
         assert isinstance(training_data, str)
 
         self.model = get_or_train_forward_model(
@@ -33,33 +36,52 @@ class GradientDescentController(Controller):
         self,
         curr_input: ra.RamanInputs,
         curr_output: ra.Spectrum[ct.Power],
-        target_output: ra.Spectrum[ct.Power]
+        target_output: ra.Spectrum[ct.Power],
     ) -> ra.RamanInputs:
-        x0 = copy.deepcopy(curr_input).normalize().as_array()
-        x_leaf = torch.tensor(x0, dtype=torch.float32, requires_grad=True)
-        x = x_leaf.unsqueeze(0)
+        
+        x_np = copy.deepcopy(curr_input).normalize().as_array()
+        x = torch.tensor(x_np, dtype=torch.float32, requires_grad=True)
+
+        if not target_output.normalized:
+            target_output.normalize()
 
         target_arr = target_output.as_array(include_freq=False)
         target = torch.tensor(target_arr, dtype=torch.float32).unsqueeze(0)
 
-        y_pred = self.model(x)
-        loss = torch.nn.functional.mse_loss(y_pred, target)
-        loss.backward()  # type: ignore
+        self.loss_history: list[float] = []
 
-        grad = x_leaf.grad
+        for _ in range(self.iterations):
+            x = x.detach().requires_grad_(True)
 
-        with torch.no_grad():
-            assert grad is not None
-            x_delta = - self.control_lr * grad
+            y_pred = self.model(x.unsqueeze(0))
+            loss = torch.nn.functional.mse_loss(y_pred, target)
 
-        x_new_np = x_leaf.detach() + x_delta.detach()
+            self.loss_history.append(loss.item())
 
-        next_input = ra.RamanInputs.from_array(x_new_np).denormalize()
+            loss.backward()
+
+            with torch.no_grad():
+                assert x.grad is not None
+                x -= self.control_lr * x.grad
+        
+        x_final = x.detach().cpu().numpy()
+        next_input = ra.RamanInputs.from_array(x_final).denormalize()
 
         control_delta = copy.deepcopy(next_input)
         control_delta -= curr_input
+
+        if target_output.normalized:
+            target_output.denormalize()
 
         return control_delta
 
     def update_controller(self, error: ra.Spectrum[ct.Power], control_delta: ra.RamanInputs) -> None:
         pass
+
+    def plot_custom_data(self, ax: matplotlib.axes.Axes):
+        # ---- Plot loss evolution ----
+        ax.plot(self.loss_history)
+        ax.set_xlabel("Optimization iteration")
+        ax.set_ylabel("MSE loss")
+        ax.set_title("Forward-model loss during control optimization")
+        ax.grid(True)
