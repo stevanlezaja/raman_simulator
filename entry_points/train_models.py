@@ -47,7 +47,7 @@ def find_latest_model(models_path: str, prefix: str, epochs: int, *args, **kwarg
 
 def get_or_train_forward_model(
     prefix: str = "forward",
-    epochs: int = 500,
+    epochs: int = 50,
     batch_size: int = 32,
     lr: float = 1e-3,
     dir_path: str = "models/models/",

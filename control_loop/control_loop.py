@@ -243,6 +243,16 @@ class ControlLoop:
                 [val.dB for val in best_gain.values],
                 label="Best Output",
             )
+        if isinstance(self.controller, ctrl.GradientDescentController):
+            try:
+                pred_gain = self.controller.pred_output / self.off_power_spectrum
+                ax.plot( # type: ignore
+                    [f.Hz for f in pred_gain.frequencies],
+                    [val.dB for val in pred_gain.values],
+                    label="Predicted Output",
+                )
+            except Exception:
+                pass
         ymax = max(val.dB for val in target_gain.values)
         ymax = max(ymax, max(val.dB for val in current_gain.values))
 

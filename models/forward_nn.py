@@ -14,13 +14,13 @@ class ForwardNN(torch.nn.Module):
     def __init__(self, lr: float = 1e-3, *args, **kwargs):  # type: ignore
         super().__init__()  # type: ignore
         self.net = torch.nn.Sequential(
-            torch.nn.Linear(6, 10),
+            torch.nn.Linear(6, 64),
             torch.nn.Tanh(),
-            torch.nn.Linear(10, 10),
+            torch.nn.Linear(64, 64),
             torch.nn.Tanh(),
-            torch.nn.Linear(10, 10),
+            torch.nn.Linear(64, 64),
             torch.nn.Tanh(),
-            torch.nn.Linear(10, 40),
+            torch.nn.Linear(64, 40),
             torch.nn.Sigmoid()  # because target is normalized [0,1]
         )
 

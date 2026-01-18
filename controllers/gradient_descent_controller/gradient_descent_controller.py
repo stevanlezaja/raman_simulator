@@ -47,6 +47,7 @@ class GradientDescentController(Controller):
 
         target_arr = target_output.as_array(include_freq=False)
         target = torch.tensor(target_arr, dtype=torch.float32).unsqueeze(0)
+        self.pred_output = copy.deepcopy(curr_output)
 
         self.loss_history: list[float] = []
 
@@ -55,6 +56,10 @@ class GradientDescentController(Controller):
 
             y_pred = self.model(x.unsqueeze(0))
             loss = torch.nn.functional.mse_loss(y_pred, target)
+            for i, f in enumerate(self.pred_output.frequencies):
+                self.pred_output.spectrum[f] = ct.Power(float(y_pred[0][i]), 'W')
+            self.pred_output.normalized = True
+            self.pred_output.denormalize()
 
             self.loss_history.append(loss.item())
 

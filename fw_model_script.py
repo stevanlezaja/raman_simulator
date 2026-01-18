@@ -10,7 +10,7 @@ from utils.loading_data_from_file import load_raman_dataset
 
 
 forward_model = get_or_train_forward_model(
-    epochs=500,
+    epochs=5000,
 )
 
 data_generator = load_raman_dataset(

@@ -13,10 +13,10 @@ def main():
         lr=1e-1,
         power_step=ct.Power(0.1, 'mW'),
         wavelength_step=ct.Length(0.1, 'nm'),
-        beta=5000,
-        sigma=1,
+        beta=10000,
         gamma=0.99,
-        weight_decay=0.1,
+        weight_decay=1e-1,
+        sigma=1,
         input_dim=6,
     )
 
@@ -32,5 +32,5 @@ def main():
     raman_system.fiber.length.km = 100
     raman_system.raman_amplifier = ra.RamanAmplifier(num_pumps=3, pumping_ratios=[0, 0, 0])
 
-    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, target_gain_value=13, iterations=1000)
+    spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, target_gain_value=13, iterations=50)
     _ = input("Press any key to finish")

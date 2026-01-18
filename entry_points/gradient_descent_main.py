@@ -23,7 +23,7 @@ def main():
         training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json',
         epochs=5000,
         lr_control=1e-1,
-        iterations=100,
+        iterations=10000,
     )
 
     spectrum_control.main(**kwargs, raman_system=raman_system, controller=controller, iterations=50, target_gain_value=10)

@@ -4,7 +4,7 @@ from pathlib import Path
 
 INVERSE_PATH = Path("results/inverse_eval_sigma_0.200.npz")
 BERNOULLI_PATH = Path("results/inverse_plus_bern_sigma_0.200.npz")
-GRADIENT_PATH = Path("results/inverse_plus_gd_sigma_0.200.npz")
+GRADIENT_PATH = Path("results/better_gd/inverse_plus_gd_sigma_0.200.npz")
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,6 +32,7 @@ def plot_error_pdfs(errors_dict: dict[str, np.ndarray]):
     ax.set_xlabel("Mean Gain Error (dB)")
     ax.set_ylabel("Probability Density")
     ax.set_title("Error Distributions (PDF)")
+    ax.set_xlim(0, 2)
     ax.grid()
     ax.legend()
 

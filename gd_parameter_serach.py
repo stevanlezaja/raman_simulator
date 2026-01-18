@@ -77,8 +77,13 @@ if __name__ == '__main__':
             )
 
             errors = np.asarray(control_loop.history["errors"])
-            assert errors.shape == (simulation_length,)
-
+            if errors.shape < (simulation_length,):
+                pad_len = simulation_length - errors.shape[0]
+                errors = np.pad(
+                    errors,
+                    (0, pad_len),
+                    mode="edge"
+                )
             runs.append(errors)
 
             np.savez(

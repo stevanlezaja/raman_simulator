@@ -21,7 +21,7 @@ from entry_points import spectrum_control
 # =========================
 
 DATASET_PATH = "data/raman_simulator/3_pumps/100_fiber_0.0_ratio_sorted.json"
-RESULTS_DIR = Path("results")
+RESULTS_DIR = Path("results/better_gd")
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 GD_ITERATIONS = 50
@@ -66,7 +66,7 @@ def main():
         checkpoint_path = RESULTS_DIR / f"inverse_plus_gd_sigma_{sigma_rpm:.3f}.npz"
         errors = load_checkpoint(checkpoint_path)
         start_idx = len(errors)
-        for i in tqdm(range(start_idx, 200)):
+        for i in tqdm(range(start_idx, 300)):
             raman_system = rs.RamanSystem()
             raman_system.fiber = fib.StandardSingleModeFiber(ct.Length(100, "km"))
             raman_system.raman_amplifier = ra.RamanAmplifier(3, [0.0, 0.0, 0.0])
@@ -83,7 +83,7 @@ def main():
                 training_data='controllers/gradient_descent_controller/data/raman_simulator_3_pumps_0.0_ratio.json',
                 epochs=5000,
                 lr_control=1e-1,
-                iterations=100,
+                iterations=10000,
             )
 
             bern_controller = ctrl.BernoulliController(  # type: ignore
