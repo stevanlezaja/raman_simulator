@@ -31,8 +31,8 @@ class Experiment:
 
     def get_signal_power_at_distance(self, z: Length) -> Power:
         assert isinstance(z, Length)
-        Ps, _, _, _, _, _, _ = self.__sol(z.m)
-        return Power(Ps, 'W')
+        sol = self.__sol(z.m)
+        return Power(sol[0], 'W')
 
     def _state_indices(self):
         pump_indices = []

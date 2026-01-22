@@ -251,8 +251,6 @@ class RamanSystem:
             signal.wavelength = conv.frequency_to_wavelenth(freq)
             self.output_spectrum[freq] = ct.Power(0, 'W')
 
-            assert len(self.raman_amplifier.pump_pairs) == 3
-
             experiment = exp.Experiment(self.fiber, signal, self.raman_amplifier.pump_pairs)
 
             self.output_spectrum[freq] = experiment.get_signal_power_at_distance(self.fiber.length)
