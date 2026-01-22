@@ -31,62 +31,79 @@ class Experiment:
 
     def get_signal_power_at_distance(self, z: Length) -> Power:
         assert isinstance(z, Length)
-        Ps, _, _, _, _, _, _ = self.__sol(z.m)
-        return Power(Ps, 'W')
+        sol = self.__sol(z.m)
+        return Power(sol[0], 'W')
 
-    # def get_pump_power_at_distance(self, z: Length) -> Power:
-    #     assert isinstance(z, Length)
-    #     _, Ppf1, Ppb1 = self.__sol(z.m)
-    #     return Power(Ppf1 + Ppb1, 'W')
+    def _state_indices(self):
+        pump_indices = []
+        idx = 1
+        for _ in self.pumps:
+            pump_indices.append((idx, idx + 1))
+            idx += 2
+        return pump_indices
 
     def _raman_ode_system(self, z, P):
-        Ps, Ppf1, Ppb1, Ppf2, Ppb2, Ppf3, Ppb3 = P
-        C_R_m1 = self.C_R(self.signal.wavelength, self.pumps[0][0].wavelength) / 1e3
-        C_R_m2 = self.C_R(self.signal.wavelength, self.pumps[1][0].wavelength) / 1e3
-        C_R_m3 = self.C_R(self.signal.wavelength, self.pumps[2][0].wavelength) / 1e3
+        Ps = P[0]
+        dP = np.zeros_like(P)
+        dPsdz = -self.fiber.alpha_s.m * Ps
+        pump_indices = self._state_indices()
 
-        dPsdz = -self.fiber.alpha_s.m * Ps + C_R_m1 * Ps * (Ppf1 + Ppb1) + C_R_m2 * Ps * (Ppf2 + Ppb2) + C_R_m3 * Ps * (Ppf3 + Ppb3)
+        for i, ((pf_idx, pb_idx), (pump_f, pump_b)) in enumerate(zip(pump_indices, self.pumps)):
+            Ppf = P[pf_idx]
+            Ppb = P[pb_idx]
 
-        dPpfdz1 = -self.fiber.alpha_p.m * Ppf1 - self.signal.wavelength.m / self.pumps[0][0].wavelength.m * C_R_m1 * Ps * Ppf1
-        dPpbdz1 = self.fiber.alpha_p.m * Ppb1 + self.signal.wavelength.m / self.pumps[0][1].wavelength.m * C_R_m1 * Ps * Ppb1
+            C_R_m = self.C_R(self.signal.wavelength, pump_f.wavelength) / 1e3
+            wavelength_ratio_f = self.signal.wavelength.m / pump_f.wavelength.m
+            wavelength_ratio_b = self.signal.wavelength.m / pump_b.wavelength.m
 
-        dPpfdz2 = -self.fiber.alpha_p.m * Ppf2 - self.signal.wavelength.m / self.pumps[1][0].wavelength.m * C_R_m2 * Ps * Ppf2
-        dPpbdz2 = self.fiber.alpha_p.m * Ppb2 + self.signal.wavelength.m / self.pumps[1][1].wavelength.m * C_R_m2 * Ps * Ppb2
+            dPsdz += C_R_m * Ps * (Ppf + Ppb)
+            dP[pf_idx] = (
+                -self.fiber.alpha_p.m * Ppf
+                - wavelength_ratio_f * C_R_m * Ps * Ppf
+            )
+            dP[pb_idx] = (
+                self.fiber.alpha_p.m * Ppb
+                + wavelength_ratio_b * C_R_m * Ps * Ppb
+            )
+        dP[0] = dPsdz
+        return dP
 
-        dPpfdz3 = -self.fiber.alpha_p.m * Ppf3 - self.signal.wavelength.m / self.pumps[2][0].wavelength.m * C_R_m3 * Ps * Ppf3
-        dPpbdz3 = self.fiber.alpha_p.m * Ppb3 + self.signal.wavelength.m / self.pumps[2][1].wavelength.m * C_R_m3 * Ps * Ppb3
+    def _boundary_conditions(self, ya, yb):
+        res = np.zeros(1 + 2 * len(self.pumps))
+        res[0] = ya[0] - self.signal.power.W
+        pump_indices = self._state_indices()
+        for i, ((pf_idx, pb_idx), (pump_f, pump_b)) in enumerate(zip(pump_indices, self.pumps)):
+            res[pf_idx] = ya[pf_idx] - pump_f.power.W
+            res[pb_idx] = yb[pb_idx] - pump_b.power.W
+        return res
 
-        return np.vstack([dPsdz, dPpfdz1, dPpbdz1, dPpfdz2, dPpbdz2, dPpfdz3, dPpbdz3])
+    def _initial_guess(self, z):
+        y = np.zeros((1 + 2 * len(self.pumps), z.size))
+        y[0] = self.signal.power.W
+        pump_indices = self._state_indices()
+        for (pf_idx, pb_idx), (pump_f, pump_b) in zip(pump_indices, self.pumps):
+            y[pf_idx] = pump_f.power.W * np.exp(-self.fiber.alpha_p.m * z)
+            y[pb_idx] = pump_b.power.W * np.exp(
+                self.fiber.alpha_p.m * (z - self.fiber.length.m)
+            )
+        return y
 
     def _solve(self):
-        def bc(ya, yb):
-            res = np.zeros(7)
-            res[0] = ya[0] - self.signal.power.W
-            res[1] = ya[1] - self.pumps[0][0].power.W
-            res[2] = yb[2] - self.pumps[0][1].power.W
-            res[3] = ya[3] - self.pumps[1][0].power.W
-            res[4] = yb[4] - self.pumps[1][1].power.W
-            res[5] = ya[5] - self.pumps[2][0].power.W
-            res[6] = yb[6] - self.pumps[2][1].power.W
-            return res
+        z = np.linspace(0.0, self.fiber.length.m, 50)
+        y_guess = self._initial_guess(z)
 
-        z_guess = np.linspace(0.0, self.fiber.length.m, 50)
-
-        P_s_guess = np.full_like(z_guess, self.signal.power.W)
-        P_p1_plus_guess = self.pumps[0][0].power.W * np.exp(-self.fiber.alpha_p.m * z_guess)
-        P_p1_minus_guess = self.pumps[0][1].power.W * np.exp(self.fiber.alpha_p.m * (z_guess - self.fiber.length.m))
-        P_p2_plus_guess = self.pumps[1][0].power.W * np.exp(-self.fiber.alpha_p.m * z_guess)
-        P_p2_minus_guess = self.pumps[1][1].power.W * np.exp(self.fiber.alpha_p.m * (z_guess - self.fiber.length.m))
-        P_p3_plus_guess = self.pumps[2][0].power.W * np.exp(-self.fiber.alpha_p.m * z_guess)
-        P_p3_minus_guess = self.pumps[2][1].power.W * np.exp(self.fiber.alpha_p.m * (z_guess - self.fiber.length.m))
-        y_guess = np.vstack([P_s_guess, P_p1_plus_guess, P_p1_minus_guess, P_p2_plus_guess, P_p2_minus_guess, P_p3_plus_guess, P_p3_minus_guess])
-
-        sol = solve_bvp(self._raman_ode_system, bc, x = z_guess, y = y_guess)
+        sol = solve_bvp(
+            self._raman_ode_system,
+            self._boundary_conditions,
+            x=z,
+            y=y_guess,
+        )
 
         if not sol.success:
             log.error("solve_bvp failed: %s", sol.message)
 
         return sol.sol
+
 
     def update(self):
         self.__sol = self._solve()
