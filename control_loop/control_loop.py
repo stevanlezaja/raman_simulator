@@ -78,7 +78,7 @@ class ControlLoop:
         self.history: dict[str, list[Any]] = {'RamanInputs': [], 'powers': [], 'wavelengths': [], 'errors': []}
         self.converged = False
         self.off_power_spectrum = self._calculate_off_power()
-        self.inverse_model = m.InverseModel()
+        # self.inverse_model = m.InverseModel()
 
     def set_target(self, target: ra.Spectrum[ct.Power]):
         """
@@ -91,7 +91,7 @@ class ControlLoop:
         """
 
         self.target = target
-        self.curr_control = self.inverse_model.get_raman_inputs(target)
+        # self.curr_control = self.inverse_model.get_raman_inputs(target)
         self.apply_control()
 
     def get_raman_output(self) -> ra.Spectrum[ct.Power]:
